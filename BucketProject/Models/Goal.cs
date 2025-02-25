@@ -11,6 +11,6 @@
 
         public bool IsDone { get; set; }
 
-        public List<>
+        public List<User> Users { get; set; }
     }
 }
