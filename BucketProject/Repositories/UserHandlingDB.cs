@@ -3,21 +3,22 @@ using System.Reflection;
 using System.Reflection.Metadata.Ecma335;
 using Azure.Identity;
 using BucketProject.Models;
+using BucketProject.ViewModels;
 using Microsoft.Data.SqlClient;
 namespace BucketProject.Repositories
 {
-    public class DBHelper
+    public class UserHandlingDB
     {
         private const string connString = "Server=DESKTOP-0DITB5G;Database=BucketProject;Trusted_Connection=True; TrustServerCertificate=True;";
 
-        internal static bool Register(User user)
+        public bool Register(RegisterViewModel user)
         {
             try
             {
                 using SqlConnection connection = new SqlConnection(connString);
                 connection.Open();
 
-                string checkSql = @"SELECT COUNT(*) FROM [User] WHERE Username = @Username or Email = @Email";
+                string checkSql = @"SELECT COUNT(*) FROM [User] WHERE [Username] = @Username or Email = @Email";
                 using SqlCommand checkCommand = new SqlCommand(checkSql, connection);
                 checkCommand.Parameters.AddWithValue("@Username", user.Username);
                 checkCommand.Parameters.AddWithValue("@Email", user.Email);
@@ -30,7 +31,7 @@ namespace BucketProject.Repositories
                     throw new ApplicationException("Username or Email is already taken.");
                 }
 
-                string insertSql = @"INSERT INTO Users (Username, Email, Password) 
+                string insertSql = @"INSERT INTO [User] ([Username], Email, [Password]) 
                              VALUES (@Username, @Email, @Password)";
                 using SqlCommand insertCommand = new SqlCommand(insertSql, connection);
                 insertCommand.Parameters.AddWithValue("@Username", user.Username);
@@ -46,15 +47,15 @@ namespace BucketProject.Repositories
             }
         }
 
-        internal static User? ValidateUser(string username, string password)
+        public User? ValidateUser(string username, string password)
         {
             try
             {
                 using (SqlConnection sqlConn = new SqlConnection(connString))
                 {
                     sqlConn.Open();
-                    string queryValidateUser = @"SELECT Id, Username, Email, [Password], Picture
-                                         FROM Customers
+                    string queryValidateUser = @"SELECT UserId, [Username], Email, [Password], Picture
+                                         FROM [User]
                                          WHERE Username = @Username AND [Password] = @Password";
 
                     using (SqlCommand validateUser = new SqlCommand(queryValidateUser, sqlConn))
@@ -69,13 +70,13 @@ namespace BucketProject.Repositories
                             if (reader.Read())
                             {
                                 return new User(
-                                    (int)reader["Id"],
-                                    reader["Username"].ToString(),
-                                    reader["Email"].ToString(),
-                                    reader["Password"].ToString(),
-                                    reader.IsDBNull(reader.GetOrdinal("Photo"))
-                                    ? null
-                                    : reader["Photo"].ToString());
+                                   (int)reader["UserId"],
+                                   reader["Username"].ToString(),
+                                   reader["Email"].ToString(),
+                                   reader["Password"].ToString(),
+                                   reader.IsDBNull(reader.GetOrdinal("Picture"))
+                                       ? null
+                                       : (byte[])reader["Picture"]);
 
 
                             };
@@ -95,7 +96,7 @@ namespace BucketProject.Repositories
             return null;
         }
 
-        internal static List<User>? LoadUsersFromDB()
+        public List<User>? LoadUsersFromDB()
         {
             List<User> users = new List<User>();
 
@@ -120,7 +121,7 @@ namespace BucketProject.Repositories
                                     reader["Password"].ToString(),
                                     reader.IsDBNull(reader.GetOrdinal("Photo"))
                                     ? null
-                                    : reader["Photo"].ToString()));
+                                    : (byte[])reader["Photo"]));
                         }
                     }
                     return users;
@@ -134,6 +135,94 @@ namespace BucketProject.Repositories
             {
                 throw new Exception($"An unexpected error occurred in {MethodBase.GetCurrentMethod().Name}: {ex.Message}", ex);
             }
+
         }
+
+        public void AddPhoto(User user, byte[] picture)
+        {
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(connString))
+                {
+                    conn.Open();
+                    string queryAddPicture = @"update [User] set Picture = @Picture where UserId = @UserId";
+
+                    using (SqlCommand changeStatus = new SqlCommand(queryAddPicture, conn))
+                    {
+                        changeStatus.Parameters.AddWithValue("@Picture", SqlDbType.VarBinary).Value = picture;
+                        changeStatus.Parameters.AddWithValue("@UserId", user.Id);
+
+                        changeStatus.ExecuteNonQuery();
+                    }
+                }
+            }
+
+            catch (SqlException sqlEx)
+            {
+                throw new Exception($"Database error occurred while adding photo: {sqlEx.Message}", sqlEx);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"An unexpected error occurred in {MethodBase.GetCurrentMethod().Name}: {ex.Message}", ex);
+            }
+        }
+        
+        public void UpdateName(User user, string username)
+        {
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(connString))
+                {
+                    conn.Open();
+                    string queryUpdateName = @"update [User] set Username = @Username where UserId = @UserId";
+
+                    using (SqlCommand changeStatus = new SqlCommand(queryUpdateName, conn))
+                    {
+                        changeStatus.Parameters.AddWithValue("@Name", username);
+                        changeStatus.Parameters.AddWithValue("@UserId", user.Id);
+
+                        changeStatus.ExecuteNonQuery();
+                    }
+                }
+            }
+
+            catch (SqlException sqlEx)
+            {
+                throw new Exception($"Database error occurred while updatting name: {sqlEx.Message}", sqlEx);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"An unexpected error occurred in {MethodBase.GetCurrentMethod().Name}: {ex.Message}", ex);
+            }
+        }
+        public void UpdateEmail(User user, string email)
+        {
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(connString))
+                {
+                    conn.Open();
+                    string queryUpdateName = @"update [User] set Email = @Email where UserId = @UserId";
+
+                    using (SqlCommand changeStatus = new SqlCommand(queryUpdateName, conn))
+                    {
+                        changeStatus.Parameters.AddWithValue("@Email", email);
+                        changeStatus.Parameters.AddWithValue("@UserId", user.Id);
+
+                        changeStatus.ExecuteNonQuery();
+                    }
+                }
+            }
+
+            catch (SqlException sqlEx)
+            {
+                throw new Exception($"Database error occurred while updatting email: {sqlEx.Message}", sqlEx);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"An unexpected error occurred in {MethodBase.GetCurrentMethod().Name}: {ex.Message}", ex);
+            }
+        }
+
     }
 }

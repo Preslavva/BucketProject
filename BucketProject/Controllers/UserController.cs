@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using BucketProject.Models;
 using BucketProject.Repositories;
+using BucketProject.ViewModels;
 
 namespace BucketProject.Controllers
 {
@@ -14,11 +15,11 @@ namespace BucketProject.Controllers
         }
 
         [HttpPost]
-        public IActionResult Register(User user)
+        public IActionResult Register(RegisterViewModel user)
         {
-            if (DBHelper.Register(user))
+            if (UserHandlingDB.Register(user))
             {
-                return RedirectToAction("LogIn");
+                return RedirectToAction("LogIn","User");
             }
             else
             {
@@ -36,10 +37,11 @@ namespace BucketProject.Controllers
         [HttpPost]
         public IActionResult LogIn(string username, string password)
         {
-            User loggedUser = DBHelper.ValidateUser(username, password);
+            User? loggedUser = UserHandlingDB.ValidateUser(username, password);
 
             if (loggedUser!=null)
             {
+                HttpContext.Session.SetString("Username", loggedUser.Username);
                 return RedirectToAction("Index","Home");
             }
             else

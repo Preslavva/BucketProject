@@ -7,10 +7,10 @@
         public string Email { get; set; }
         public string Password { get; set; }
 
-        public string Picture { get; set; }
+        public byte[] Picture { get; set; }
 
         //database reading 
-        public User(int id, string username, string email, string password, string picture)
+        public User(int id, string username, string email, string password, byte[] picture)
         {
             this.Id = id;
             this.Username = username;
