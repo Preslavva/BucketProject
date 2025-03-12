@@ -9,22 +9,25 @@ namespace BucketProject.Repositories
     {
         private const string connString = "Server=DESKTOP-0DITB5G;Database=BucketProject;Trusted_Connection=True; TrustServerCertificate=True;";
 
-        public void CreateGoal(Category category, string description, DateTime deadline, bool isDone)
+        public void CreateGoal(Category category, string description, DateTime deadline, DateTime createdAt)
         {
             try
             {
                 using (SqlConnection conn = new SqlConnection(connString))
                 {
                     conn.Open();
-                    string queryCreateGoal = @"insertt into Goal (Category, Description, Deadline, IsDone)
+                    string queryCreateGoal = @"insert into Goal (Category, Description, Deadline, IsDone, IsDeleted, CreatedAt)
                                            values (@Category, @Description, @Deadline, @isDone)";
 
                     using (SqlCommand createGoal = new SqlCommand(queryCreateGoal, conn))
                     {
                         createGoal.Parameters.AddWithValue("@Category", category);
                         createGoal.Parameters.AddWithValue("@Description", description);
+                        createGoal.Parameters.AddWithValue("@CreatedAt", createdAt);
                         createGoal.Parameters.AddWithValue("@Deadline", deadline);
-                        createGoal.Parameters.AddWithValue("@IDone", false);
+                        createGoal.Parameters.AddWithValue("@IsDone", false);
+                        createGoal.Parameters.AddWithValue("@IsDeleted", false);
+
 
                         createGoal.ExecuteNonQuery();
 
@@ -74,7 +77,7 @@ namespace BucketProject.Repositories
             }
         }
 
-        public List<Goal> LoadGoalsOfUserAndCategory(User user, Category category)
+        public List<Goal> LoadGoalsOfUser(User user, Category category)
         {
             List<Goal> goals = new List<Goal>();
 
@@ -87,7 +90,7 @@ namespace BucketProject.Repositories
                                              from Goal as g
                                              inner join User_Goal as ug
                                              on g.Id = ug.GoalId
-                                             where g.Category = @Category and ug.UserId = @UserId and IsDeleted = @IsDeleted";
+                                             where ug.UserId = @UserId and IsDeleted = @IsDeleted";
 
                     using (SqlCommand loadGoals = new SqlCommand(queryGetGoals, conn))
                     {
@@ -105,8 +108,10 @@ namespace BucketProject.Repositories
                                 Id = reader.GetInt32(0),
                                 Category = (Category)Enum.Parse(typeof(Category), reader.GetString(1)),
                                 Description = reader.GetString(2),
-                                Deadline = reader.GetDateTime(3),
-                                IsDone = reader.GetBoolean(4)
+    
+                                IsDone = reader.GetBoolean(3),
+                                IsDeleted = reader.GetBoolean(4),
+                                CreatedAt = reader.GetDateTime(5)
                             });
                         }
                     }
@@ -215,18 +220,18 @@ namespace BucketProject.Repositories
             }
         }
 
-        public void PostponeGoal(Goal goal, Category category)
+        public void PostponeGoal(Goal goal, DateTime deadline)
         {
             try
             {
                 using (SqlConnection conn = new SqlConnection(connString))
                 {
                     conn.Open();
-                    string queryPostponeGoal = @"update Goal set Category = @Category where Id = @Id";
+                    string queryPostponeGoal = @"update Goal set Deadline = @Deadline where Id = @Id";
 
                     using (SqlCommand changeStatus = new SqlCommand(queryPostponeGoal, conn))
                     {
-                        changeStatus.Parameters.AddWithValue("@Category", category);
+                        changeStatus.Parameters.AddWithValue("@Deadline", deadline);
                         changeStatus.Parameters.AddWithValue("@Id", goal.Id);
 
                         changeStatus.ExecuteNonQuery();

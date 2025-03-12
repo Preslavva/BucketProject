@@ -69,17 +69,18 @@ namespace BucketProject.Services
                             {
                                 if (reader.Read())
                                 {
-                                    return new User(
-                                        (int)reader["UserId"],
-                                        reader["Username"].ToString(),
-                                        reader["Email"].ToString(),
-                                        reader["Password"].ToString(),
-                                        reader.IsDBNull(reader.GetOrdinal("Picture"))
-                                        ? null
-                                        : reader["Picture"].ToString());
+                                return new User(
+                                   (int)reader["UserId"],
+                                   reader["Username"].ToString(),
+                                   reader["Email"].ToString(),
+                                   reader["Password"].ToString(),
+                                   reader.IsDBNull(reader.GetOrdinal("Picture"))
+                                       ? null
+                                       : (byte[])reader["Picture"] 
+                                   );
 
 
-                                };
+                            };
                             }
                         }
                     }
@@ -114,14 +115,14 @@ namespace BucketProject.Services
 
                             while (reader.Read())
                             {
-                                users.Add(new User(
-                                    (int)reader["Id"],
-                                        reader["Username"].ToString(),
-                                        reader["Email"].ToString(),
-                                        reader["Password"].ToString(),
-                                        reader.IsDBNull(reader.GetOrdinal("Photo"))
-                                        ? null
-                                        : reader["Photo"].ToString()));
+                            users.Add(new User(
+                                (int)reader["Id"],
+                                    reader["Username"].ToString(),
+                                    reader["Email"].ToString(),
+                                    reader["Password"].ToString(),
+                                    reader.IsDBNull(reader.GetOrdinal("Picture"))
+                                   ? null
+                                   : (byte[])reader["Picture"]));
                             }
                         }
                         return users;

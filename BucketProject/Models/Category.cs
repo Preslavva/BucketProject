@@ -2,12 +2,10 @@
 {
     public enum Category
     {
-        CURRENT_WEEK,
-        NEXT_WEEK,
-        CURRENT_MONTH,
-        NEXT_MONTH,
-        CURRENT_YEAR,
-        NEXT_YEAR,
-        BUCKET_LIST
+      week,
+      month,
+      year,
+      bucket_list
+  
     }
 }

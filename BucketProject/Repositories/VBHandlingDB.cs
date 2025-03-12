@@ -274,7 +274,7 @@ namespace BucketProject.Repositories
                 {
                     conn.Open();
                     string queryChangeStatus = @"update Vision_Board_Items
-                                                 set ssDarkened = @ssDarkened
+                                                 set isDarkened = @isDarkened
                                                  where Image = @Image
                                                  ";
 
@@ -351,7 +351,6 @@ namespace BucketProject.Repositories
                     }
                 }
             }
-
             catch (SqlException sqlEx)
             {
                 throw new Exception($"Database error occurred while updating vision board name: {sqlEx.Message}", sqlEx);

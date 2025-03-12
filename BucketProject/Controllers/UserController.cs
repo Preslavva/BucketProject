@@ -7,6 +7,7 @@ namespace BucketProject.Controllers
 {
     public class UserController : Controller
     {
+        UserHandlingDB userDB = new UserHandlingDB();
         
         [HttpGet]
         public IActionResult Register()
@@ -17,7 +18,7 @@ namespace BucketProject.Controllers
         [HttpPost]
         public IActionResult Register(RegisterViewModel user)
         {
-            if (UserHandlingDB.Register(user))
+            if (userDB.Register(user))
             {
                 return RedirectToAction("LogIn","User");
             }
@@ -37,7 +38,7 @@ namespace BucketProject.Controllers
         [HttpPost]
         public IActionResult LogIn(string username, string password)
         {
-            User? loggedUser = UserHandlingDB.ValidateUser(username, password);
+            User? loggedUser = userDB.ValidateUser(username, password);
 
             if (loggedUser!=null)
             {
