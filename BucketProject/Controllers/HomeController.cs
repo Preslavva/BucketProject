@@ -20,6 +20,19 @@ namespace BucketProject.Controllers
             return View();
         }
 
+        public IActionResult WeekGoals()
+        {
+            return View();
+        }
+        public IActionResult MonthGoals()
+        {
+            return View();
+        }
+        public IActionResult YearGoals()
+        {
+            return View();
+        }
+
         public IActionResult Privacy()
         {
             ViewBag.Username = HttpContext.Session.GetString("Username");
