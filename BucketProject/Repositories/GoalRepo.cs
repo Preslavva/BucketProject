@@ -5,11 +5,11 @@ using Microsoft.Data.SqlClient;
 
 namespace BucketProject.Repositories
 {
-    public class GoalHandlingDB
+    public class GoalRepo
     {
         private const string connString = "Server=DESKTOP-0DITB5G;Database=BucketProject;Trusted_Connection=True; TrustServerCertificate=True;";
 
-        public void CreateGoal(Category category, string description, DateTime deadline, DateTime createdAt)
+        public void CreateGoal(Category category, string description, DateTime deadline, DateTime createdAt, bool isDone, bool isDeleted)
         {
             try
             {
@@ -17,7 +17,7 @@ namespace BucketProject.Repositories
                 {
                     conn.Open();
                     string queryCreateGoal = @"insert into Goal (Category, Description, Deadline, IsDone, IsDeleted, CreatedAt)
-                                           values (@Category, @Description, @Deadline, @isDone)";
+                                           values (@Category, @Description, @Deadline, @isDone, @IsDeleted, @CreatedAt)";
 
                     using (SqlCommand createGoal = new SqlCommand(queryCreateGoal, conn))
                     {
@@ -77,7 +77,7 @@ namespace BucketProject.Repositories
             }
         }
 
-        public List<Goal> LoadGoalsOfUser(User user, Category category)
+        public List<Goal> LoadGoalsOfUserbyCategory(User user, Category category)
         {
             List<Goal> goals = new List<Goal>();
 
@@ -90,7 +90,7 @@ namespace BucketProject.Repositories
                                              from Goal as g
                                              inner join User_Goal as ug
                                              on g.Id = ug.GoalId
-                                             where ug.UserId = @UserId and IsDeleted = @IsDeleted";
+                                             where g.Category = @Category, ug.UserId = @UserId and IsDeleted = @IsDeleted";
 
                     using (SqlCommand loadGoals = new SqlCommand(queryGetGoals, conn))
                     {

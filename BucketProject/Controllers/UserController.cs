@@ -7,7 +7,7 @@ namespace BucketProject.Controllers
 {
     public class UserController : Controller
     {
-        UserHandlingDB userDB = new UserHandlingDB();
+        UserRepo userDB = new UserRepo();
         
         [HttpGet]
         public IActionResult Register()

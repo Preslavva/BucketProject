@@ -7,7 +7,7 @@ using BucketProject.ViewModels;
 using Microsoft.Data.SqlClient;
 namespace BucketProject.Repositories
 {
-    public class UserHandlingDB
+    public class UserRepo
     {
         private const string connString = "Server=DESKTOP-0DITB5G;Database=BucketProject;Trusted_Connection=True; TrustServerCertificate=True;";
 
