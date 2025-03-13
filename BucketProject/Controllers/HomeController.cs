@@ -20,10 +20,10 @@ namespace BucketProject.Controllers
             return View();
         }
 
-        public IActionResult WeekGoals()
-        {
-            return View();
-        }
+        //public IActionResult WeekGoals()
+        //{
+        //    return View();
+        //}
         public IActionResult MonthGoals()
         {
             return View();

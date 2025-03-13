@@ -7,8 +7,14 @@ namespace BucketProject.Controllers
 {
     public class UserController : Controller
     {
-        UserRepo userDB = new UserRepo();
+        private readonly UserRepo _userRepo;
         
+        public UserController(UserRepo userRepo)
+        {
+            _userRepo = userRepo;
+        }
+
+
         [HttpGet]
         public IActionResult Register()
         {
@@ -18,7 +24,7 @@ namespace BucketProject.Controllers
         [HttpPost]
         public IActionResult Register(RegisterViewModel user)
         {
-            if (userDB.Register(user))
+            if (_userRepo.Register(user))
             {
                 return RedirectToAction("LogIn","User");
             }
@@ -38,7 +44,7 @@ namespace BucketProject.Controllers
         [HttpPost]
         public IActionResult LogIn(string username, string password)
         {
-            User? loggedUser = userDB.ValidateUser(username, password);
+            User? loggedUser = _userRepo.ValidateUser(username, password);
 
             if (loggedUser!=null)
             {

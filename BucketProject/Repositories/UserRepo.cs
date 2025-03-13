@@ -9,7 +9,12 @@ namespace BucketProject.Repositories
 {
     public class UserRepo
     {
-        private const string connString = "Server=DESKTOP-0DITB5G;Database=BucketProject;Trusted_Connection=True; TrustServerCertificate=True;";
+        private readonly string connString;
+
+        public UserRepo(IConfiguration configuration)
+        {
+            connString = configuration.GetConnectionString("DefaultConnection");
+        }
 
         public bool Register(RegisterViewModel user)
         {

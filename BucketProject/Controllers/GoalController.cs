@@ -13,49 +13,73 @@ namespace BucketProject.Controllers
             _goalService = goalService;
         }
 
-        [HttpPost]
-        public IActionResult CreateGoal(Category category, string description, DateTime deadline)
-        {
-            int userId = GetLoggedInUserId(); 
-
-            if (!string.IsNullOrWhiteSpace(description))
-            {
-                DateTime createdAt = DateTime.Now;
-                bool isDone = false;
-                bool isDeleted = false;
-
-                _goalService.CreateGoal(category, description, deadline, isDone, isDeleted, createdAt);
-            }
-            return RedirectToAction("Index");
-        }
-
-        [HttpPost]
-        public IActionResult AssignGoalToUser(int goalId, int userId)
-        {
-            User user = new User { Id = userId };
-            Goal goal = new Goal { Id = goalId };
-
-            _goalService.AssignGoalToUser(user, goal);
-
-            return RedirectToAction("Index");
-        }
-
         [HttpGet]
-        public IActionResult LoadGoalsByCategory(Category category)
+        public IActionResult WeekGoals()
         {
-            int userId = GetLoggedInUserId();
-            User user = new User { Id = userId };
-
-            List<Goal> goals = _goalService.LoadGoalsByCategory(user, category);
-
-            return View(@category+ " Goals", goals);
+            HttpContext.Session.GetString("Username");
+            return View();
         }
 
-        private int GetLoggedInUserId()
+
+        [HttpPost]
+        public IActionResult CreateWeekGoal(string description)
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-            return userIdClaim != null ? int.Parse(userIdClaim.Value) : 0;
+            Category category = Category.Week;
+            _goalService.CreateGoal(category, description);
+            return RedirectToAction("WeekGoals");
         }
+
+    //    [HttpPost]
+    //    public IActionResult CreateMonthGoal(string description)
+    //    {
+    //        Category category = Category.Month;
+    //        _goalService.CreateGoal(category, description);
+    //        return RedirectToAction("Index");
+    //    }
+
+    //    [HttpPost]
+    //    public IActionResult CreateYearGoal(string description)
+    //    {
+    //        Category category = Category.Year;
+    //        _goalService.CreateGoal(category, description);
+    //        return RedirectToAction("Index");
+    //    }
+
+    //    [HttpPost]
+    //    public IActionResult CreateLifeGoal(string description)
+    //    {
+    //        Category category = Category.Bucket_list;
+    //        _goalService.CreateGoal(category, description);
+    //        return RedirectToAction("Index");
+    //    }
+
+    //    [HttpPost]
+    //    public IActionResult AssignGoalToUser(int goalId, int userId)
+    //    {
+    //        User user = new User { Id = userId };
+    //        Goal goal = new Goal { Id = goalId };
+
+    //        _goalService.AssignGoalToUser(user, goal);
+
+    //        return View();
+    //    }
+
+    //    [HttpGet]
+    //    public IActionResult LoadGoalsByCategory(Category category)
+    //    {
+    //        int userId = GetLoggedInUserId();
+    //        User user = new User { Id = userId };
+
+    //        List<Goal> goals = _goalService.LoadGoalsByCategory(user, category);
+
+    //        return View(goals);
+    //    }
+
+    //    private int GetLoggedInUserId()
+    //    {
+    //        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+    //        return userIdClaim != null ? int.Parse(userIdClaim.Value) : 0;
+    //    }
     }
 }
 

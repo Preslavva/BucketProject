@@ -2,10 +2,9 @@
 {
     public enum Category
     {
-      week,
-      month,
-      year,
-      bucket_list
-  
+      Week,
+      Month,
+      Year,
+      Bucket_list
     }
 }

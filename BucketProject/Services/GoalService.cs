@@ -12,11 +12,17 @@ namespace BucketProject.Services
             _goalRepo = goalRepo;
         }
 
-        public void CreateGoal(Category category, string description, DateTime deadline, bool isDone, bool isDeleted, DateTime createdAt)
+        public void CreateGoal(Category category, string description)
         {
-            if (!string.IsNullOrWhiteSpace(description))
+            string[] descriptions = description.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+
+            foreach (var desc in descriptions)
             {
-                _goalRepo.CreateGoal(category, description, deadline, createdAt, isDone, isDeleted);
+                if (!string.IsNullOrWhiteSpace(desc))
+                {
+                    Goal newGoal = new Goal(category, desc.Trim()); 
+                    _goalRepo.CreateGoal(newGoal);
+                }
             }
         }
 

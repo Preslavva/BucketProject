@@ -1,0 +1,15 @@
+﻿@model Category
+
+@{
+    ViewData["Title"] = "Week Goals";
+}
+
+
+    <h2>@ViewData["Title"]</h2>
+
+<form method="post" asp-controller="Goal" asp-action="CreateWeekGoal">
+
+    <textarea name="description" placeholder="Enter your goals here..." rows="3" required onchange="this.form.submit()"></textarea>
+</form>
+
+

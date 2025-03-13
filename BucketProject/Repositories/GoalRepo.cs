@@ -7,9 +7,14 @@ namespace BucketProject.Repositories
 {
     public class GoalRepo
     {
-        private const string connString = "Server=DESKTOP-0DITB5G;Database=BucketProject;Trusted_Connection=True; TrustServerCertificate=True;";
+        private readonly string connString;
 
-        public void CreateGoal(Category category, string description, DateTime deadline, DateTime createdAt, bool isDone, bool isDeleted)
+        public GoalRepo(IConfiguration configuration)
+        {
+            connString = configuration.GetConnectionString("DefaultConnection");
+        }
+
+        public void CreateGoal(Goal goal)
         {
             try
             {
@@ -17,14 +22,14 @@ namespace BucketProject.Repositories
                 {
                     conn.Open();
                     string queryCreateGoal = @"insert into Goal (Category, Description, Deadline, IsDone, IsDeleted, CreatedAt)
-                                           values (@Category, @Description, @Deadline, @isDone, @IsDeleted, @CreatedAt)";
+                                           values (@Category, @Description, @Deadline, @IsDone, @IsDeleted, @CreatedAt)";
 
                     using (SqlCommand createGoal = new SqlCommand(queryCreateGoal, conn))
                     {
-                        createGoal.Parameters.AddWithValue("@Category", category);
-                        createGoal.Parameters.AddWithValue("@Description", description);
-                        createGoal.Parameters.AddWithValue("@CreatedAt", createdAt);
-                        createGoal.Parameters.AddWithValue("@Deadline", deadline);
+                        createGoal.Parameters.AddWithValue("@Category", goal.Category.ToString());
+                        createGoal.Parameters.AddWithValue("@Description", goal.Description);
+                        createGoal.Parameters.AddWithValue("@CreatedAt", goal.CreatedAt);
+                        createGoal.Parameters.AddWithValue("@Deadline", goal.Deadline);
                         createGoal.Parameters.AddWithValue("@IsDone", false);
                         createGoal.Parameters.AddWithValue("@IsDeleted", false);
 

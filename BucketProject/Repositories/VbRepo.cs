@@ -9,7 +9,12 @@ namespace BucketProject.Repositories
 {
     public class VbRepo
     {
-        private const string connString = "Server=DESKTOP-0DITB5G;Database=BucketProject;Trusted_Connection=True; TrustServerCertificate=True;";
+        private readonly string connString;
+
+        public VbRepo(IConfiguration configuration)
+        {
+            connString = configuration.GetConnectionString("DefaultConnection");
+        }
 
         public void CreateVB(string name, User owner, DateTime createdAt)
         {

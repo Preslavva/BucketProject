@@ -1,8 +1,20 @@
+using BucketProject.Repositories;
+using BucketProject.Services;
+
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddSession();
+
+builder.Services.AddScoped<GoalRepo>();
+builder.Services.AddScoped<VbRepo>();
+builder.Services.AddScoped<UserRepo>();
+
+builder.Services.AddScoped<GoalService>();
+
+
 
 var app = builder.Build();
 

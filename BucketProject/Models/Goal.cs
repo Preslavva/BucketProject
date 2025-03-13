@@ -21,6 +21,7 @@
 
         public List<User> Users { get; set; }
 
+        //for reading from database
         public Goal(int id, Category category, string description, DateTime createdAt, DateTime deadline, bool isDone, bool isDeleted)
         {
             this.Id = id;
@@ -32,10 +33,13 @@
             this.IsDeleted = isDeleted;
         }
 
-        public Goal(Category category, DateTime createdAt, string description )
+        //saving to database
+        public Goal(Category category, string description)
         {
             this.Category = category;
             this.Description = description;
+            this.CreatedAt = DateTime.Now;
+            this.Deadline = DetermineDeadLine(DateTime.Now, category);
             this.IsDone = false;
             this.IsDeleted = false;
             Users = new List<User>();
@@ -45,21 +49,21 @@
 
         public DateTime? DetermineDeadLine(DateTime createdAt, Category category)
         {
-            if (category==Category.week)
+            if (category==Category.Week)
             {
                 return createdAt.AddDays(7);
             }
-            else if (category == Category.month)
+            else if (category == Category.Month)
             {
                 return createdAt.AddMonths(1);
 
             }
-            else if (category == Category.year)
+            else if (category == Category.Year)
             {
                 return createdAt.AddYears(1);
 
             }
-            else if (category == Category.bucket_list)
+            else if (category == Category.Bucket_list)
             {
                 return null;
 
