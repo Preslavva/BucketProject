@@ -14,44 +14,88 @@ namespace BucketProject.Repositories
             connString = configuration.GetConnectionString("DefaultConnection");
         }
 
-        public void CreateGoal(Goal goal)
+        //public void CreateGoal(Goal goal)
+        //{
+        //    try
+        //    {
+        //        using (SqlConnection conn = new SqlConnection(connString))
+        //        {
+        //            conn.Open();
+        //            string queryCreateGoal = @"insert into Goal (Category, Description, Deadline, IsDone, IsDeleted, CreatedAt)
+        //                                   values (@Category, @Description, @Deadline, @IsDone, @IsDeleted, @CreatedAt)";
+
+        //            using (SqlCommand createGoal = new SqlCommand(queryCreateGoal, conn))
+        //            {
+        //                createGoal.Parameters.AddWithValue("@Category", goal.Category.ToString());
+        //                createGoal.Parameters.AddWithValue("@Description", goal.Description);
+        //                createGoal.Parameters.AddWithValue("@CreatedAt", goal.CreatedAt);
+        //                createGoal.Parameters.AddWithValue("@Deadline", goal.Deadline);
+        //                createGoal.Parameters.AddWithValue("@IsDone", false);
+        //                createGoal.Parameters.AddWithValue("@IsDeleted", false);
+
+
+        //                createGoal.ExecuteNonQuery();
+
+        //            }
+        //        }
+        //    }
+
+        //    catch (SqlException sqlEx)
+        //    {
+        //        throw new Exception($"Database error occurred while creating goal: {sqlEx.Message}", sqlEx);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        throw new Exception($"An unexpected error occurred in {MethodBase.GetCurrentMethod().Name}: {ex.Message}", ex);
+        //    }
+
+        //}
+        public void InsertGoalAndAssignToUser(int userId,Goal goal)
         {
-            try
+            using (SqlConnection conn = new SqlConnection(connString))
             {
-                using (SqlConnection conn = new SqlConnection(connString))
+                conn.Open();
+                using (SqlTransaction transaction = conn.BeginTransaction()) 
                 {
-                    conn.Open();
-                    string queryCreateGoal = @"insert into Goal (Category, Description, Deadline, IsDone, IsDeleted, CreatedAt)
-                                           values (@Category, @Description, @Deadline, @IsDone, @IsDeleted, @CreatedAt)";
-
-                    using (SqlCommand createGoal = new SqlCommand(queryCreateGoal, conn))
+                    try
                     {
-                        createGoal.Parameters.AddWithValue("@Category", goal.Category.ToString());
-                        createGoal.Parameters.AddWithValue("@Description", goal.Description);
-                        createGoal.Parameters.AddWithValue("@CreatedAt", goal.CreatedAt);
-                        createGoal.Parameters.AddWithValue("@Deadline", goal.Deadline);
-                        createGoal.Parameters.AddWithValue("@IsDone", false);
-                        createGoal.Parameters.AddWithValue("@IsDeleted", false);
+                        string insertGoalQuery = "INSERT INTO Goal (Category, Description, Deadline, IsDone, IsDeleted, CreatedAt) OUTPUT INSERTED.Id " +
+                            "VALUES (@Category, @Description, @Deadline, @IsDone, @IsDeleted, @CreatedAt);";
+                        int goalId;
+
+                        using (SqlCommand insertGoalCmd = new SqlCommand(insertGoalQuery, conn, transaction))
+                        {
+                            insertGoalCmd.Parameters.AddWithValue("@Category", goal.Category.ToString());
+                            insertGoalCmd.Parameters.AddWithValue("@Description", goal.Description);
+                            insertGoalCmd.Parameters.AddWithValue("@CreatedAt", goal.CreatedAt);
+                            insertGoalCmd.Parameters.AddWithValue("@Deadline", goal.Deadline);
+                            insertGoalCmd.Parameters.AddWithValue("@IsDone", false);
+                            insertGoalCmd.Parameters.AddWithValue("@IsDeleted", false);
 
 
-                        createGoal.ExecuteNonQuery();
+                            goalId = (int)insertGoalCmd.ExecuteScalar(); 
+                        }
+
+                        string insertUserGoalQuery = "INSERT INTO User_Goal (UserId, GoalId) VALUES (@UserId, @GoalId);";
+                        using (SqlCommand insertUserGoalCmd = new SqlCommand(insertUserGoalQuery, conn, transaction))
+                        {
+                            insertUserGoalCmd.Parameters.AddWithValue("@UserId", userId);
+                            insertUserGoalCmd.Parameters.AddWithValue("@GoalId", goalId);
+                            insertUserGoalCmd.ExecuteNonQuery();
+                        }
+
+                        transaction.Commit(); 
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
 
                     }
                 }
             }
-
-            catch (SqlException sqlEx)
-            {
-                throw new Exception($"Database error occurred while creating goal: {sqlEx.Message}", sqlEx);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"An unexpected error occurred in {MethodBase.GetCurrentMethod().Name}: {ex.Message}", ex);
-            }
-
         }
 
-        public void AssignGoalToUser(User user, Goal goal)
+        public void AssignGoalToUser(int userId, Goal goal)
         {
             try
             {
@@ -59,11 +103,11 @@ namespace BucketProject.Repositories
                 {
                     conn.Open();
                     string queyAssignGoalToUser = @" insert into User_Goal (UserId, GoalId)
-                                                     values (@UserId, GoalId)";
+                                                     values (@UserId, @GoalId)";
 
                     using (SqlCommand assignGoalToUser = new SqlCommand(queyAssignGoalToUser, conn))
                     {
-                        assignGoalToUser.Parameters.AddWithValue("@UserId", user.Id);
+                        assignGoalToUser.Parameters.AddWithValue("@UserId", userId);
                         assignGoalToUser.Parameters.AddWithValue("@GoalId", goal.Id);
 
                         assignGoalToUser.ExecuteNonQuery();
@@ -82,7 +126,7 @@ namespace BucketProject.Repositories
             }
         }
 
-        public List<Goal> LoadGoalsOfUserbyCategory(User user, Category category)
+        public List<Goal> LoadGoalsOfUserbyCategory(int userId, Category category)
         {
             List<Goal> goals = new List<Goal>();
 
@@ -91,36 +135,36 @@ namespace BucketProject.Repositories
                 using (SqlConnection conn = new SqlConnection(connString))
                 {
                     conn.Open();
-                    string queryGetGoals = @"select g.Id, g.Category, g.Description, g.DeadLine, g.IsDone
-                                             from Goal as g
-                                             inner join User_Goal as ug
-                                             on g.Id = ug.GoalId
-                                             where g.Category = @Category, ug.UserId = @UserId and IsDeleted = @IsDeleted";
+
+                    string queryGetGoals = @"SELECT g.Id, g.Category, g.[Description], g.IsDone, g.IsDeleted, g.CreatedAt, g.Deadline
+                                     FROM Goal AS g
+                                     INNER JOIN User_Goal AS ug ON g.Id = ug.GoalId
+                                     WHERE g.Category = @Category AND ug.UserId = @UserId AND g.IsDeleted = @IsDeleted";
 
                     using (SqlCommand loadGoals = new SqlCommand(queryGetGoals, conn))
                     {
-                        loadGoals.Parameters.AddWithValue("@Category", category);
-                        loadGoals.Parameters.AddWithValue("@UserId", user.Id);
+                        loadGoals.Parameters.AddWithValue("@Category", category.ToString()); 
+                        loadGoals.Parameters.AddWithValue("@UserId", userId);
                         loadGoals.Parameters.AddWithValue("@IsDeleted", false);
 
-
-                        SqlDataReader reader = loadGoals.ExecuteReader();
-
-                        while (reader.Read())
+                        using (SqlDataReader reader = loadGoals.ExecuteReader())
                         {
-                            goals.Add(new Goal
+                            while (reader.Read())
                             {
-                                Id = reader.GetInt32(0),
-                                Category = (Category)Enum.Parse(typeof(Category), reader.GetString(1)),
-                                Description = reader.GetString(2),
-    
-                                IsDone = reader.GetBoolean(3),
-                                IsDeleted = reader.GetBoolean(4),
-                                CreatedAt = reader.GetDateTime(5)
-                            });
+                                goals.Add(new Goal
+                                {
+                                    Id = reader.GetInt32(0),
+                                    Category = Enum.Parse<Category>(reader.GetString(1)),
+                                    Description = reader.GetString(2),
+                                    IsDone = reader.GetBoolean(3),
+                                    IsDeleted = reader.GetBoolean(4),
+                                    CreatedAt = reader.GetDateTime(5),
+                                    Deadline = reader.GetDateTime(6)
+
+                                });
+                            }
                         }
                     }
-                    return goals;
                 }
             }
             catch (SqlException sqlEx)
@@ -131,7 +175,10 @@ namespace BucketProject.Repositories
             {
                 throw new Exception($"An unexpected error occurred in {MethodBase.GetCurrentMethod().Name}: {ex.Message}", ex);
             }
+
+            return goals;
         }
+
 
         public void ChangeGoalStatus(Goal goal, bool isDone)
         {
@@ -247,6 +294,35 @@ namespace BucketProject.Repositories
             catch (SqlException sqlEx)
             {
                 throw new Exception($"Database error occurred while deleting goal: {sqlEx.Message}", sqlEx);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"An unexpected error occurred in {MethodBase.GetCurrentMethod().Name}: {ex.Message}", ex);
+            }
+        }
+    
+     public int GetIdOfUser(string username)
+        {
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(connString))
+                {
+                    conn.Open();
+                    string queryUpdateName = @"select UserId from [User] where Username = @Username";
+
+                    using (SqlCommand changeStatus = new SqlCommand(queryUpdateName, conn))
+                    {
+                        changeStatus.Parameters.AddWithValue("@Username", username);
+
+                        int id = (int)changeStatus.ExecuteScalar();
+                        return id;
+                    }
+                }
+            }
+
+            catch (SqlException sqlEx)
+            {
+                throw new Exception($"Database error occurred while updatting email: {sqlEx.Message}", sqlEx);
             }
             catch (Exception ex)
             {

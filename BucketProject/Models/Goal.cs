@@ -12,7 +12,7 @@
         public DateTime? Deadline
         {
             get => _deadline;
-            private set => _deadline = DetermineDeadLine(CreatedAt, Category);
+            set => _deadline = DetermineDeadLine(CreatedAt, Category);
         }
 
         public bool IsDone { get; set; }

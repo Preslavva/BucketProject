@@ -1,15 +1,26 @@
-﻿@model Category
+﻿@model List<Goal>
 
 @{
     ViewData["Title"] = "Week Goals";
 }
 
-
-    <h2>@ViewData["Title"]</h2>
+<h2>@ViewData["Title"]</h2>
 
 <form method="post" asp-controller="Goal" asp-action="CreateWeekGoal">
-
     <textarea name="description" placeholder="Enter your goals here..." rows="3" required onchange="this.form.submit()"></textarea>
 </form>
 
 
+<ul>
+    @if (Model != null)
+    {
+        @foreach (Goal goal in Model)
+        {
+            <li>@goal.Description</li>
+        }
+    }
+    else
+    {
+        <li>No goals found for this category.</li>
+    }
+</ul>

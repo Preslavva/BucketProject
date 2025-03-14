@@ -229,5 +229,33 @@ namespace BucketProject.Repositories
             }
         }
 
+        public int GetIdOfUser(string username)
+        {
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(connString))
+                {
+                    conn.Open();
+                    string queryUpdateName = @"select UserId from [User] where Username = @Username";
+
+                    using (SqlCommand changeStatus = new SqlCommand(queryUpdateName, conn))
+                    { 
+                        changeStatus.Parameters.AddWithValue("@Username", username);
+
+                        int id = (int)changeStatus.ExecuteScalar();
+                        return id;
+                    }
+                }
+            }
+            
+            catch (SqlException sqlEx)
+            {
+                throw new Exception($"Database error occurred while updatting email: {sqlEx.Message}", sqlEx);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"An unexpected error occurred in {MethodBase.GetCurrentMethod().Name}: {ex.Message}", ex);
+            }
+        }
     }
 }

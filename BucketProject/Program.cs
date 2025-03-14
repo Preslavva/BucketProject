@@ -8,11 +8,18 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 builder.Services.AddSession();
 
+builder.Services.AddHttpContextAccessor();
+
 builder.Services.AddScoped<GoalRepo>();
 builder.Services.AddScoped<VbRepo>();
 builder.Services.AddScoped<UserRepo>();
 
 builder.Services.AddScoped<GoalService>();
+builder.Services.AddScoped<UserService>();
+
+
+
+
 
 
 
@@ -35,6 +42,6 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=User}/{action=LogIn}/{id?}");
 
 app.Run();

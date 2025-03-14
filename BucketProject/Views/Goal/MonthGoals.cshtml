@@ -1,16 +1,15 @@
-﻿@{
+﻿@model Category
+
+@{
     ViewData["Title"] = "Month Goals";
 }
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-</head>
-<body>
 
-    <textarea placeholder="Enter your goals here..."></textarea>
+    <h2>@ViewData["Title"]</h2>
 
-</body>
-</html>
+<form method="post" asp-controller="Goal" asp-action="CreateMonthGoal">
+
+    <textarea name="description" placeholder="Enter your goals here..." rows="3" required onchange="this.form.submit()"></textarea>
+</form>
+
+

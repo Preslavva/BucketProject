@@ -24,14 +24,14 @@ namespace BucketProject.Controllers
         //{
         //    return View();
         //}
-        public IActionResult MonthGoals()
-        {
-            return View();
-        }
-        public IActionResult YearGoals()
-        {
-            return View();
-        }
+        //public IActionResult MonthGoals()
+        //{
+        //    return View();
+        //}
+        //public IActionResult YearGoals()
+        //{
+        //    return View();
+        //}
 
         public IActionResult Privacy()
         {
