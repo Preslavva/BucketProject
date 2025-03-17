@@ -17,29 +17,14 @@ namespace BucketProject.Services
 
         }
 
-
         public void CreateGoal(Category category, string description)
         {
           string? username = _contextAccessor.HttpContext.Session.GetString("Username");
 
             int id = _goalRepo.GetIdOfUser(username);
-
-            string[] descriptions = description.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
-
-            foreach (var desc in descriptions)
-            {
-                if (!string.IsNullOrWhiteSpace(desc))
-                {
-                    Goal newGoal = new Goal(category, desc.Trim());
-                    _goalRepo.InsertGoalAndAssignToUser(id, newGoal);
-                }
-            }
+            Goal newGoal = new Goal(category, description);
+            _goalRepo.InsertGoalAndAssignToUser(id, newGoal);
         }
-
-        //public void AssignGoalToUser(User user, Goal goal)
-        //{
-        //    _goalRepo.AssignGoalToUser(user, goal);
-        //}
 
         public List<Goal> LoadGoalsByCategory(Category category)
         {
@@ -48,7 +33,18 @@ namespace BucketProject.Services
             return  _goalRepo.LoadGoalsOfUserbyCategory(id, category);
         }
 
+        public void UpdateGoal(Goal goal, string description)
+        {
+            _goalRepo.UpdateGoalDescription(goal, description);
+        }
+        public void DeleteGoal(Goal goal)
+        {
+            _goalRepo.DeleteGoal(goal);
+        }
        
-
+        public void ChangeGoalStatus(Goal goal, bool isDone)
+        {
+            _goalRepo.ChangeGoalStatus(goal, isDone);
+        }
     }
 }

@@ -1,26 +1,37 @@
 ﻿@model List<Goal>
 
-@{
-    ViewData["Title"] = "Week Goals";
-}
-
-<h2>@ViewData["Title"]</h2>
+<h2>Weekly Goals</h2>
 
 <form method="post" asp-controller="Goal" asp-action="CreateWeekGoal">
-    <textarea name="description" placeholder="Enter your goals here..." rows="3" required onchange="this.form.submit()"></textarea>
+    <input type="text" id="goal" name="GoalDescription" placeholder="Enter your goal..." required>
+    <button type="submit">Add Goal</button>
 </form>
 
+@foreach (Goal goal in Model)
+{
+    <div class="goal-item">
+        <form method="post" asp-action="EditGoalWeek" class="goal-form">
+            <input type="hidden" name="goal.Id" value="@goal.Id" />
+            <input type="text" name="description" value="@goal.Description" required />
+            <button type="submit">Save changes</button>
+        </form>
 
-<ul>
-    @if (Model != null)
-    {
-        @foreach (Goal goal in Model)
-        {
-            <li>@goal.Description</li>
-        }
-    }
-    else
-    {
-        <li>No goals found for this category.</li>
-    }
-</ul>
+        <form method="post" asp-action="ChangeGoalStatus">
+            <input type="hidden" name="Id" value="@goal.Id" />
+            <input type="hidden" name="isDone" value="true" />
+            <button type="submit" @(goal.IsDone ? "disabled" : "")>Done</button>
+        </form>
+
+        <form method="post" asp-action="ChangeGoalStatus">
+            <input type="hidden" name="Id" value="@goal.Id" />
+            <input type="hidden" name="isDone" value="false" />
+            <button type="submit" @(!goal.IsDone ? "disabled" : "")>Undone</button>
+        </form>
+
+            <form method="post" asp-action="DeleteGoalWeek">
+                <input type="hidden" name="goal.Id" value="@goal.Id" />
+                <button type="submit" class="delete-btn">Delete goal</button>
+            </form>
+    </div>
+
+}

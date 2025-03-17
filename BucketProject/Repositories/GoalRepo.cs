@@ -188,11 +188,13 @@ namespace BucketProject.Repositories
                 {
                     conn.Open();
                     string queryChangeStatus = @"update Goal
-                                                 set IsDone = @IsDone";
+                                                 set IsDone = @IsDone
+                                                 where Id = @Id";
 
                     using (SqlCommand changeStatus = new SqlCommand(queryChangeStatus, conn))
                     {
                         changeStatus.Parameters.AddWithValue("@IsDone", isDone);
+                        changeStatus.Parameters.AddWithValue("@Id", goal.Id);
 
                         changeStatus.ExecuteNonQuery();
                     }

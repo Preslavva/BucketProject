@@ -1,15 +1,31 @@
-﻿@model Category
+﻿@model List<Goal>
 
-@{
-    ViewData["Title"] = "Year Goals";
-}
-
-
-    <h2>@ViewData["Title"]</h2>
+<h2>Year Goals</h2>
 
 <form method="post" asp-controller="Goal" asp-action="CreateYearGoal">
-
-    <textarea name="description" placeholder="Enter your goals here..." rows="3" required onchange="this.form.submit()"></textarea>
+    <input type="text" id="goal" name="Description" placeholder="Enter your goal..." required>
+    <button type="submit">Add Goal</button>
 </form>
 
+@foreach (Goal goal in Model)
+{
+    <div class="goal-item">
+        <form method="post" asp-action="EditGoalYear" class="goal-form">
+            <input type="hidden" name="Id" value="@goal.Id" />
+            <input type="text" name="description" value="@goal.Description" required />
+            <button type="submit">Save changes</button>
+        </form>
+
+        <form method="post" asp-action="ChangeGoalStatusYear">
+            <input type="hidden" name="Id" value="@goal.Id" />
+            <input type="hidden" name="isDone" value="@(goal.IsDone ? "false" : "true")" />
+            <button type="submit">@((goal.IsDone) ? "Undone" : "Done")</button>
+        </form>
+
+        <form method="post" asp-action="DeleteGoalYear">
+            <input type="hidden" name="Id" value="@goal.Id" />
+            <button type="submit" class="delete-btn">Delete goal</button>
+        </form>
+    </div>
+}
 
