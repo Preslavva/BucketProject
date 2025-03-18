@@ -1,11 +1,13 @@
 ﻿using System.Reflection;
+using BucketProject.Interfaces;
 using BucketProject.Models;
 using BucketProject.ViewModels;
 using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace BucketProject.Repositories
 {
-    public class GoalRepo
+    public class GoalRepo: IGoalRepo
     {
         private readonly string connString;
 

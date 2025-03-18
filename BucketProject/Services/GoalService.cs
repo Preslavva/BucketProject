@@ -1,20 +1,20 @@
 ﻿using System.Security.Claims;
+using BucketProject.Interfaces;
 using BucketProject.Models;
 using BucketProject.Repositories;
 
+
 namespace BucketProject.Services
 {
-    public class GoalService
+    public class GoalService:IGoalService
     {
         private readonly IHttpContextAccessor _contextAccessor;
+        private readonly IGoalRepo _goalRepo;
 
-        private readonly GoalRepo _goalRepo;
-
-        public GoalService(GoalRepo goalRepo, IHttpContextAccessor contextAccessor)
+        public GoalService(IGoalRepo goalRepo, IHttpContextAccessor contextAccessor)
         {
             _goalRepo = goalRepo;
             _contextAccessor = contextAccessor;
-
         }
 
         public void CreateGoal(Category category, string description)

@@ -1,16 +1,19 @@
-﻿using BucketProject.Models;
+﻿using BucketProject.Interfaces;
+using BucketProject.Models;
 using BucketProject.Repositories;
 using BucketProject.ViewModels;
 
 namespace BucketProject.Services
 {
-    public class UserService
+    public class UserService: IUserService
     {
-        private readonly UserRepo _userRepo;
+        private readonly IHttpContextAccessor _contextAccessor;
+        private readonly IUserRepo _userRepo;
 
-        public UserService(UserRepo userRepo)
+        public UserService(IUserRepo userRepo, IHttpContextAccessor contextAccessor)
         {
             _userRepo = userRepo;
+            _contextAccessor = contextAccessor;
         }
 
         public User? LogIn(string username, string password)

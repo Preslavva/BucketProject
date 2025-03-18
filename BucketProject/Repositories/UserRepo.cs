@@ -2,12 +2,16 @@
 using System.Reflection;
 using System.Reflection.Metadata.Ecma335;
 using Azure.Identity;
+using BucketProject.Interfaces;
 using BucketProject.Models;
 using BucketProject.ViewModels;
 using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.DependencyInjection;
+
 namespace BucketProject.Repositories
+
 {
-    public class UserRepo
+    public class UserRepo: IUserRepo
     {
         private readonly string connString;
 
