@@ -68,7 +68,7 @@ namespace BucketProject.Repositories
                             insertGoalCmd.Parameters.AddWithValue("@Category", goal.Category.ToString());
                             insertGoalCmd.Parameters.AddWithValue("@Description", goal.Description);
                             insertGoalCmd.Parameters.AddWithValue("@CreatedAt", goal.CreatedAt);
-                            insertGoalCmd.Parameters.AddWithValue("@Deadline", goal.Deadline);
+                            insertGoalCmd.Parameters.AddWithValue("@Deadline", goal.Deadline ?? (object)DBNull.Value);
                             insertGoalCmd.Parameters.AddWithValue("@IsDone", false);
                             insertGoalCmd.Parameters.AddWithValue("@IsDeleted", false);
 
@@ -159,7 +159,8 @@ namespace BucketProject.Repositories
                                     IsDone = reader.GetBoolean(3),
                                     IsDeleted = reader.GetBoolean(4),
                                     CreatedAt = reader.GetDateTime(5),
-                                    Deadline = reader.GetDateTime(6)
+                                    Deadline = reader.IsDBNull(6) ? (DateTime?)null : reader.GetDateTime(6) 
+
 
                                 });
                             }

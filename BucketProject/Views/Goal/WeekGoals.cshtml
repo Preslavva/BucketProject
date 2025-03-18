@@ -16,16 +16,9 @@
             <button type="submit">Save changes</button>
         </form>
 
-        <form method="post" asp-action="ChangeGoalStatus">
+        <form method="post" asp-action="ChangeGoalStatusWeek" id="goalForm-@goal.Id">
             <input type="hidden" name="Id" value="@goal.Id" />
-            <input type="hidden" name="isDone" value="true" />
-            <button type="submit" @(goal.IsDone ? "disabled" : "")>Done</button>
-        </form>
-
-        <form method="post" asp-action="ChangeGoalStatus">
-            <input type="hidden" name="Id" value="@goal.Id" />
-            <input type="hidden" name="isDone" value="false" />
-            <button type="submit" @(!goal.IsDone ? "disabled" : "")>Undone</button>
+            <input type="checkbox" name="isDone" value="true" @(goal.IsDone ? "checked" : "") onchange="this.form.submit()" />
         </form>
 
             <form method="post" asp-action="DeleteGoalWeek">

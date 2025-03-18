@@ -30,11 +30,11 @@ namespace BucketProject.Controllers
         }
 
         [HttpPost]
-        public IActionResult CreateLifeGoal(string description)
+        public IActionResult CreateBucketListGoal(string description)
         {
             Category category = Category.Bucket_list;
             _goalService.CreateGoal(category, description);
-            return RedirectToAction("Index");
+            return RedirectToAction("BucketList");
         }
 
         [HttpPost]
@@ -46,6 +46,8 @@ namespace BucketProject.Controllers
 
             return RedirectToAction("WeekGoals");
         }
+
+      
 
         [HttpPost]
         public IActionResult EditGoalWeek(Goal goal, string description)
@@ -72,6 +74,14 @@ namespace BucketProject.Controllers
         }
 
         [HttpPost]
+        public IActionResult EditGoalBucketList(Goal goal, string description)
+        {
+
+            _goalService.UpdateGoal(goal, description);
+            return RedirectToAction("BucketList");
+        }
+
+        [HttpPost]
         public IActionResult DeleteGoalWeek(Goal goal)
         {
 
@@ -92,6 +102,14 @@ namespace BucketProject.Controllers
 
             _goalService.DeleteGoal(goal);
             return RedirectToAction("MonthGoals");
+        }
+
+        [HttpPost]
+        public IActionResult DeleteGoalBucketList(Goal goal)
+        {
+
+            _goalService.DeleteGoal(goal);
+            return RedirectToAction("BucketList");
         }
 
         [HttpGet]
@@ -136,6 +154,15 @@ namespace BucketProject.Controllers
 
         }
 
+        [HttpPost]
+        public IActionResult ChangeGoalStatusBucketList(Goal goal, bool isDone)
+        {
+            _goalService.ChangeGoalStatus(goal, isDone);
+            return RedirectToAction("BucketList");
+
+        }
+
+
         [HttpGet]
         public IActionResult YearGoals()
         {
@@ -144,6 +171,13 @@ namespace BucketProject.Controllers
             return View(goals);
         }
 
+        [HttpGet]
+        public IActionResult BucketList()
+        {
+            List<Goal> goals = _goalService.LoadGoalsByCategory(Category.Bucket_list);
+
+            return View(goals);
+        }
     }
 
 }

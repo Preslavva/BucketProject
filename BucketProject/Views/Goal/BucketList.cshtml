@@ -1,0 +1,30 @@
+﻿@model List<Goal>
+
+<h2>Bucket List</h2>
+
+<form method="post" asp-controller="Goal" asp-action="CreateBucketListGoal">
+    <input type="text" id="goal" name="Description" placeholder="Enter your goal..." required>
+    <button type="submit">Add Goal</button>
+</form>
+
+@foreach (Goal goal in Model)
+{
+        <div class="goal-item">
+            <form method="post" asp-action="EditGoalBucketList" class="goal-form">
+                <input type="hidden" name="goal.Id" value="@goal.Id" />
+                <input type="text" name="description" value="@goal.Description" required />
+                <button type="submit">Save changes</button>
+            </form>
+
+            <form method="post" asp-action="ChangeGoalStatusBucketList" id="goalForm-@goal.Id">
+                <input type="hidden" name="Id" value="@goal.Id" />
+                <input type="checkbox" name="isDone" value="true" @(goal.IsDone ? "checked" : "") onchange="this.form.submit()" />
+            </form>
+
+                <form method="post" asp-action="DeleteGoalBucketList">
+                    <input type="hidden" name="goal.Id" value="@goal.Id" />
+                    <button type="submit" class="delete-btn">Delete goal</button>
+                </form>
+        </div>
+
+}
