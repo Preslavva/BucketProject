@@ -1,8 +1,8 @@
-﻿using BucketProject.Models;
-using BucketProject.Services;
+﻿using BucketProject.Data.Models;
+using BucketProject.Business_Logic.Services;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
-using BucketProject.Interfaces;
+using BucketProject.Business_Logic.InterfacesService;
 
 namespace BucketProject.Controllers
 {

@@ -1,10 +1,12 @@
 ﻿using System.Security.Claims;
-using BucketProject.Interfaces;
-using BucketProject.Models;
-using BucketProject.Repositories;
+using BucketProject.Business_Logic.InterfacesService;
+using BucketProject.Data.InterfacesRepo;
+using BucketProject.Data.Models;
+using BucketProject.Data.Repositories;
+using Microsoft.AspNetCore.Http;
 
 
-namespace BucketProject.Services
+namespace BucketProject.Business_Logic.Services
 {
     public class GoalService:IGoalService
     {

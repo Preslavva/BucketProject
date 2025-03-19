@@ -1,5 +1,5 @@
 using System.Diagnostics;
-using BucketProject.Models;
+using BucketProject.Data.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BucketProject.Controllers

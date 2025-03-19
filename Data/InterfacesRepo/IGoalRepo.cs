@@ -1,8 +1,7 @@
 ﻿using System.Runtime.CompilerServices;
-using BucketProject.Models;
-using Microsoft.Extensions.Configuration;
+using BucketProject.Data.Models;
 
-namespace BucketProject.Interfaces
+namespace BucketProject.Data.InterfacesRepo
 {
         public interface IGoalRepo
         {

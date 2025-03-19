@@ -1,4 +1,4 @@
-﻿namespace BucketProject.Models
+﻿namespace BucketProject.Data.Models
 {
     public class Goal
     {

@@ -2,13 +2,14 @@
 using System.Reflection;
 using System.Reflection.Metadata.Ecma335;
 using Azure.Identity;
-using BucketProject.Interfaces;
-using BucketProject.Models;
-using BucketProject.ViewModels;
+using BucketProject.Data.InterfacesRepo;
+using BucketProject.Data.Models;
+using BucketProject.Data.ViewModels;
 using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace BucketProject.Repositories
+namespace BucketProject.Data.Repositories
 
 {
     public class UserRepo: IUserRepo

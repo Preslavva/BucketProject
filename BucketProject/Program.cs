@@ -1,6 +1,8 @@
-using BucketProject.Repositories;
-using BucketProject.Services;
-using BucketProject.Interfaces;
+using BucketProject.Data.InterfacesRepo;
+using BucketProject.Business_Logic.Services;
+using BucketProject.Business_Logic.InterfacesService;
+using BucketProject.Data.Repositories;
+
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,13 +17,8 @@ builder.Services.AddScoped<IGoalRepo,GoalRepo>();
 builder.Services.AddScoped<VbRepo>();
 builder.Services.AddScoped<IUserRepo,UserRepo>();
 
-builder.Services.AddScoped<IGoalService,GoalService>();
+builder.Services.AddScoped<IGoalService, GoalService>();
 builder.Services.AddScoped<IUserService,UserService>();
-
-
-
-
-
 
 
 var app = builder.Build();

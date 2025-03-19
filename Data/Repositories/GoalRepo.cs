@@ -1,11 +1,12 @@
 ﻿using System.Reflection;
-using BucketProject.Interfaces;
-using BucketProject.Models;
-using BucketProject.ViewModels;
+using BucketProject.Data.InterfacesRepo;
+using BucketProject.Data.Models;
+using BucketProject.Data.ViewModels;
 using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace BucketProject.Repositories
+namespace BucketProject.Data.Repositories
 {
     public class GoalRepo: IGoalRepo
     {
@@ -16,43 +17,7 @@ namespace BucketProject.Repositories
             connString = configuration.GetConnectionString("DefaultConnection");
         }
 
-        //public void CreateGoal(Goal goal)
-        //{
-        //    try
-        //    {
-        //        using (SqlConnection conn = new SqlConnection(connString))
-        //        {
-        //            conn.Open();
-        //            string queryCreateGoal = @"insert into Goal (Category, Description, Deadline, IsDone, IsDeleted, CreatedAt)
-        //                                   values (@Category, @Description, @Deadline, @IsDone, @IsDeleted, @CreatedAt)";
-
-        //            using (SqlCommand createGoal = new SqlCommand(queryCreateGoal, conn))
-        //            {
-        //                createGoal.Parameters.AddWithValue("@Category", goal.Category.ToString());
-        //                createGoal.Parameters.AddWithValue("@Description", goal.Description);
-        //                createGoal.Parameters.AddWithValue("@CreatedAt", goal.CreatedAt);
-        //                createGoal.Parameters.AddWithValue("@Deadline", goal.Deadline);
-        //                createGoal.Parameters.AddWithValue("@IsDone", false);
-        //                createGoal.Parameters.AddWithValue("@IsDeleted", false);
-
-
-        //                createGoal.ExecuteNonQuery();
-
-        //            }
-        //        }
-        //    }
-
-        //    catch (SqlException sqlEx)
-        //    {
-        //        throw new Exception($"Database error occurred while creating goal: {sqlEx.Message}", sqlEx);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        throw new Exception($"An unexpected error occurred in {MethodBase.GetCurrentMethod().Name}: {ex.Message}", ex);
-        //    }
-
-        //}
-        public void InsertGoalAndAssignToUser(int userId,Goal goal)
+        public void InsertGoalAndAssignToUser(int userId, Goal goal)
         {
             using (SqlConnection conn = new SqlConnection(connString))
             {

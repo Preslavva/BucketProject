@@ -1,6 +1,6 @@
-﻿using BucketProject.Models;
+﻿using BucketProject.Data.Models;
 
-namespace BucketProject.Interfaces
+namespace BucketProject.Business_Logic.InterfacesService
 {
     public interface IGoalService
     {

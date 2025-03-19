@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using BucketProject.Models;
-using BucketProject.Repositories;
-using BucketProject.ViewModels;
-using BucketProject.Services;
-using BucketProject.Interfaces;
+using BucketProject.Data.Models;
+using BucketProject.Business_Logic.InterfacesService;
+using BucketProject.Data.ViewModels;
+using BucketProject.Business_Logic.Services;
+using BucketProject.Data.InterfacesRepo;
 
 
 

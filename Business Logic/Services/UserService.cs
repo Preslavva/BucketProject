@@ -1,9 +1,11 @@
-﻿using BucketProject.Interfaces;
-using BucketProject.Models;
-using BucketProject.Repositories;
-using BucketProject.ViewModels;
+﻿using BucketProject.Business_Logic.InterfacesService;
+using BucketProject.Data.InterfacesRepo;
+using BucketProject.Data.Models;
+using BucketProject.Data.Repositories;
+using BucketProject.Data.ViewModels;
+using Microsoft.AspNetCore.Http;
 
-namespace BucketProject.Services
+namespace BucketProject.Business_Logic.Services
 {
     public class UserService: IUserService
     {

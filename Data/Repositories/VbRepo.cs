@@ -1,11 +1,11 @@
-﻿using BucketProject.Models;
-using Microsoft.AspNetCore.Mvc.TagHelpers;
+﻿using BucketProject.Data.Models;
 using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Identity.Client;
 using System.Reflection;
 using static System.Net.Mime.MediaTypeNames;
 
-namespace BucketProject.Repositories
+namespace BucketProject.Data.Repositories
 {
     public class VbRepo
     {

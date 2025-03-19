@@ -1,7 +1,7 @@
-﻿using BucketProject.Models;
-using BucketProject.ViewModels;
+﻿using BucketProject.Data.Models;
+using BucketProject.Data.ViewModels;
 
-namespace BucketProject.Interfaces
+namespace BucketProject.Data.InterfacesRepo
 {
     public interface IUserRepo
     {
