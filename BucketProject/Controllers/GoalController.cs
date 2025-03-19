@@ -2,13 +2,14 @@
 using BucketProject.Services;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
+using BucketProject.Interfaces;
 
 namespace BucketProject.Controllers
 {
     public class GoalController : Controller
     {
-        private readonly GoalService _goalService;
-        public GoalController(GoalService goalService)
+        private readonly IGoalService _goalService;
+        public GoalController(IGoalService goalService)
         {
             _goalService = goalService;
         }

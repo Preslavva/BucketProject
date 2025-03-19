@@ -49,26 +49,21 @@
 
         public DateTime? DetermineDeadLine(DateTime createdAt, Category category)
         {
-            if (category==Category.Week)
+            if (category == Category.Week) 
             {
-                return createdAt.AddDays(7);
+                int daysUntilNextMonday = ((int)DayOfWeek.Monday - (int)createdAt.DayOfWeek + 7) % 7;
+                return createdAt.AddDays(daysUntilNextMonday);
             }
-            else if (category == Category.Month)
+            else if (category == Category.Month) 
             {
-                return createdAt.AddMonths(1);
+                return new DateTime(createdAt.Year, createdAt.Month, 1).AddMonths(1);
+            }
+            else if (category == Category.Year) 
+            {
+                return new DateTime(createdAt.Year + 1, 1, 1);
+            }
 
-            }
-            else if (category == Category.Year)
-            {
-                return createdAt.AddYears(1);
-
-            }
-            else if (category == Category.Bucket_list)
-            {
-                return null;
-
-            }
-            return null;
+            return null; 
         }
     }
 }

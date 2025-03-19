@@ -1,5 +1,6 @@
 using BucketProject.Repositories;
 using BucketProject.Services;
+using BucketProject.Interfaces;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,12 +11,12 @@ builder.Services.AddSession();
 
 builder.Services.AddHttpContextAccessor();
 
-builder.Services.AddScoped<GoalRepo>();
+builder.Services.AddScoped<IGoalRepo,GoalRepo>();
 builder.Services.AddScoped<VbRepo>();
-builder.Services.AddScoped<UserRepo>();
+builder.Services.AddScoped<IUserRepo,UserRepo>();
 
-builder.Services.AddScoped<GoalService>();
-builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<IGoalService,GoalService>();
+builder.Services.AddScoped<IUserService,UserService>();
 
 
 
