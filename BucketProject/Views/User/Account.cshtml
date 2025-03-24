@@ -2,6 +2,30 @@
 
 <h2>Account Info</h2>
 
+@if (Model.Picture != null)
+{
+    var base64 = Convert.ToBase64String(Model.Picture);
+    var imgSrc = $"data:image/jpeg;base64,{base64}";
+    <div>
+        <img src="@imgSrc" alt="Profile Picture" style="border-radius:50%; width:150px; height:150px;" />
+    </div>
+}
+else
+{
+    <p>No profile picture uploaded.</p>
+}
+
+<form asp-action="AddPhoto" asp-controller="User" method="post" enctype="multipart/form-data">
+    <div>
+        <label for="photoFile">Select a photo:</label><br />
+        <input type="file" name="photoFile" id="photoFile" accept="image/*" required />
+    </div>
+    <br />
+    <button type="submit">Upload</button>
+</form>
+
+<hr />
+
 <form asp-action="UpdateUsername" asp-controller="User" method="post">
     <div class="form-group">
         <label for="username">Username</label>
@@ -9,6 +33,8 @@
     </div>
     <button type="submit" class="btn btn-primary">Update Username</button>
 </form>
+
+<hr />
 
 <div class="form-group">
     <label>Email</label>

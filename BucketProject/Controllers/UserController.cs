@@ -81,5 +81,13 @@ namespace BucketProject.Controllers
 
             return RedirectToAction("Account", "User");
         }
+
+        [HttpPost]
+        public async Task<IActionResult> AddPhoto(IFormFile photoFile)
+        {
+            await _userService.UpdateProfilePicture(photoFile);
+            return RedirectToAction("Account", "User");
+        }
+
     }
 }

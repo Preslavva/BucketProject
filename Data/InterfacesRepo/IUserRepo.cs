@@ -11,5 +11,7 @@ namespace BucketProject.Data.InterfacesRepo
         User GetUserByUsername(string username);
 
         void UpdateName(User user, string username);
+
+        void AddPhoto(User user, byte[] pictute);
     }
 }

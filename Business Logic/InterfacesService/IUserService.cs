@@ -1,5 +1,6 @@
 ﻿using BucketProject.Data.Models;
 using BucketProject.Data.ViewModels;
+using Microsoft.AspNetCore.Http;
 
 namespace BucketProject.Business_Logic.InterfacesService
 {
@@ -13,6 +14,7 @@ namespace BucketProject.Business_Logic.InterfacesService
 
         void UpdateUsername(string newUsername);
 
+        Task UpdateProfilePicture(IFormFile? photoFile);
 
 
 

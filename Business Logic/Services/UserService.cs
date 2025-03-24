@@ -48,5 +48,23 @@ namespace BucketProject.Business_Logic.Services
 
             _userRepo.UpdateName(user, newUsername);
         }
+
+        public async Task UpdateProfilePicture(IFormFile? photoFile)
+        {
+            if (photoFile == null || photoFile.Length == 0)
+                throw new Exception("No file uploaded.");
+
+            string? username = _contextAccessor.HttpContext?.Session.GetString("Username");
+
+
+            User? user = _userRepo.GetUserByUsername(username);
+
+            using (var memoryStream = new MemoryStream())
+            {
+                await photoFile.CopyToAsync(memoryStream);
+                byte[] photoBytes = memoryStream.ToArray();
+                _userRepo.AddPhoto(user, photoBytes);
+            }
+        }
     }
 }
