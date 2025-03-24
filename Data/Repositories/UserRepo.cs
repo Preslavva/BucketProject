@@ -12,7 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 namespace BucketProject.Data.Repositories
 
 {
-    public class UserRepo: IUserRepo
+    public class UserRepo : IUserRepo
     {
         private readonly string connString;
 
@@ -49,7 +49,7 @@ namespace BucketProject.Data.Repositories
                 insertCommand.Parameters.AddWithValue("@Password", user.Password);
 
                 insertCommand.ExecuteNonQuery();
-                return true; 
+                return true;
             }
             catch (Exception ex)
             {
@@ -176,7 +176,7 @@ namespace BucketProject.Data.Repositories
                 throw new Exception($"An unexpected error occurred in {MethodBase.GetCurrentMethod().Name}: {ex.Message}", ex);
             }
         }
-        
+
         public void UpdateName(User user, string username)
         {
             try
@@ -188,7 +188,7 @@ namespace BucketProject.Data.Repositories
 
                     using (SqlCommand changeStatus = new SqlCommand(queryUpdateName, conn))
                     {
-                        changeStatus.Parameters.AddWithValue("@Name", username);
+                        changeStatus.Parameters.AddWithValue("@Username", username);
                         changeStatus.Parameters.AddWithValue("@UserId", user.Id);
 
                         changeStatus.ExecuteNonQuery();
@@ -244,7 +244,7 @@ namespace BucketProject.Data.Repositories
                     string queryUpdateName = @"select UserId from [User] where Username = @Username";
 
                     using (SqlCommand changeStatus = new SqlCommand(queryUpdateName, conn))
-                    { 
+                    {
                         changeStatus.Parameters.AddWithValue("@Username", username);
 
                         int id = (int)changeStatus.ExecuteScalar();
@@ -252,7 +252,7 @@ namespace BucketProject.Data.Repositories
                     }
                 }
             }
-            
+
             catch (SqlException sqlEx)
             {
                 throw new Exception($"Database error occurred while updatting email: {sqlEx.Message}", sqlEx);
@@ -261,6 +261,81 @@ namespace BucketProject.Data.Repositories
             {
                 throw new Exception($"An unexpected error occurred in {MethodBase.GetCurrentMethod().Name}: {ex.Message}", ex);
             }
+        }
+        public int GetIdOfUserU(string username)
+        {
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(connString))
+                {
+                    conn.Open();
+                    string queryUpdateName = @"select UserId from [User] where Username = @Username";
+
+                    using (SqlCommand changeStatus = new SqlCommand(queryUpdateName, conn))
+                    {
+                        changeStatus.Parameters.AddWithValue("@Username", username);
+
+                        int id = (int)changeStatus.ExecuteScalar();
+                        return id;
+                    }
+                }
+            }
+
+            catch (SqlException sqlEx)
+            {
+                throw new Exception($"Database error occurred while updatting email: {sqlEx.Message}", sqlEx);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"An unexpected error occurred in {MethodBase.GetCurrentMethod().Name}: {ex.Message}", ex);
+            }
+        }
+
+
+        public User? GetUserByUsername(string username)
+        {
+            try
+            {
+                using (SqlConnection sqlConn = new SqlConnection(connString))
+                {
+                    sqlConn.Open();
+                    string queryValidateUser = @"SELECT UserId, [Username], Email, [Password], Picture
+                                         FROM [User]
+                                         WHERE Username = @Username";
+
+                    using (SqlCommand validateUser = new SqlCommand(queryValidateUser, sqlConn))
+                    {
+                        validateUser.Parameters.Add("@Username", SqlDbType.NVarChar).Value = username;
+
+                        using (SqlDataReader reader = validateUser.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                return new User(
+                                   (int)reader["UserId"],
+                                   reader["Username"].ToString(),
+                                   reader["Email"].ToString(),
+                                   reader["Password"].ToString(),
+                                   reader.IsDBNull(reader.GetOrdinal("Picture"))
+                                       ? null
+                                       : (byte[])reader["Picture"]);
+
+
+                            };
+                        }
+                    }
+                }
+            }
+            catch (SqlException sqlEx)
+            {
+                throw new Exception($"Database error occurred while validating customer: {sqlEx.Message}", sqlEx);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"An unexpected error occurred in {MethodBase.GetCurrentMethod().Name}: {ex.Message}", ex);
+            }
+
+            return null;
         }
     }
 }

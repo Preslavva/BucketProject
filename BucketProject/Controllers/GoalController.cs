@@ -17,6 +17,7 @@ namespace BucketProject.Controllers
         [HttpPost]
         public IActionResult CreateMonthGoal(string description)
         {
+            ViewBag.Username = HttpContext.Session.GetString("Username");
             Category category = Category.Month;
             _goalService.CreateGoal(category, description);
             return RedirectToAction("MonthGoals");
@@ -25,6 +26,7 @@ namespace BucketProject.Controllers
         [HttpPost]
         public IActionResult CreateYearGoal(string description)
         {
+            ViewBag.Username = HttpContext.Session.GetString("Username");
             Category category = Category.Year;
             _goalService.CreateGoal(category, description);
             return RedirectToAction("YearGoals");
@@ -33,6 +35,7 @@ namespace BucketProject.Controllers
         [HttpPost]
         public IActionResult CreateBucketListGoal(string description)
         {
+            ViewBag.Username = HttpContext.Session.GetString("Username");
             Category category = Category.Bucket_list;
             _goalService.CreateGoal(category, description);
             return RedirectToAction("BucketList");
@@ -41,6 +44,7 @@ namespace BucketProject.Controllers
         [HttpPost]
         public IActionResult CreateWeekGoal(string goalDescription)
         {
+            ViewBag.Username = HttpContext.Session.GetString("Username");
 
             Category category = Category.Week;
             _goalService.CreateGoal(category, goalDescription);
@@ -48,11 +52,12 @@ namespace BucketProject.Controllers
             return RedirectToAction("WeekGoals");
         }
 
-      
+
 
         [HttpPost]
         public IActionResult EditGoalWeek(Goal goal, string description)
         {
+            ViewBag.Username = HttpContext.Session.GetString("Username");
 
             _goalService.UpdateGoal(goal, description);
             return RedirectToAction("WeekGoals");
@@ -62,6 +67,7 @@ namespace BucketProject.Controllers
         public IActionResult EditGoalMonth(Goal goal, string description)
         {
 
+            ViewBag.Username = HttpContext.Session.GetString("Username");
             _goalService.UpdateGoal(goal, description);
             return RedirectToAction("MonthGoals");
         }
@@ -69,6 +75,7 @@ namespace BucketProject.Controllers
         [HttpPost]
         public IActionResult EditGoalYear(Goal goal, string description)
         {
+            ViewBag.Username = HttpContext.Session.GetString("Username");
 
             _goalService.UpdateGoal(goal, description);
             return RedirectToAction("YearGoals");
@@ -78,6 +85,7 @@ namespace BucketProject.Controllers
         public IActionResult EditGoalBucketList(Goal goal, string description)
         {
 
+            ViewBag.Username = HttpContext.Session.GetString("Username");
             _goalService.UpdateGoal(goal, description);
             return RedirectToAction("BucketList");
         }
@@ -85,7 +93,7 @@ namespace BucketProject.Controllers
         [HttpPost]
         public IActionResult DeleteGoalWeek(Goal goal)
         {
-
+            ViewBag.Username = HttpContext.Session.GetString("Username");
             _goalService.DeleteGoal(goal);
             return RedirectToAction("WeekGoals");
         }
@@ -93,14 +101,14 @@ namespace BucketProject.Controllers
         [HttpPost]
         public IActionResult DeleteGoalYear(Goal goal)
         {
-
+            ViewBag.Username = HttpContext.Session.GetString("Username");
             _goalService.DeleteGoal(goal);
             return RedirectToAction("YearGoals");
         }
         [HttpPost]
         public IActionResult DeleteGoalMonth(Goal goal)
         {
-
+            ViewBag.Username = HttpContext.Session.GetString("Username");
             _goalService.DeleteGoal(goal);
             return RedirectToAction("MonthGoals");
         }
@@ -108,7 +116,7 @@ namespace BucketProject.Controllers
         [HttpPost]
         public IActionResult DeleteGoalBucketList(Goal goal)
         {
-
+            ViewBag.Username = HttpContext.Session.GetString("Username");
             _goalService.DeleteGoal(goal);
             return RedirectToAction("BucketList");
         }
@@ -116,6 +124,7 @@ namespace BucketProject.Controllers
         [HttpGet]
         public IActionResult WeekGoals()
         {
+            ViewBag.Username = HttpContext.Session.GetString("Username");
             Category weekCategory = Category.Week;
             List<Goal> goals = _goalService.LoadGoalsByCategory(weekCategory);
 
@@ -125,6 +134,7 @@ namespace BucketProject.Controllers
         [HttpGet]
         public IActionResult MonthGoals()
         {
+            ViewBag.Username = HttpContext.Session.GetString("Username");
             List<Goal> goals = _goalService.LoadGoalsByCategory(Category.Month);
 
             return View(goals);
@@ -133,7 +143,7 @@ namespace BucketProject.Controllers
         [HttpPost]
         public IActionResult ChangeGoalStatusWeek(Goal goal, bool isDone)
         {
-
+            ViewBag.Username = HttpContext.Session.GetString("Username");
             _goalService.ChangeGoalStatus(goal, isDone);
             return RedirectToAction("WeekGoals");
 
@@ -142,7 +152,7 @@ namespace BucketProject.Controllers
         [HttpPost]
         public IActionResult ChangeGoalStatusMonth(Goal goal, bool isDone)
         {
-
+            ViewBag.Username = HttpContext.Session.GetString("Username");
             _goalService.ChangeGoalStatus(goal, isDone);
             return RedirectToAction("MonthGoals");
 
@@ -150,6 +160,7 @@ namespace BucketProject.Controllers
         [HttpPost]
         public IActionResult ChangeGoalStatusYear(Goal goal, bool isDone)
         {
+            ViewBag.Username = HttpContext.Session.GetString("Username");
             _goalService.ChangeGoalStatus(goal, isDone);
             return RedirectToAction("YearGoals");
 
@@ -158,6 +169,7 @@ namespace BucketProject.Controllers
         [HttpPost]
         public IActionResult ChangeGoalStatusBucketList(Goal goal, bool isDone)
         {
+            ViewBag.Username = HttpContext.Session.GetString("Username");
             _goalService.ChangeGoalStatus(goal, isDone);
             return RedirectToAction("BucketList");
 
@@ -167,6 +179,7 @@ namespace BucketProject.Controllers
         [HttpGet]
         public IActionResult YearGoals()
         {
+            ViewBag.Username = HttpContext.Session.GetString("Username");
             List<Goal> goals = _goalService.LoadGoalsByCategory(Category.Year);
 
             return View(goals);
@@ -175,10 +188,41 @@ namespace BucketProject.Controllers
         [HttpGet]
         public IActionResult BucketList()
         {
+            ViewBag.Username = HttpContext.Session.GetString("Username");
             List<Goal> goals = _goalService.LoadGoalsByCategory(Category.Bucket_list);
 
             return View(goals);
         }
-    }
 
+        [HttpGet]
+        public IActionResult WeekGoalsPreview()
+        {
+            ViewBag.Username = HttpContext.Session.GetString("Username");
+            Category weekCategory = Category.Week;
+            List<Goal> goals = _goalService.LoadGoalsByCategory(weekCategory);
+
+            return View(goals);
+        }
+
+        [HttpGet]
+        public IActionResult MonthGoalsPreview()
+        {
+            ViewBag.Username = HttpContext.Session.GetString("Username");
+            Category weekCategory = Category.Month;
+            List<Goal> goals = _goalService.LoadGoalsByCategory(weekCategory);
+
+            return View(goals);
+        }
+
+        [HttpGet]
+        public IActionResult YearGoalsPreview()
+        {
+            ViewBag.Username = HttpContext.Session.GetString("Username");
+            Category weekCategory = Category.Year;
+            List<Goal> goals = _goalService.LoadGoalsByCategory(weekCategory);
+
+            return View(goals);
+        }
+
+    }
 }

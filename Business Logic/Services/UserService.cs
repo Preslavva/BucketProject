@@ -27,5 +27,26 @@ namespace BucketProject.Business_Logic.Services
         {
           return _userRepo.Register(newUser);
         }
+
+        public User GetUserByUsername()
+        {
+            string? username = _contextAccessor.HttpContext.Session.GetString("Username");
+
+            User user = _userRepo.GetUserByUsername(username);
+
+            return user;
+
+        }
+
+        public void UpdateUsername(string newUsername)
+        {
+            string? username = _contextAccessor.HttpContext.Session.GetString("Username");
+
+            User user = _userRepo.GetUserByUsername(username);
+
+            _contextAccessor.HttpContext.Session.SetString("Username", newUsername);
+
+            _userRepo.UpdateName(user, newUsername);
+        }
     }
 }

@@ -4,6 +4,8 @@ using BucketProject.Business_Logic.InterfacesService;
 using BucketProject.Data.ViewModels;
 using BucketProject.Business_Logic.Services;
 using BucketProject.Data.InterfacesRepo;
+using System.Security.Claims;
+using BucketProject.Data.Repositories;
 
 
 
@@ -60,6 +62,24 @@ namespace BucketProject.Controllers
                 ViewBag.ErrorMessage = "Wrong username or password";
                 return View(loggedUser);
             }
+        }
+
+
+        [HttpGet]
+        public IActionResult Account()
+        {
+
+            User user = _userService.GetUserByUsername();
+
+            return View(user);
+        }
+
+        [HttpPost]
+        public IActionResult UpdateUsername(string newUsername)
+        {
+            _userService.UpdateUsername(newUsername);
+
+            return RedirectToAction("Account", "User");
         }
     }
 }

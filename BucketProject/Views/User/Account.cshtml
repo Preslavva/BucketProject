@@ -1,0 +1,16 @@
+﻿@model BucketProject.Data.Models.User
+
+<h2>Account Info</h2>
+
+<form asp-action="UpdateUsername" asp-controller="User" method="post">
+    <div class="form-group">
+        <label for="username">Username</label>
+        <input type="text" name="newUsername" id="username" value="@Model.Username" class="form-control" required />
+    </div>
+    <button type="submit" class="btn btn-primary">Update Username</button>
+</form>
+
+<div class="form-group">
+    <label>Email</label>
+    <input type="email" value="@Model.Email" readonly class="form-control" />
+</div>

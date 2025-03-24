@@ -1,5 +1,35 @@
-﻿@{
-    ViewData["Title"] = "Month Goals Preview";
+﻿@model List<Goal>
+
+@{
+    Layout = null;
 }
-<h3>Month Goals Preview</h3>
-<p>This is a read-only preview of Page 1.</p>
+
+
+<h2>Monthly Goals</h2>
+
+<form method="post" asp-controller="Goal" asp-action="CreateMonthGoal">
+    <input type="text" id="goal" name="Description" placeholder="Enter your goal..." required>
+    <button type="submit">Add Goal</button>
+</form>
+
+@foreach (Goal goal in Model)
+{
+    <div class="goal-item">
+        <form method="post" asp-action="EditGoalMonth" class="goal-form">
+            <input type="hidden" name="Id" value="@goal.Id" />
+            <input type="text" name="description" value="@goal.Description" required />
+            <button type="submit">Save changes</button>
+        </form>
+
+        <form method="post" asp-action="ChangeGoalStatusWeek" id="goalForm-@goal.Id">
+            <input type="hidden" name="Id" value="@goal.Id" />
+            <input type="checkbox" name="isDone" value="true" @(goal.IsDone ? "checked" : "") onchange="this.form.submit()" />
+        </form>
+
+        <form method="post" asp-action="DeleteGoalMonth">
+            <input type="hidden" name="Id" value="@goal.Id" />
+            <button type="submit" class="delete-btn">Delete goal</button>
+        </form>
+    </div>
+}
+
