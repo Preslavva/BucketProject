@@ -8,6 +8,7 @@ using BucketProject.Data.ViewModels;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using BucketProject.Business_Logic.InterfacesService;
 
 namespace BucketProject.Data.Repositories
 
@@ -15,10 +16,12 @@ namespace BucketProject.Data.Repositories
     public class UserRepo : IUserRepo
     {
         private readonly string connString;
+        private readonly IPasswordHasher _passwordHasher;
 
-        public UserRepo(IConfiguration configuration)
+        public UserRepo(IConfiguration configuration, IPasswordHasher passwordHasher)
         {
             connString = configuration.GetConnectionString("DefaultConnection");
+            _passwordHasher = passwordHasher;
         }
 
         public bool Register(RegisterViewModel user)
@@ -41,12 +44,16 @@ namespace BucketProject.Data.Repositories
                     throw new ApplicationException("Username or Email is already taken.");
                 }
 
-                string insertSql = @"INSERT INTO [User] ([Username], Email, [Password]) 
-                             VALUES (@Username, @Email, @Password)";
+                var (hashedPassword, salt) = _passwordHasher.HashPassword(user.Password);
+
+                string insertSql = @"INSERT INTO [User] ([Username], Email, [Password], Salt) 
+                             VALUES (@Username, @Email, @Password, @Salt)";
                 using SqlCommand insertCommand = new SqlCommand(insertSql, connection);
                 insertCommand.Parameters.AddWithValue("@Username", user.Username);
                 insertCommand.Parameters.AddWithValue("@Email", user.Email);
-                insertCommand.Parameters.AddWithValue("@Password", user.Password);
+                insertCommand.Parameters.AddWithValue("@Password", hashedPassword);
+                insertCommand.Parameters.AddWithValue("@Salt", salt);
+
 
                 insertCommand.ExecuteNonQuery();
                 return true;

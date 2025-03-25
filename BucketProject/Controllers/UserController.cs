@@ -6,6 +6,7 @@ using BucketProject.Business_Logic.Services;
 using BucketProject.Data.InterfacesRepo;
 using System.Security.Claims;
 using BucketProject.Data.Repositories;
+using Business_Logic.InterfacesService;
 
 
 
@@ -14,10 +15,13 @@ namespace BucketProject.Controllers
     public class UserController : Controller
     {
         private readonly IUserService _userService;
+        private readonly IPasswordHasher _passwordHasher;
         
-        public UserController(IUserService userService)
+        public UserController(IUserService userService, IPasswordHasher passwordHasher)
         {
             _userService = userService;
+            _passwordHasher = passwordHasher;
+
         }
 
 
@@ -68,6 +72,7 @@ namespace BucketProject.Controllers
         [HttpGet]
         public IActionResult Account()
         {
+            ViewBag.Username = HttpContext.Session.GetString("Username");
 
             User user = _userService.GetUserByUsername();
 
