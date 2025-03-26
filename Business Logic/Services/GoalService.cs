@@ -1,14 +1,14 @@
 ﻿using System.Security.Claims;
-using BucketProject.Business_Logic.InterfacesService;
-using BucketProject.Data.InterfacesRepo;
-using BucketProject.Data.Models;
-using BucketProject.Data.Repositories;
+using BucketProject.BLL.Business_Logic.InterfacesService;
+using BucketProject.DAL.Data.InterfacesRepo;
+using BucketProject.DAL.Models.Entities;
+using BucketProject.DAL.Models.Enums;
 using Microsoft.AspNetCore.Http;
 
 
-namespace BucketProject.Business_Logic.Services
+namespace BucketProject.BLL.Business_Logic.Services
 {
-    public class GoalService:IGoalService
+    public class GoalService: IGoalService
     {
         private readonly IHttpContextAccessor _contextAccessor;
         private readonly IGoalRepo _goalRepo;

@@ -1,25 +1,24 @@
 ﻿using System.Reflection;
-using BucketProject.Data.InterfacesRepo;
-using BucketProject.Data.Models;
-using BucketProject.Data.ViewModels;
+using BucketProject.DAL.Data.InterfacesRepo;
+using BucketProject.DAL.Models.Entities;
+using BucketProject.DAL.Models.Enums;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace BucketProject.Data.Repositories
+namespace BucketProject.DAL.Data.Repositories
 {
-    public class GoalRepo: IGoalRepo
+    public class GoalRepo: Repository, IGoalRepo
     {
-        private readonly string connString;
 
-        public GoalRepo(IConfiguration configuration)
-        {
-            connString = configuration.GetConnectionString("DefaultConnection");
+
+        public GoalRepo(IConfiguration configuration):base(configuration)
+        { 
         }
 
         public void InsertGoalAndAssignToUser(int userId, Goal goal)
         {
-            using (SqlConnection conn = new SqlConnection(connString))
+            using (SqlConnection conn = GetSqlConnection())
             {
                 conn.Open();
                 using (SqlTransaction transaction = conn.BeginTransaction()) 
@@ -66,7 +65,7 @@ namespace BucketProject.Data.Repositories
         {
             try
             {
-                using (SqlConnection conn = new SqlConnection(connString))
+                using (SqlConnection conn = GetSqlConnection())
                 {
                     conn.Open();
                     string queyAssignGoalToUser = @" insert into User_Goal (UserId, GoalId)
@@ -99,7 +98,7 @@ namespace BucketProject.Data.Repositories
 
             try
             {
-                using (SqlConnection conn = new SqlConnection(connString))
+                using (SqlConnection conn = GetSqlConnection())
                 {
                     conn.Open();
 
@@ -152,7 +151,7 @@ namespace BucketProject.Data.Repositories
         {
             try
             {
-                using (SqlConnection conn = new SqlConnection(connString))
+                using (SqlConnection conn = GetSqlConnection())
                 {
                     conn.Open();
                     string queryChangeStatus = @"update Goal
@@ -184,7 +183,7 @@ namespace BucketProject.Data.Repositories
         {
             try
             {
-                using (SqlConnection conn = new SqlConnection(connString))
+                using (SqlConnection conn = GetSqlConnection())
                 {
                     conn.Open();
                     string queryChangeStatus = @"update Goal
@@ -216,7 +215,7 @@ namespace BucketProject.Data.Repositories
         {
             try
             {
-                using (SqlConnection conn = new SqlConnection(connString))
+                using (SqlConnection conn = GetSqlConnection())
                 {
                     conn.Open();
                     string queryDeleteGoal = @"update Goal set IsDeleted = @IsDeleted where Id = @Id";
@@ -246,7 +245,7 @@ namespace BucketProject.Data.Repositories
         {
             try
             {
-                using (SqlConnection conn = new SqlConnection(connString))
+                using (SqlConnection conn = GetSqlConnection())
                 {
                     conn.Open();
                     string queryPostponeGoal = @"update Goal set Deadline = @Deadline where Id = @Id";
@@ -275,7 +274,7 @@ namespace BucketProject.Data.Repositories
         {
             try
             {
-                using (SqlConnection conn = new SqlConnection(connString))
+                using (SqlConnection conn = GetSqlConnection())
                 {
                     conn.Open();
                     string queryUpdateName = @"select UserId from [User] where Username = @Username";

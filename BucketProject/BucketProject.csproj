@@ -13,7 +13,12 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Business Logic\BusinessLogic.csproj" />
-    <ProjectReference Include="..\Data\Data.csproj" />
+    <ProjectReference Include="..\Models\Models.csproj" />
+    <ProjectReference Include="..\ViewModels\ViewModels.csproj" /> 
+
+
+
+
   </ItemGroup>
 
 </Project>

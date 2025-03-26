@@ -1,26 +1,24 @@
-﻿using BucketProject.Data.Models;
+﻿using BucketProject.DAL.Models.Entities;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Identity.Client;
 using System.Reflection;
 using static System.Net.Mime.MediaTypeNames;
 
-namespace BucketProject.Data.Repositories
+namespace BucketProject.DAL.Data.Repositories
 {
-    public class VbRepo
+    public class VbRepo:Repository
     {
-        private readonly string connString;
 
-        public VbRepo(IConfiguration configuration)
+        public VbRepo(IConfiguration configuration):base(configuration)
         {
-            connString = configuration.GetConnectionString("DefaultConnection");
         }
 
         public void CreateVB(string name, User owner, DateTime createdAt)
         {
             try
             {
-                using (SqlConnection conn = new SqlConnection(connString))
+                using (SqlConnection conn = GetSqlConnection())
                 {
                     conn.Open();
                     string queryCreateVB = @"insert into Vision_Board (Name, OwnerId, Created_at)
@@ -50,7 +48,7 @@ namespace BucketProject.Data.Repositories
         {
             try
             {
-                using (SqlConnection conn = new SqlConnection(connString))
+                using (SqlConnection conn = GetSqlConnection())
                 {
                     conn.Open();
                     string queryDeleteVB = @"alter Vision_Board set IsDeleted = @IsDeleted where VisionBoardId = @VisionBoardId" ;
@@ -80,7 +78,7 @@ namespace BucketProject.Data.Repositories
         {
             try
             {
-                using (SqlConnection conn = new SqlConnection(connString))
+                using (SqlConnection conn = GetSqlConnection())
                 {
                     conn.Open();
                     string queryAssignVBToUser = @"insert into User_Vision_Board (UserId, VisionBoardId)
@@ -113,7 +111,7 @@ namespace BucketProject.Data.Repositories
 
             try
             {
-                using (SqlConnection conn = new SqlConnection(connString))
+                using (SqlConnection conn = GetSqlConnection())
                 {
                     conn.Open();
                     string queryGetVBs = @"select vb.Id, vb.Name, vb.OwnerId, vb.Created_at
@@ -162,7 +160,7 @@ namespace BucketProject.Data.Repositories
 
             try
             {
-                using (SqlConnection conn = new SqlConnection(connString))
+                using (SqlConnection conn = GetSqlConnection())
                 {
                     conn.Open();
                     string queryGetPictures = @"select Image
@@ -206,7 +204,7 @@ namespace BucketProject.Data.Repositories
 
             try
             {
-                using (SqlConnection conn = new SqlConnection(connString))
+                using (SqlConnection conn = GetSqlConnection())
                 {
                     conn.Open();
                     string queryGetPictures = @"select Image
@@ -244,7 +242,7 @@ namespace BucketProject.Data.Repositories
         {
             try
             {
-                using (SqlConnection conn = new SqlConnection(connString))
+                using (SqlConnection conn = GetSqlConnection())
                 {
                     conn.Open();
                     string queryAddImage = @"insert into Vision_Board (Image)
@@ -275,7 +273,7 @@ namespace BucketProject.Data.Repositories
         {
             try
             {
-                using (SqlConnection conn = new SqlConnection(connString))
+                using (SqlConnection conn = GetSqlConnection())
                 {
                     conn.Open();
                     string queryChangeStatus = @"update Vision_Board_Items
@@ -307,7 +305,7 @@ namespace BucketProject.Data.Repositories
         {
             try
             {
-                using (SqlConnection conn = new SqlConnection(connString))
+                using (SqlConnection conn = GetSqlConnection())
                 {
                     conn.Open();
                     string queryChangeStatus = @"update Vision_Board_Items
@@ -339,7 +337,7 @@ namespace BucketProject.Data.Repositories
         {
             try
             {
-                using (SqlConnection conn = new SqlConnection(connString))
+                using (SqlConnection conn = GetSqlConnection())
                 {
                     conn.Open();
                     string queryChangeStatus = @"update Vision_Board

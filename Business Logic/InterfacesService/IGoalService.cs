@@ -1,6 +1,8 @@
-﻿using BucketProject.Data.Models;
+﻿using BucketProject.DAL.Models.Entities;
+using BucketProject.DAL.Models.Enums;
 
-namespace BucketProject.Business_Logic.InterfacesService
+
+namespace BucketProject.BLL.Business_Logic.InterfacesService
 {
     public interface IGoalService
     {

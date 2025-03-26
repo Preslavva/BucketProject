@@ -1,10 +1,10 @@
-﻿using BucketProject.Data.Models;
-using BucketProject.Business_Logic.Services;
+﻿using BucketProject.DAL.Models.Entities;
+using BucketProject.DAL.Models.Enums;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
-using BucketProject.Business_Logic.InterfacesService;
+using BucketProject.BLL.Business_Logic.InterfacesService;
 
-namespace BucketProject.Controllers
+namespace BucketProjetc.UI.BucketProject.Controllers
 {
     public class GoalController : Controller
     {

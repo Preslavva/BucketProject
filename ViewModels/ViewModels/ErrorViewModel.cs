@@ -1,4 +1,4 @@
-namespace BucketProject.Data.Models
+namespace BucketProject.UI.ViewModels.ViewModels
 {
     public class ErrorViewModel
     {

@@ -2,33 +2,29 @@
 using System.Reflection;
 using System.Reflection.Metadata.Ecma335;
 using Azure.Identity;
-using BucketProject.Data.InterfacesRepo;
-using BucketProject.Data.Models;
-using BucketProject.Data.ViewModels;
+using BucketProject.DAL.Data.InterfacesRepo;
+using BucketProject.DAL.Models.Entities;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using BucketProject.Business_Logic.InterfacesService;
 
-namespace BucketProject.Data.Repositories
+namespace BucketProject.DAL.Data.Repositories
 
 {
-    public class UserRepo : IUserRepo
+    public class UserRepo : Repository, IUserRepo
     {
-        private readonly string connString;
         private readonly IPasswordHasher _passwordHasher;
 
-        public UserRepo(IConfiguration configuration, IPasswordHasher passwordHasher)
+        public UserRepo(IConfiguration configuration, IPasswordHasher passwordHasher):base(configuration)
         {
-            connString = configuration.GetConnectionString("DefaultConnection");
             _passwordHasher = passwordHasher;
         }
 
-        public bool Register(RegisterViewModel user)
+        public bool Register(User user)
         {
             try
             {
-                using SqlConnection connection = new SqlConnection(connString);
+                using SqlConnection connection = GetSqlConnection();
                 connection.Open();
 
                 string checkSql = @"SELECT COUNT(*) FROM [User] WHERE [Username] = @Username or Email = @Email";
@@ -68,10 +64,10 @@ namespace BucketProject.Data.Repositories
         {
             try
             {
-                using (SqlConnection sqlConn = new SqlConnection(connString))
+                using (SqlConnection sqlConn = GetSqlConnection())
                 {
                     sqlConn.Open();
-                    string queryValidateUser = @"SELECT UserId, [Username], Email, [Password], Picture
+                    string queryValidateUser = @"SELECT UserId, [Username], Email, [Password], Picture,Salt
                                          FROM [User]
                                          WHERE Username = @Username AND [Password] = @Password";
 
@@ -93,7 +89,8 @@ namespace BucketProject.Data.Repositories
                                    reader["Password"].ToString(),
                                    reader.IsDBNull(reader.GetOrdinal("Picture"))
                                        ? null
-                                       : (byte[])reader["Picture"]);
+                                       : (byte[])reader["Picture"],
+                                   reader["Salt"].ToString());
 
 
                             };
@@ -119,10 +116,10 @@ namespace BucketProject.Data.Repositories
 
             try
             {
-                using (SqlConnection conn = new SqlConnection(connString))
+                using (SqlConnection conn = GetSqlConnection())
                 {
                     conn.Open();
-                    string queryGetUsers = @"select Id, Username, Password, Email, Photo
+                    string queryGetUsers = @"select UserId, Username, Email, Password, Photo, Salt
                                                 from [User]";
 
                     using (SqlCommand loadUsers = new SqlCommand(queryGetUsers, conn))
@@ -132,16 +129,18 @@ namespace BucketProject.Data.Repositories
                         while (reader.Read())
                         {
                             users.Add(new User(
-                                (int)reader["Id"],
-                                    reader["Username"].ToString(),
-                                    reader["Email"].ToString(),
-                                    reader["Password"].ToString(),
-                                    reader.IsDBNull(reader.GetOrdinal("Photo"))
+                                (int)reader["UserId"],
+                                reader["Username"].ToString(),
+                                reader["Email"].ToString(),
+                                reader["Password"].ToString(),
+                                reader.IsDBNull(reader.GetOrdinal("Photo"))
                                     ? null
-                                    : (byte[])reader["Photo"]));
+                                    : (byte[])reader["Photo"],
+                                reader["Salt"].ToString()
+                            ));
                         }
+                        return users;
                     }
-                    return users;
                 }
             }
             catch (SqlException sqlEx)
@@ -159,7 +158,7 @@ namespace BucketProject.Data.Repositories
         {
             try
             {
-                using (SqlConnection conn = new SqlConnection(connString))
+                using (SqlConnection conn = GetSqlConnection())
                 {
                     conn.Open();
                     string queryAddPicture = @"update [User] set Picture = @Picture where UserId = @UserId";
@@ -188,7 +187,7 @@ namespace BucketProject.Data.Repositories
         {
             try
             {
-                using (SqlConnection conn = new SqlConnection(connString))
+                using (SqlConnection conn = GetSqlConnection())
                 {
                     conn.Open();
                     string queryUpdateName = @"update [User] set Username = @Username where UserId = @UserId";
@@ -216,7 +215,7 @@ namespace BucketProject.Data.Repositories
         {
             try
             {
-                using (SqlConnection conn = new SqlConnection(connString))
+                using (SqlConnection conn = GetSqlConnection())
                 {
                     conn.Open();
                     string queryUpdateName = @"update [User] set Email = @Email where UserId = @UserId";
@@ -245,7 +244,7 @@ namespace BucketProject.Data.Repositories
         {
             try
             {
-                using (SqlConnection conn = new SqlConnection(connString))
+                using (SqlConnection conn = GetSqlConnection())
                 {
                     conn.Open();
                     string queryUpdateName = @"select UserId from [User] where Username = @Username";
@@ -273,7 +272,7 @@ namespace BucketProject.Data.Repositories
         {
             try
             {
-                using (SqlConnection conn = new SqlConnection(connString))
+                using (SqlConnection conn = GetSqlConnection())
                 {
                     conn.Open();
                     string queryUpdateName = @"select UserId from [User] where Username = @Username";
@@ -303,10 +302,10 @@ namespace BucketProject.Data.Repositories
         {
             try
             {
-                using (SqlConnection sqlConn = new SqlConnection(connString))
+                using (SqlConnection sqlConn = GetSqlConnection())
                 {
                     sqlConn.Open();
-                    string queryValidateUser = @"SELECT UserId, [Username], Email, [Password], Picture
+                    string queryValidateUser = @"SELECT UserId, [Username], Email, [Password], Picture, Salt
                                          FROM [User]
                                          WHERE Username = @Username";
 
@@ -325,8 +324,8 @@ namespace BucketProject.Data.Repositories
                                    reader["Password"].ToString(),
                                    reader.IsDBNull(reader.GetOrdinal("Picture"))
                                        ? null
-                                       : (byte[])reader["Picture"]);
-
+                                       : (byte[])reader["Picture"],
+                                   reader["Salt"].ToString());
 
                             };
                         }

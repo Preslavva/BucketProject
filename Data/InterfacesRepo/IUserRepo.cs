@@ -1,11 +1,10 @@
-﻿using BucketProject.Data.Models;
-using BucketProject.Data.ViewModels;
+﻿using BucketProject.DAL.Models.Entities;
 
-namespace BucketProject.Data.InterfacesRepo
+namespace BucketProject.DAL.Data.InterfacesRepo
 {
     public interface IUserRepo
     {
-        bool Register(RegisterViewModel user);
+        bool Register(User user);
         User ValidateUser(string username, string password);
 
         User GetUserByUsername(string username);

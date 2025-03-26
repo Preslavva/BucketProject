@@ -1,16 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using BucketProject.Data.Models;
-using BucketProject.Business_Logic.InterfacesService;
-using BucketProject.Data.ViewModels;
-using BucketProject.Business_Logic.Services;
-using BucketProject.Data.InterfacesRepo;
+using BucketProject.DAL.Models.Entities;
+using BucketProject.BLL.Business_Logic.InterfacesService;
+using BucketProject.UI.ViewModels.ViewModels;
+using BucketProject.DAL.Data.InterfacesRepo;
 using System.Security.Claims;
-using BucketProject.Data.Repositories;
-using Business_Logic.InterfacesService;
 
 
-
-namespace BucketProject.Controllers
+namespace BucketProject.UI.BucketProject.Controllers
 {
     public class UserController : Controller
     {

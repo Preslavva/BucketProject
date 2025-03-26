@@ -1,7 +1,8 @@
-using BucketProject.Data.InterfacesRepo;
-using BucketProject.Business_Logic.Services;
-using BucketProject.Business_Logic.InterfacesService;
-using BucketProject.Data.Repositories;
+using BucketProject.DAL.Data.InterfacesRepo;
+using BucketProject.BLL.Business_Logic.Services;
+using BucketProject.BLL.Business_Logic.InterfacesService;
+using BucketProject.DAL.Data.Repositories;
+using BucketProject.BLL.Business_Logic.Mapping;
 
 
 
@@ -19,7 +20,9 @@ builder.Services.AddScoped<IUserRepo,UserRepo>();
 
 builder.Services.AddScoped<IGoalService, GoalService>();
 builder.Services.AddScoped<IUserService,UserService>();
+builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 
+builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
 
 var app = builder.Build();
 

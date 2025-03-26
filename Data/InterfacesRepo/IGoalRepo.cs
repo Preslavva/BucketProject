@@ -1,7 +1,9 @@
 ﻿using System.Runtime.CompilerServices;
-using BucketProject.Data.Models;
+using BucketProject.DAL.Models.Entities;
+using BucketProject.DAL.Models.Enums;
 
-namespace BucketProject.Data.InterfacesRepo
+
+namespace BucketProject.DAL.Data.InterfacesRepo
 {
         public interface IGoalRepo
         {

@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace BucketProject.Data.ViewModels
+namespace BucketProject.UI.ViewModels.ViewModels
 {
     public class RegisterViewModel
     {

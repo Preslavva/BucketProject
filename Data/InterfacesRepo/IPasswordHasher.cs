@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Business_Logic.InterfacesService
+namespace BucketProject.DAL.Data.InterfacesRepo
 {
     public interface IPasswordHasher
     {

@@ -1,8 +1,8 @@
 using System.Diagnostics;
-using BucketProject.Data.Models;
 using Microsoft.AspNetCore.Mvc;
+using BucketProject.UI.ViewModels.ViewModels;
 
-namespace BucketProject.Controllers
+namespace BucketProject.UI.BucketProject.Controllers
 {
     public class HomeController : Controller
     {
@@ -20,18 +20,6 @@ namespace BucketProject.Controllers
             return View();
         }
 
-        //public IActionResult WeekGoals()
-        //{
-        //    return View();
-        //}
-        //public IActionResult MonthGoals()
-        //{
-        //    return View();
-        //}
-        //public IActionResult YearGoals()
-        //{
-        //    return View();
-        //}
 
         public IActionResult Privacy()
         {
