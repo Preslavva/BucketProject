@@ -19,12 +19,12 @@ namespace BucketProject.BLL.Business_Logic.Services
             _contextAccessor = contextAccessor;
         }
 
-        public void CreateGoal(Category category, string description)
+        public void CreateGoal(Category category, GoalType type, string description)
         {
           string? username = _contextAccessor.HttpContext.Session.GetString("Username");
 
             int id = _goalRepo.GetIdOfUser(username);
-            Goal newGoal = new Goal(category, description);
+            Goal newGoal = new Goal(category, type, description);
             _goalRepo.InsertGoalAndAssignToUser(id, newGoal);
         }
 

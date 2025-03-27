@@ -1,4 +1,5 @@
 ﻿@using BucketProject.DAL.Models.Entities
+@using BucketProject.DAL.Models.Enums;
 
 @model List<Goal>
 
@@ -6,6 +7,15 @@
 
 <form method="post" asp-controller="Goal" asp-action="CreateYearGoal">
     <input type="text" id="goal" name="Description" placeholder="Enter your goal..." required>
+
+    <select name="type" required>
+        <option value="" disabled selected>Select goal type</option>
+        @foreach (GoalType type in Enum.GetValues(typeof(GoalType)))
+        {
+            <option value="@type">@type</option>
+        }
+    </select>
+
     <button type="submit">Add Goal</button>
 </form>
 

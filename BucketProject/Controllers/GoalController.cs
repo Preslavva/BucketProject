@@ -15,39 +15,39 @@ namespace BucketProjetc.UI.BucketProject.Controllers
         }
 
         [HttpPost]
-        public IActionResult CreateMonthGoal(string description)
+        public IActionResult CreateMonthGoal(GoalType type,string description)
         {
             ViewBag.Username = HttpContext.Session.GetString("Username");
             Category category = Category.Month;
-            _goalService.CreateGoal(category, description);
+            _goalService.CreateGoal(category,type,description);
             return RedirectToAction("MonthGoals");
         }
 
         [HttpPost]
-        public IActionResult CreateYearGoal(string description)
+        public IActionResult CreateYearGoal(GoalType type,string description)
         {
             ViewBag.Username = HttpContext.Session.GetString("Username");
             Category category = Category.Year;
-            _goalService.CreateGoal(category, description);
+            _goalService.CreateGoal(category, type, description);
             return RedirectToAction("YearGoals");
         }
 
         [HttpPost]
-        public IActionResult CreateBucketListGoal(string description)
+        public IActionResult CreateBucketListGoal(GoalType type,string description)
         {
             ViewBag.Username = HttpContext.Session.GetString("Username");
             Category category = Category.Bucket_list;
-            _goalService.CreateGoal(category, description);
+            _goalService.CreateGoal(category,type,description);
             return RedirectToAction("BucketList");
         }
 
         [HttpPost]
-        public IActionResult CreateWeekGoal(string goalDescription)
+        public IActionResult CreateWeekGoal(GoalType type,string goalDescription)
         {
             ViewBag.Username = HttpContext.Session.GetString("Username");
 
             Category category = Category.Week;
-            _goalService.CreateGoal(category, goalDescription);
+            _goalService.CreateGoal(category, type, goalDescription);
 
             return RedirectToAction("WeekGoals");
         }

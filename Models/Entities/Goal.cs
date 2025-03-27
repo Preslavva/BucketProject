@@ -7,7 +7,11 @@ public class Goal
     public int Id { get; set; }
     public Category Category { get; set; }
 
+    public GoalType Type { get; set; }
+
     public DateTime CreatedAt { get; set; } = DateTime.Now;
+
+    public DateTime? CompletedAt { get; set; }
     public string Description { get; set; }
 
     private DateTime? _deadline;
@@ -17,14 +21,31 @@ public class Goal
         set => _deadline = DetermineDeadLine(CreatedAt, Category);
     }
 
-    public bool IsDone { get; set; }
+    private bool _isDone;
+    public bool IsDone
+    {
+        get => _isDone;
+        set
+        {
+            _isDone = value;
+
+            if (_isDone)
+            {
+                CompletedAt = DateTime.Now;
+            }
+            else
+            {
+                CompletedAt = null;
+            }
+        }
+    }
 
     public bool IsDeleted { get; set; }
 
     public List<User> Users { get; set; }
 
     //for reading from database
-    public Goal(int id, Category category, string description, DateTime createdAt, DateTime deadline, bool isDone, bool isDeleted)
+    public Goal(int id, Category category, GoalType type, string description, DateTime createdAt, DateTime completedAt, DateTime deadline, bool isDone, bool isDeleted)
     {
         this.Id = id;
         this.Category = category;
@@ -33,12 +54,15 @@ public class Goal
         this.Deadline = deadline;
         this.IsDone = isDone;
         this.IsDeleted = isDeleted;
+        this.Type = type;
+        this.CompletedAt = completedAt;
     }
 
     //saving to database
-    public Goal(Category category, string description)
+    public Goal(Category category, GoalType type, string description)
     {
         this.Category = category;
+        this.Type = type;
         this.Description = description;
         this.CreatedAt = DateTime.Now;
         this.Deadline = DetermineDeadLine(DateTime.Now, category);

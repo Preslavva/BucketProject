@@ -1,12 +1,20 @@
 ﻿@using BucketProject.DAL.Models.Entities
-
+@using BucketProject.DAL.Models.Enums
 @model List<Goal>
-
 
 <h2>Weekly Goals</h2>
 
 <form method="post" asp-controller="Goal" asp-action="CreateWeekGoal">
-    <input type="text" id="goal" name="GoalDescription" placeholder="Enter your goal..." required>
+    <input type="text" id="goal" name="GoalDescription" placeholder="Enter your goal..." required />
+
+    <select name="type" required>
+        <option value="" disabled selected>Select goal type</option>
+        @foreach (GoalType type in Enum.GetValues(typeof(GoalType)))
+        {
+            <option value="@type">@type</option>
+        }
+    </select>
+
     <button type="submit">Add Goal</button>
 </form>
 
@@ -24,10 +32,9 @@
             <input type="checkbox" name="isDone" value="true" @(goal.IsDone ? "checked" : "") onchange="this.form.submit()" />
         </form>
 
-            <form method="post" asp-action="DeleteGoalWeek">
-                <input type="hidden" name="goal.Id" value="@goal.Id" />
-                <button type="submit" class="delete-btn">Delete goal</button>
-            </form>
+        <form method="post" asp-action="DeleteGoalWeek">
+            <input type="hidden" name="goal.Id" value="@goal.Id" />
+            <button type="submit" class="delete-btn">Delete goal</button>
+        </form>
     </div>
-
 }

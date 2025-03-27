@@ -5,7 +5,6 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using BucketProject.DAL.Data.InterfacesRepo;
-//using System.Security.Cryptography;
 
 namespace BucketProject.DAL.Data.Repositories
 {
