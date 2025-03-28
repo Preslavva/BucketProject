@@ -1,6 +1,9 @@
 ﻿using BucketProject.DAL.Models.Enums;
+using BucketProject.DAL.Models.Entities;
 
-namespace BucketProject.DAL.Models.Entities;
+using BucketProject.BLL.Business_Logic.Strategies;
+
+namespace BucketProject.BLL.Business_Logic.Entity;
 
 public class Goal
 {
@@ -17,9 +20,17 @@ public class Goal
     private DateTime? _deadline;
     public DateTime? Deadline
     {
-        get => _deadline;
-        set => _deadline = DetermineDeadLine(CreatedAt, Category);
+        get
+        {
+            return _deadline ??= DeadlineStrategyManager.GetStrategy(Category)?.GetDeadline(CreatedAt);
+        }
+        set
+        {
+            _deadline = value;
+        }
     }
+
+
 
     private bool _isDone;
     public bool IsDone
@@ -45,13 +56,13 @@ public class Goal
     public List<User> Users { get; set; }
 
     //for reading from database
-    public Goal(int id, Category category, GoalType type, string description, DateTime createdAt, DateTime completedAt, DateTime deadline, bool isDone, bool isDeleted)
+    public Goal(int id, Category category, GoalType type, string description, DateTime createdAt, DateTime completedAt, bool isDone, bool isDeleted)
     {
         this.Id = id;
         this.Category = category;
         this.Description = description;
         this.CreatedAt = createdAt;
-        this.Deadline = deadline;
+        this.Deadline = Deadline;
         this.IsDone = isDone;
         this.IsDeleted = isDeleted;
         this.Type = type;
@@ -65,7 +76,6 @@ public class Goal
         this.Type = type;
         this.Description = description;
         this.CreatedAt = DateTime.Now;
-        this.Deadline = DetermineDeadLine(DateTime.Now, category);
         this.IsDone = false;
         this.IsDeleted = false;
         Users = new List<User>();
@@ -73,22 +83,5 @@ public class Goal
 
     public Goal() { }
 
-    public DateTime? DetermineDeadLine(DateTime createdAt, Category category)
-    {
-        if (category == Category.Week) 
-        {
-            int daysUntilNextMonday = ((int)DayOfWeek.Monday - (int)createdAt.DayOfWeek + 7) % 7;
-            return createdAt.AddDays(daysUntilNextMonday);
-        }
-        else if (category == Category.Month) 
-        {
-            return new DateTime(createdAt.Year, createdAt.Month, 1).AddMonths(1);
-        }
-        else if (category == Category.Year) 
-        {
-            return new DateTime(createdAt.Year + 1, 1, 1);
-        }
-
-        return null; 
-    }
+    
 }

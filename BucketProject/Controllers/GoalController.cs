@@ -1,4 +1,4 @@
-﻿using BucketProject.DAL.Models.Entities;
+﻿using BucketProject.BLL.Business_Logic.Entity;
 using BucketProject.DAL.Models.Enums;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;

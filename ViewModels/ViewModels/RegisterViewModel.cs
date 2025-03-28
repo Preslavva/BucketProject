@@ -1,4 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Reflection;
+
 
 namespace BucketProject.UI.ViewModels.ViewModels
 {
@@ -14,10 +16,27 @@ namespace BucketProject.UI.ViewModels.ViewModels
             public string Email { get; set; }
 
             [Required]
+            [DataType(DataType.Date)]
+            [Display(Name = "Date of Birth")]
+            public DateTime DateOfBirth { get; set; }
+            
+            [Required]
+            [Display(Name = "Nationality")]
+            public string Nationality { get; set; }
+            
+            [Required]
+            [Display(Name = "Gender")]
+            public string Gender { get; set; }
+
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
+
+            [Required]
             [StringLength(100, MinimumLength = 6)]
             [DataType(DataType.Password)]
             [Display(Name = "Password")]
             public string Password { get; set; }
+
+            
 
             [Required]
             [Display(Name = "Confirm Password")]

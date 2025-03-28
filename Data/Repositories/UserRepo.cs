@@ -15,7 +15,7 @@ namespace BucketProject.DAL.Data.Repositories
     {
         private readonly IPasswordHasher _passwordHasher;
 
-        public UserRepo(IConfiguration configuration, IPasswordHasher passwordHasher):base(configuration)
+        public UserRepo(IConfiguration configuration, IPasswordHasher passwordHasher) : base(configuration)
         {
             _passwordHasher = passwordHasher;
         }
@@ -42,13 +42,21 @@ namespace BucketProject.DAL.Data.Repositories
 
                 var (hashedPassword, salt) = _passwordHasher.HashPassword(user.Password);
 
-                string insertSql = @"INSERT INTO [User] ([Username], Email, [Password], Salt) 
-                             VALUES (@Username, @Email, @Password, @Salt)";
+                string insertSql = @"INSERT INTO [User] ([Username], Email, [Password], Salt, Nationality, DateOfBirth, Gender, CreatedAt) 
+                             VALUES (@Username, @Email, @Password, @Salt, @Nationality, @DateOfBirth, @Gender, @CreatedAt)";
                 using SqlCommand insertCommand = new SqlCommand(insertSql, connection);
                 insertCommand.Parameters.AddWithValue("@Username", user.Username);
                 insertCommand.Parameters.AddWithValue("@Email", user.Email);
                 insertCommand.Parameters.AddWithValue("@Password", hashedPassword);
                 insertCommand.Parameters.AddWithValue("@Salt", salt);
+                insertCommand.Parameters.AddWithValue("@Nationality", user.Nationality);
+                insertCommand.Parameters.AddWithValue("@DateOfBirth", user.DateOfBirth);
+                insertCommand.Parameters.AddWithValue("@Gender", user.Gender);
+                insertCommand.Parameters.AddWithValue("@CreatedAt", user.CreatedAt);
+
+
+
+
 
 
                 insertCommand.ExecuteNonQuery();
@@ -60,102 +68,63 @@ namespace BucketProject.DAL.Data.Repositories
             }
         }
 
-       public User? ValidateUser(string username, string password)
-{
-    try
-    {
-        using (SqlConnection sqlConn = GetSqlConnection())
+        public User? ValidateUser(string username, string password)
         {
-            sqlConn.Open();
-            string query = @"SELECT UserId, [Username], Email, [Password], Picture, Salt
+            try
+            {
+                using (SqlConnection sqlConn = GetSqlConnection())
+                {
+                    sqlConn.Open();
+                    string query = @"SELECT UserId, [Username], Email, [Password], Picture, Salt, Nationality, DateofBirth, Gender, CreatedAt
                              FROM [User]
                              WHERE Username = @Username";
 
-            using (SqlCommand cmd = new SqlCommand(query, sqlConn))
-            {
-                cmd.Parameters.Add("@Username", SqlDbType.NVarChar).Value = username;
-
-                using (SqlDataReader reader = cmd.ExecuteReader())
-                {
-                    if (reader.Read())
+                    using (SqlCommand cmd = new SqlCommand(query, sqlConn))
                     {
-                        string storedHash = reader["Password"].ToString();
-                        string storedSalt = reader["Salt"].ToString();
+                        cmd.Parameters.Add("@Username", SqlDbType.NVarChar).Value = username;
 
-                        bool isValid = _passwordHasher.VerifyPassword(password, storedHash, storedSalt);
-
-                        if (isValid)
+                        using (SqlDataReader reader = cmd.ExecuteReader())
                         {
-                            return new User(
-                                (int)reader["UserId"],
-                                reader["Username"].ToString(),
-                                reader["Email"].ToString(),
-                                storedHash,
-                                reader.IsDBNull(reader.GetOrdinal("Picture")) ? null : (byte[])reader["Picture"],
-                                storedSalt
-                            );
+                            if (reader.Read())
+                            {
+                                string storedHash = reader["Password"].ToString();
+                                string storedSalt = reader["Salt"].ToString();
+
+                                bool isValid = _passwordHasher.VerifyPassword(password, storedHash, storedSalt);
+
+                                if (isValid)
+                                {
+                                    return new User(
+                                        (int)reader["UserId"],
+                                        reader["Username"].ToString(),
+                                        reader["Email"].ToString(),
+                                        storedHash,
+                                        reader.IsDBNull(reader.GetOrdinal("Picture")) ? null : (byte[])reader["Picture"],
+                                        storedSalt,
+                                        reader["Nationality"].ToString(),
+                                        Convert.ToDateTime(reader["DateOfBirth"]),
+                                        reader["Gender"].ToString(),
+                                        Convert.ToDateTime(reader["CreatedAt"])
+                                    );
+                                }
+                            }
                         }
-                    }
-                }
-            }
-        }
-    }
-    catch (SqlException sqlEx)
-    {
-        throw new Exception($"Database error occurred while validating user: {sqlEx.Message}", sqlEx);
-    }
-    catch (Exception ex)
-    {
-        throw new Exception($"An unexpected error occurred in {MethodBase.GetCurrentMethod().Name}: {ex.Message}", ex);
-    }
-
-    return null;
-}
-
-
-        public List<User>? LoadUsersFromDB()
-        {
-            List<User> users = new List<User>();
-
-            try
-            {
-                using (SqlConnection conn = GetSqlConnection())
-                {
-                    conn.Open();
-                    string queryGetUsers = @"select UserId, Username, Email, Password, Photo, Salt
-                                                from [User]";
-
-                    using (SqlCommand loadUsers = new SqlCommand(queryGetUsers, conn))
-                    {
-                        SqlDataReader reader = loadUsers.ExecuteReader();
-
-                        while (reader.Read())
-                        {
-                            users.Add(new User(
-                                (int)reader["UserId"],
-                                reader["Username"].ToString(),
-                                reader["Email"].ToString(),
-                                reader["Password"].ToString(),
-                                reader.IsDBNull(reader.GetOrdinal("Photo"))
-                                    ? null
-                                    : (byte[])reader["Photo"],
-                                reader["Salt"].ToString()
-                            ));
-                        }
-                        return users;
                     }
                 }
             }
             catch (SqlException sqlEx)
             {
-                throw new Exception($"Database error occurred while loading customers: {sqlEx.Message}", sqlEx);
+                throw new Exception($"Database error occurred while validating user: {sqlEx.Message}", sqlEx);
             }
             catch (Exception ex)
             {
                 throw new Exception($"An unexpected error occurred in {MethodBase.GetCurrentMethod().Name}: {ex.Message}", ex);
             }
 
+            return null;
         }
+
+
 
         public void AddPhoto(User user, byte[] picture)
         {
@@ -308,9 +277,11 @@ namespace BucketProject.DAL.Data.Repositories
                 using (SqlConnection sqlConn = GetSqlConnection())
                 {
                     sqlConn.Open();
-                    string queryValidateUser = @"SELECT UserId, [Username], Email, [Password], Picture, Salt
-                                         FROM [User]
-                                         WHERE Username = @Username";
+
+                    string queryValidateUser = @"
+                SELECT UserId, [Username], Email, [Password], Picture, Salt, Nationality, Age, Gender, CreatedAt
+                FROM [User]
+                WHERE Username = @Username";
 
                     using (SqlCommand validateUser = new SqlCommand(queryValidateUser, sqlConn))
                     {
@@ -321,29 +292,30 @@ namespace BucketProject.DAL.Data.Repositories
                             if (reader.Read())
                             {
                                 return new User(
-                                   (int)reader["UserId"],
-                                   reader["Username"].ToString(),
-                                   reader["Email"].ToString(),
-                                   reader["Password"].ToString(),
-                                   reader.IsDBNull(reader.GetOrdinal("Picture"))
-                                       ? null
-                                       : (byte[])reader["Picture"],
-                                   reader["Salt"].ToString());
-
-                            };
+                                    id: (int)reader["UserId"],
+                                    username: reader["Username"].ToString(),
+                                    email: reader["Email"].ToString(),
+                                    password: reader["Password"].ToString(),
+                                    picture: reader.IsDBNull(reader.GetOrdinal("Picture")) ? null : (byte[])reader["Picture"],
+                                    salt: reader["Salt"].ToString(),
+                                    nationality: reader["Nationality"].ToString(),
+                                    dateOfBirth: Convert.ToDateTime(reader["DateOfBirth"]),
+                                    gender: reader["Gender"].ToString(),
+                                    createdAt: Convert.ToDateTime(reader["CreatedAt"])
+                                );
+                            }
                         }
                     }
                 }
             }
             catch (SqlException sqlEx)
             {
-                throw new Exception($"Database error occurred while validating customer: {sqlEx.Message}", sqlEx);
+                throw new Exception($"Database error occurred while validating user: {sqlEx.Message}", sqlEx);
             }
             catch (Exception ex)
             {
                 throw new Exception($"An unexpected error occurred in {MethodBase.GetCurrentMethod().Name}: {ex.Message}", ex);
-            }
-
+        }
             return null;
         }
     }

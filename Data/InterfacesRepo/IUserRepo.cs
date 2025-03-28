@@ -7,7 +7,7 @@ namespace BucketProject.DAL.Data.InterfacesRepo
         bool Register(User user);
         User ValidateUser(string username, string password);
 
-        User GetUserByUsername(string username);
+        User? GetUserByUsername(string username);
 
         void UpdateName(User user, string username);
 

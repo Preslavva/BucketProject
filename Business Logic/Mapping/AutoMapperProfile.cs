@@ -14,6 +14,8 @@ namespace BucketProject.BLL.Business_Logic.Mapping
         public AutoMapperProfile()
         {
             CreateMap<RegisterViewModel, User>();
+            
+
         }
     }
 }
