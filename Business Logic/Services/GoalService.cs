@@ -60,24 +60,85 @@ namespace BucketProject.BLL.Business_Logic.Services
             _goalRepo.ChangeGoalStatus(goal, isDone);
         }
 
-        public Dictionary<Category, List<Goal>> LoadExpiredGoalsGroupedByCategory()
+        //public Dictionary<Category, List<Goal>> LoadExpiredGoalsGroupedByCategory()
+        //{
+        //    string? username = _contextAccessor.HttpContext.Session.GetString("Username");
+        //    if (string.IsNullOrEmpty(username))
+        //        return new Dictionary<Category, List<Goal>>();
+
+        //    int userId = _goalRepo.GetIdOfUser(username);
+
+        //    var expiredGoals = _goalRepo.LoadExpiredGoalsOfUser(userId);
+
+        //    var grouped = expiredGoals
+        //        .Where(g => g.Deadline.HasValue && g.Deadline.Value.Date < DateTime.Today)
+        //        .GroupBy(g => g.Category)
+        //        .ToDictionary(g => g.Key, g => g.ToList());
+
+        //    return grouped;
+        //}
+
+        public (
+           Dictionary<string, Dictionary<GoalType, List<Goal>>> weekly,
+           Dictionary<string, Dictionary<GoalType, List<Goal>>> monthly,
+           Dictionary<string, Dictionary<GoalType, List<Goal>>> yearly
+       ) LoadGroupedExpiredGoals()
         {
+            var weekly = new Dictionary<string, Dictionary<GoalType, List<Goal>>>();
+            var monthly = new Dictionary<string, Dictionary<GoalType, List<Goal>>>();
+            var yearly = new Dictionary<string, Dictionary<GoalType, List<Goal>>>();
+
             string? username = _contextAccessor.HttpContext.Session.GetString("Username");
             if (string.IsNullOrEmpty(username))
-                return new Dictionary<Category, List<Goal>>();
+                return (weekly, monthly, yearly);
 
             int userId = _goalRepo.GetIdOfUser(username);
+            var expiredGoals = _goalRepo.LoadExpiredGoalsOfUser(userId)
+                .Where(g => g.Deadline.HasValue && g.Deadline.Value.Date < DateTime.Today);
 
-            var expiredGoals = _goalRepo.LoadExpiredGoalsOfUser(userId);
+            foreach (var goal in expiredGoals)
+            {
+                var date = goal.Deadline!.Value.Date;
 
-            var grouped = expiredGoals
-                .Where(g => g.Deadline.HasValue && g.Deadline.Value.Date < DateTime.Today)
-                .GroupBy(g => g.Category)
-                .ToDictionary(g => g.Key, g => g.ToList());
+                switch (goal.Category)
+                {
+                    case Category.Week:
+                        var startOfWeek = date.AddDays(-(int)date.DayOfWeek);
+                        var endOfWeek = startOfWeek.AddDays(6);
+                        var weekKey = $"Week {startOfWeek:dd.MM.yyyy} - {endOfWeek:dd.MM.yyyy}";
+                        AddToGroup(weekly, weekKey, goal);
+                        break;
 
-            return grouped;
+                    case Category.Month:
+                        var monthKey = $"{date:MMMM yyyy}";
+                        AddToGroup(monthly, monthKey, goal);
+                        break;
+
+                    case Category.Year:
+                        var yearKey = $"{date.Year}";
+                        AddToGroup(yearly, yearKey, goal);
+                        break;
+                }
+            }
+
+            return (weekly, monthly, yearly);
         }
 
 
+        private void AddToGroup(Dictionary<string, Dictionary<GoalType, List<Goal>>> group, string key, Goal goal)
+        {
+            var type = goal.Type;
+
+            if (!group.ContainsKey(key))
+                group[key] = new Dictionary<GoalType, List<Goal>>();
+
+            if (!group[key].ContainsKey(type))
+                group[key][type] = new List<Goal>();
+
+            group[key][type].Add(goal);
+        }
+
     }
+
 }
+

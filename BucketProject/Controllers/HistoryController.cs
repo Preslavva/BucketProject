@@ -1,4 +1,6 @@
-﻿using BucketProject.BLL.Business_Logic.InterfacesService;
+﻿using BucketProject.BLL.Business_Logic.Entity;
+using BucketProject.BLL.Business_Logic.InterfacesService;
+using BucketProject.DAL.Models.Enums;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BucketProject.Controllers
@@ -16,8 +18,14 @@ namespace BucketProject.Controllers
         {
             ViewBag.Username = HttpContext.Session.GetString("Username");
 
-            var groupedGoals = _goalService.LoadExpiredGoalsGroupedByCategory();
-            return View(groupedGoals);
+            var (weekly, monthly, yearly) = _goalService.LoadGroupedExpiredGoals();
+
+            ViewBag.Weekly = weekly ?? new Dictionary<string, Dictionary<GoalType, List<Goal>>>();
+            ViewBag.Monthly = monthly ?? new Dictionary<string, Dictionary<GoalType, List<Goal>>>();
+            ViewBag.Yearly = yearly ?? new Dictionary<string, Dictionary<GoalType, List<Goal>>>();
+
+
+            return View();
         }
 
     }

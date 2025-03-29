@@ -53,6 +53,8 @@ public class Goal
 
     public bool IsDeleted { get; set; }
 
+   // public bool IsPostponed { get; set; }
+
     public List<User> Users { get; set; }
 
     //for reading from database
@@ -67,6 +69,7 @@ public class Goal
         this.IsDeleted = isDeleted;
         this.Type = type;
         this.CompletedAt = completedAt;
+       
     }
 
     //saving to database
