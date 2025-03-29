@@ -16,9 +16,9 @@ public class User
 
     public string Nationality { get; set; }
 
-    private DateTime _dateOfBirth;
+    private DateOnly _dateOfBirth;
 
-    public DateTime DateOfBirth
+    public DateOnly DateOfBirth
     {
         get => _dateOfBirth;
         set => _dateOfBirth = value;
@@ -28,9 +28,9 @@ public class User
     {
         get
         {
-            var today = DateTime.Today;
+            var today = DateOnly.FromDateTime(DateTime.Today);
             var age = today.Year - _dateOfBirth.Year;
-            if (_dateOfBirth.Date > today.AddYears(-age))
+            if (_dateOfBirth > today.AddYears(-age))
             {
                 age--;
             }
@@ -38,16 +38,18 @@ public class User
         }
         set
         {
-            _dateOfBirth = DateTime.Today.AddYears(-value);
+            _dateOfBirth = DateOnly.FromDateTime(DateTime.Today.AddYears(-value));
         }
     }
 
+
     public string Gender { get; set; }
 
-    public DateTime CreatedAt { get; set; } = DateTime.Now;
+    public DateOnly CreatedAt { get; set; } = DateOnly.FromDateTime(DateTime.Today);
+
 
     // Constructor for database reading
-    public User(int id, string username, string email, string password, byte[] picture, string salt, string nationality, DateTime dateOfBirth, string gender, DateTime createdAt)
+    public User(int id, string username, string email, string password, byte[] picture, string salt, string nationality, DateOnly dateOfBirth, string gender, DateOnly createdAt)
     {
         this.Id = id;
         this.Username = username;
@@ -61,7 +63,7 @@ public class User
         this.CreatedAt = createdAt;
     }
 
-    public User(string username, string email, string password, string salt, string nationality, DateTime dateOfBirth, string gender)
+    public User(string username, string email, string password, string salt, string nationality, DateOnly dateOfBirth, string gender)
     {
         this.Username = username;
         this.Email = email;
@@ -70,7 +72,7 @@ public class User
         this.Nationality = nationality;
         this.DateOfBirth = dateOfBirth;
         this.Gender = gender;
-        this.CreatedAt = DateTime.Now; ;
+        this.CreatedAt = DateOnly.FromDateTime(DateTime.Today);
     }
 
     public User() { }

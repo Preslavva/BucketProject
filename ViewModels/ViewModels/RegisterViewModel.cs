@@ -28,9 +28,10 @@ namespace BucketProject.UI.ViewModels.ViewModels
             [Display(Name = "Gender")]
             public string Gender { get; set; }
 
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
+             public DateOnly CreatedAt { get; set; } = DateOnly.FromDateTime(DateTime.Today);
 
-            [Required]
+
+        [Required]
             [StringLength(100, MinimumLength = 6)]
             [DataType(DataType.Password)]
             [Display(Name = "Password")]

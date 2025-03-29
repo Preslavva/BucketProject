@@ -95,17 +95,18 @@ namespace BucketProject.DAL.Data.Repositories
                                 if (isValid)
                                 {
                                     return new User(
-                                        (int)reader["UserId"],
-                                        reader["Username"].ToString(),
-                                        reader["Email"].ToString(),
-                                        storedHash,
-                                        reader.IsDBNull(reader.GetOrdinal("Picture")) ? null : (byte[])reader["Picture"],
-                                        storedSalt,
-                                        reader["Nationality"].ToString(),
-                                        Convert.ToDateTime(reader["DateOfBirth"]),
-                                        reader["Gender"].ToString(),
-                                        Convert.ToDateTime(reader["CreatedAt"])
-                                    );
+                                      (int)reader["UserId"],
+                                      reader["Username"].ToString(),
+                                      reader["Email"].ToString(),
+                                      storedHash,
+                                      reader.IsDBNull(reader.GetOrdinal("Picture")) ? null : (byte[])reader["Picture"],
+                                      storedSalt,
+                                      reader["Nationality"].ToString(),
+                                      DateOnly.FromDateTime((DateTime)reader["DateOfBirth"]),
+                                      reader["Gender"].ToString(),
+                                      DateOnly.FromDateTime((DateTime)reader["CreatedAt"])
+);
+
                                 }
                             }
                         }
@@ -279,7 +280,7 @@ namespace BucketProject.DAL.Data.Repositories
                     sqlConn.Open();
 
                     string queryValidateUser = @"
-                SELECT UserId, [Username], Email, [Password], Picture, Salt, Nationality, Age, Gender, CreatedAt
+                SELECT UserId, [Username], Email, [Password], Picture, Salt, Nationality, DateOfBirth, Gender, CreatedAt
                 FROM [User]
                 WHERE Username = @Username";
 
@@ -292,17 +293,18 @@ namespace BucketProject.DAL.Data.Repositories
                             if (reader.Read())
                             {
                                 return new User(
-                                    id: (int)reader["UserId"],
-                                    username: reader["Username"].ToString(),
-                                    email: reader["Email"].ToString(),
-                                    password: reader["Password"].ToString(),
-                                    picture: reader.IsDBNull(reader.GetOrdinal("Picture")) ? null : (byte[])reader["Picture"],
-                                    salt: reader["Salt"].ToString(),
-                                    nationality: reader["Nationality"].ToString(),
-                                    dateOfBirth: Convert.ToDateTime(reader["DateOfBirth"]),
-                                    gender: reader["Gender"].ToString(),
-                                    createdAt: Convert.ToDateTime(reader["CreatedAt"])
-                                );
+                                 id: (int)reader["UserId"],
+                                 username: reader["Username"].ToString(),
+                                 email: reader["Email"].ToString(),
+                                 password: reader["Password"].ToString(),
+                                 picture: reader.IsDBNull(reader.GetOrdinal("Picture")) ? null : (byte[])reader["Picture"],
+                                 salt: reader["Salt"].ToString(),
+                                 nationality: reader["Nationality"].ToString(),
+                                 dateOfBirth: DateOnly.FromDateTime((DateTime)reader["DateOfBirth"]),
+                                 gender: reader["Gender"].ToString(),
+                                 createdAt: DateOnly.FromDateTime((DateTime)reader["CreatedAt"])
+);
+
                             }
                         }
                     }

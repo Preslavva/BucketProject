@@ -13,4 +13,8 @@ namespace BucketProject.BLL.Business_Logic.Entity;
     void UpdateGoalDescription(Goal goal, string description);
     void DeleteGoal(Goal goal);
     void ChangeGoalStatus(Goal goal, bool isDone);
+
+    int GetNumberOfAccomplishedGoalsByCategoryAndDeadline(Category category, DateTime deadline);
+
+    void PostponeGoal(Goal goal, DateTime deadline);
 } 

@@ -48,5 +48,7 @@ namespace BucketProject.BLL.Business_Logic.Services
         {
             _goalRepo.ChangeGoalStatus(goal, isDone);
         }
+
+       
     }
 }

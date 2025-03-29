@@ -137,7 +137,9 @@ public class GoalRepo: Repository, IGoalRepo
                 {
                     changeStatus.Parameters.AddWithValue("@IsDone", isDone);
                     changeStatus.Parameters.AddWithValue("@Id", goal.Id);
-                    changeStatus.Parameters.AddWithValue("@CompletedAt", goal.CompletedAt);
+                    changeStatus.Parameters.AddWithValue("@CompletedAt",
+    goal.CompletedAt ?? (object)DBNull.Value);
+
 
 
                     changeStatus.ExecuteNonQuery();
@@ -247,8 +249,8 @@ public class GoalRepo: Repository, IGoalRepo
         }
     }
 
- public int GetIdOfUser(string username)
-    {
+       public int GetIdOfUser(string username)
+        {
         try
         {
             using (SqlConnection conn = GetSqlConnection())
@@ -262,6 +264,39 @@ public class GoalRepo: Repository, IGoalRepo
 
                     int id = (int)changeStatus.ExecuteScalar();
                     return id;
+                }
+            }
+        }
+
+        catch (SqlException sqlEx)
+        {
+            throw new Exception($"Database error occurred while updatting email: {sqlEx.Message}", sqlEx);
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"An unexpected error occurred in {MethodBase.GetCurrentMethod().Name}: {ex.Message}", ex);
+        }
+    }
+
+    public int GetNumberOfAccomplishedGoalsByCategoryAndDeadline(Category category, DateTime deadline)
+    {
+        try
+        {
+            using (SqlConnection conn = GetSqlConnection())
+            {
+                conn.Open();
+                string queryGetNumber = @"select count(*) from Goal where @IsDone = @IsDone,Category = @Category, Deadline = @Deadline";
+
+                using (SqlCommand getNumber = new SqlCommand(queryGetNumber, conn))
+                {
+                    getNumber.Parameters.AddWithValue("@Category", category);
+                    getNumber.Parameters.AddWithValue("@Deadline", deadline);
+                    getNumber.Parameters.AddWithValue("@IsDone", 1);
+
+
+
+                    int number = (int)getNumber.ExecuteScalar();
+                    return number;
                 }
             }
         }

@@ -4,6 +4,18 @@
 
 <h2>Weekly Goals</h2>
 
+@{
+    int total = Model.Count;
+    int accomplishedCount = Model.Count(g => g.IsDone);
+    int remaining = total - accomplishedCount;
+}
+
+<p>
+     <strong>Completed:</strong> @accomplishedCount /
+     <strong>Total:</strong> @total –
+     <strong>Remaining:</strong> @remaining
+</p>
+
 <form method="post" asp-controller="Goal" asp-action="CreateWeekGoal">
     <input type="text" id="goal" name="GoalDescription" placeholder="Enter your goal..." required />
 
@@ -18,23 +30,29 @@
     <button type="submit">Add Goal</button>
 </form>
 
+<hr />
+
+
 @foreach (Goal goal in Model)
 {
-    <div class="goal-item">
-        <form method="post" asp-action="EditGoalWeek" class="goal-form">
+    <div class="goal-item" style="margin-bottom: 1em; padding: 0.5em; border: 1px solid #ccc;">
+        <form method="post" asp-action="EditGoalWeek" class="goal-form" style="display: inline;">
             <input type="hidden" name="goal.Id" value="@goal.Id" />
             <input type="text" name="description" value="@goal.Description" required />
             <button type="submit">Save changes</button>
         </form>
 
-        <form method="post" asp-action="ChangeGoalStatusWeek" id="goalForm-@goal.Id">
+        <form method="post" asp-action="ChangeGoalStatusWeek" id="goalForm-@goal.Id" style="display: inline;">
             <input type="hidden" name="Id" value="@goal.Id" />
-            <input type="checkbox" name="isDone" value="true" @(goal.IsDone ? "checked" : "") onchange="this.form.submit()" />
+            <label style="margin-left: 10px;">
+                <input type="checkbox" name="isDone" value="true" @(goal.IsDone ? "checked" : "") onchange="this.form.submit()" />
+                Done
+            </label>
         </form>
 
-        <form method="post" asp-action="DeleteGoalWeek">
+        <form method="post" asp-action="DeleteGoalWeek" style="display: inline;">
             <input type="hidden" name="goal.Id" value="@goal.Id" />
-            <button type="submit" class="delete-btn">Delete goal</button>
+            <button type="submit" class="delete-btn" style="margin-left: 10px;">Delete goal</button>
         </form>
     </div>
 }
