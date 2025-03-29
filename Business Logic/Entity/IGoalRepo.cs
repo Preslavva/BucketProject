@@ -14,7 +14,6 @@ namespace BucketProject.BLL.Business_Logic.Entity;
     void DeleteGoal(Goal goal);
     void ChangeGoalStatus(Goal goal, bool isDone);
 
-    int GetNumberOfAccomplishedGoalsByCategoryAndDeadline(Category category, DateTime deadline);
-
     void PostponeGoal(Goal goal, DateTime deadline);
+    List<Goal> LoadExpiredGoalsOfUser(int userId);
 } 

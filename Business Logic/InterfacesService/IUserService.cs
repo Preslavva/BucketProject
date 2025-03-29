@@ -1,4 +1,6 @@
-﻿using BucketProject.DAL.Models.Entities;
+﻿using BucketProject.BLL.Business_Logic.Entity;
+using BucketProject.DAL.Models.Entities;
+using BucketProject.DAL.Models.Enums;
 using BucketProject.UI.ViewModels.ViewModels;
 using Microsoft.AspNetCore.Http;
 
@@ -16,7 +18,7 @@ namespace BucketProject.BLL.Business_Logic.InterfacesService
 
         Task UpdateProfilePicture(IFormFile? photoFile);
 
-
+        
 
     }
 }

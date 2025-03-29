@@ -278,38 +278,65 @@ public class GoalRepo: Repository, IGoalRepo
         }
     }
 
-    public int GetNumberOfAccomplishedGoalsByCategoryAndDeadline(Category category, DateTime deadline)
+    public List<Goal> LoadExpiredGoalsOfUser(int userId)
     {
+        List<Goal> goals = new List<Goal>();
+
         try
         {
             using (SqlConnection conn = GetSqlConnection())
             {
                 conn.Open();
-                string queryGetNumber = @"select count(*) from Goal where @IsDone = @IsDone,Category = @Category, Deadline = @Deadline";
 
-                using (SqlCommand getNumber = new SqlCommand(queryGetNumber, conn))
+                string queryGetGoals = @"SELECT g.Id, g.Category, g.[Description], g.IsDone, g.IsDeleted, g.CreatedAt, g.Deadline, g.Type, g.CompletedAt
+                                     FROM Goal AS g
+                                     INNER JOIN User_Goal AS ug ON g.Id = ug.GoalId
+                                     WHERE ug.UserId = @UserId AND g.IsDeleted = @IsDeleted AND g.Deadline < CAST(GETDATE() AS DATE)
+";
+
+                using (SqlCommand loadGoals = new SqlCommand(queryGetGoals, conn))
                 {
-                    getNumber.Parameters.AddWithValue("@Category", category);
-                    getNumber.Parameters.AddWithValue("@Deadline", deadline);
-                    getNumber.Parameters.AddWithValue("@IsDone", 1);
+                    loadGoals.Parameters.AddWithValue("@UserId", userId);
+                    loadGoals.Parameters.AddWithValue("@IsDeleted", false);
 
 
 
-                    int number = (int)getNumber.ExecuteScalar();
-                    return number;
+                    using (SqlDataReader reader = loadGoals.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            goals.Add(new Goal
+                            {
+                                Id = reader.GetInt32(0),
+                                Category = Enum.Parse<Category>(reader.GetString(1)),
+                                Description = reader.GetString(2),
+                                IsDone = reader.GetBoolean(3),
+                                IsDeleted = reader.GetBoolean(4),
+                                CreatedAt = reader.GetDateTime(5),
+                                Deadline = reader.IsDBNull(6) ? (DateTime?)null : reader.GetDateTime(6),
+                                Type = Enum.Parse<GoalType>(reader.GetString(7)),
+                                CompletedAt = reader.IsDBNull(8) ? (DateTime?)null : reader.GetDateTime(8)
+
+
+                            });
+                        }
+                    }
                 }
             }
         }
-
         catch (SqlException sqlEx)
         {
-            throw new Exception($"Database error occurred while updatting email: {sqlEx.Message}", sqlEx);
+            throw new Exception($"Database error occurred while loading goals: {sqlEx.Message}", sqlEx);
         }
         catch (Exception ex)
         {
             throw new Exception($"An unexpected error occurred in {MethodBase.GetCurrentMethod().Name}: {ex.Message}", ex);
         }
+
+        return goals;
     }
+
+
 }
 
 

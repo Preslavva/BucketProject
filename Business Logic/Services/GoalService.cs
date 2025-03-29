@@ -4,6 +4,7 @@ using BucketProject.DAL.Data.InterfacesRepo;
 using BucketProject.BLL.Business_Logic.Entity;
 using BucketProject.DAL.Models.Enums;
 using Microsoft.AspNetCore.Http;
+using System.Globalization;
 
 
 namespace BucketProject.BLL.Business_Logic.Services
@@ -32,8 +33,18 @@ namespace BucketProject.BLL.Business_Logic.Services
         {
             string? username = _contextAccessor.HttpContext.Session.GetString("Username");
             int id = _goalRepo.GetIdOfUser(username);
-            return  _goalRepo.LoadGoalsOfUserbyCategory(id, category);
+
+            var allGoals = _goalRepo.LoadGoalsOfUserbyCategory(id, category);
+
+            var today = DateTime.Today;
+
+            var nonExpiredGoals = allGoals
+                .Where(g => g.Deadline.HasValue && g.Deadline.Value.Date >= today)
+                .ToList();
+
+            return nonExpiredGoals;
         }
+
 
         public void UpdateGoal(Goal goal, string description)
         {
@@ -49,6 +60,24 @@ namespace BucketProject.BLL.Business_Logic.Services
             _goalRepo.ChangeGoalStatus(goal, isDone);
         }
 
-       
+        public Dictionary<Category, List<Goal>> LoadExpiredGoalsGroupedByCategory()
+        {
+            string? username = _contextAccessor.HttpContext.Session.GetString("Username");
+            if (string.IsNullOrEmpty(username))
+                return new Dictionary<Category, List<Goal>>();
+
+            int userId = _goalRepo.GetIdOfUser(username);
+
+            var expiredGoals = _goalRepo.LoadExpiredGoalsOfUser(userId);
+
+            var grouped = expiredGoals
+                .Where(g => g.Deadline.HasValue && g.Deadline.Value.Date < DateTime.Today)
+                .GroupBy(g => g.Category)
+                .ToDictionary(g => g.Key, g => g.ToList());
+
+            return grouped;
+        }
+
+
     }
 }

@@ -1,0 +1,31 @@
+﻿@using BucketProject.BLL.Business_Logic.Entity
+@using BucketProject.DAL.Models.Enums
+
+@model Dictionary<Category, List<Goal>>
+
+<h1>Goal History</h1>
+
+@foreach (var group in Model)
+{
+    var completedCount = group.Value.Count(g => g.IsDone);
+    var notCompletedCount = group.Value.Count(g => !g.IsDone);
+
+    <div class="goal-board">
+        <h2>@group.Key</h2>
+        <p>
+             Completed: @completedCount |
+             Not Done: @notCompletedCount
+        </p>
+        <ul>
+            @foreach (var goal in group.Value)
+            {
+                <li>
+                    <strong>@goal.Description</strong><br />
+                    Category: @goal.Type<br />
+                    Deadline: @goal.Deadline?.ToShortDateString()<br />
+                    Status: @(goal.IsDone ? "Completed" : "Not Done")
+                </li>
+            }
+        </ul>
+    </div>
+}

@@ -11,5 +11,7 @@ namespace BucketProject.BLL.Business_Logic.InterfacesService
         void UpdateGoal(Goal goal, string description);
         void DeleteGoal(Goal goal);
         void ChangeGoalStatus(Goal goal, bool isDone);
+
+        Dictionary<Category, List<Goal>> LoadExpiredGoalsGroupedByCategory();
     }
 }
