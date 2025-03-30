@@ -25,9 +25,9 @@ public class GoalRepo: Repository, IGoalRepo
                 try
                 {
                     string insertGoalQuery = @"
-                    INSERT INTO Goal (Category, Description, Type, Deadline, IsDone, IsDeleted, CreatedAt, CompletedAt)
+                    INSERT INTO Goal (Category, Description, Type, Deadline, IsDone, IsDeleted, CreatedAt, CompletedAt, IsPostponed)
                     OUTPUT INSERTED.Id
-                    VALUES (@Category, @Description, @Type, @Deadline, @IsDone, @IsDeleted, @CreatedAt, @CompletedAt);";
+                    VALUES (@Category, @Description, @Type, @Deadline, @IsDone, @IsDeleted, @CreatedAt, @CompletedAt, @IsPostponed);";
 
                     int goalId;
 
@@ -41,6 +41,8 @@ public class GoalRepo: Repository, IGoalRepo
                         insertGoalCmd.Parameters.AddWithValue("@IsDeleted", false);
                         insertGoalCmd.Parameters.AddWithValue("@CreatedAt", goal.CreatedAt);
                         insertGoalCmd.Parameters.AddWithValue("@CompletedAt", goal.CompletedAt ?? (object)DBNull.Value);
+                        insertGoalCmd.Parameters.AddWithValue("@IsPostponed", false);
+
 
                         goalId = (int)insertGoalCmd.ExecuteScalar();
                     }
@@ -75,7 +77,7 @@ public class GoalRepo: Repository, IGoalRepo
             {
                 conn.Open();
 
-                string queryGetGoals = @"SELECT g.Id, g.Category, g.[Description], g.IsDone, g.IsDeleted, g.CreatedAt, g.Deadline, g.Type, g.CompletedAt
+                string queryGetGoals = @"SELECT g.Id, g.Category, g.[Description], g.IsDone, g.IsDeleted, g.CreatedAt, g.Deadline, g.Type, g.CompletedAt, g.IsPostponed
                                      FROM Goal AS g
                                      INNER JOIN User_Goal AS ug ON g.Id = ug.GoalId
                                      WHERE g.Category = @Category AND ug.UserId = @UserId AND g.IsDeleted = @IsDeleted";
@@ -100,8 +102,8 @@ public class GoalRepo: Repository, IGoalRepo
                                 CreatedAt = reader.GetDateTime(5),
                                 Deadline = reader.IsDBNull(6) ? (DateTime?)null : reader.GetDateTime(6),
                                 Type = Enum.Parse<GoalType>(reader.GetString(7)),
-                                CompletedAt = reader.IsDBNull(8) ? (DateTime?)null : reader.GetDateTime(8)
-
+                                CompletedAt = reader.IsDBNull(8) ? (DateTime?)null : reader.GetDateTime(8),
+                                IsPostponed = reader.GetBoolean(9)
 
                             });
                         }
@@ -137,8 +139,7 @@ public class GoalRepo: Repository, IGoalRepo
                 {
                     changeStatus.Parameters.AddWithValue("@IsDone", isDone);
                     changeStatus.Parameters.AddWithValue("@Id", goal.Id);
-                    changeStatus.Parameters.AddWithValue("@CompletedAt",
-    goal.CompletedAt ?? (object)DBNull.Value);
+                    changeStatus.Parameters.AddWithValue("@CompletedAt", goal.CompletedAt ?? (object)DBNull.Value);
 
 
 
@@ -288,7 +289,7 @@ public class GoalRepo: Repository, IGoalRepo
             {
                 conn.Open();
 
-                string queryGetGoals = @"SELECT g.Id, g.Category, g.[Description], g.IsDone, g.IsDeleted, g.CreatedAt, g.Deadline, g.Type, g.CompletedAt
+                string queryGetGoals = @"SELECT g.Id, g.Category, g.[Description], g.IsDone, g.IsDeleted, g.CreatedAt, g.Deadline, g.Type, g.CompletedAt, g.IsPostponed
                                      FROM Goal AS g
                                      INNER JOIN User_Goal AS ug ON g.Id = ug.GoalId
                                      WHERE ug.UserId = @UserId AND g.IsDeleted = @IsDeleted AND g.Deadline < CAST(GETDATE() AS DATE)
@@ -315,7 +316,9 @@ public class GoalRepo: Repository, IGoalRepo
                                 CreatedAt = reader.GetDateTime(5),
                                 Deadline = reader.IsDBNull(6) ? (DateTime?)null : reader.GetDateTime(6),
                                 Type = Enum.Parse<GoalType>(reader.GetString(7)),
-                                CompletedAt = reader.IsDBNull(8) ? (DateTime?)null : reader.GetDateTime(8)
+                                CompletedAt = reader.IsDBNull(8) ? (DateTime?)null : reader.GetDateTime(8),
+                                IsPostponed = reader.GetBoolean(9)
+
 
 
                             });

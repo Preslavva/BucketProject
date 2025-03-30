@@ -22,7 +22,7 @@ public class Goal
     {
         get
         {
-            return _deadline ??= DeadlineStrategyManager.GetStrategy(Category)?.GetDeadline(CreatedAt);
+            return _deadline ??= DeadlineStrategyManager.GetStrategy(Category)?.GetDeadline(CreatedAt,IsPostponed);
         }
         set
         {
@@ -53,12 +53,12 @@ public class Goal
 
     public bool IsDeleted { get; set; }
 
-   // public bool IsPostponed { get; set; }
-
+    public bool IsPostponed { get; set; }
+    
     public List<User> Users { get; set; }
 
     //for reading from database
-    public Goal(int id, Category category, GoalType type, string description, DateTime createdAt, DateTime completedAt, bool isDone, bool isDeleted)
+    public Goal(int id, Category category, GoalType type, string description, DateTime createdAt, DateTime completedAt, bool isDone, bool isDeleted, bool isPostponed)
     {
         this.Id = id;
         this.Category = category;
@@ -69,6 +69,7 @@ public class Goal
         this.IsDeleted = isDeleted;
         this.Type = type;
         this.CompletedAt = completedAt;
+        this.IsPostponed = isPostponed;
        
     }
 
@@ -81,6 +82,7 @@ public class Goal
         this.CreatedAt = DateTime.Now;
         this.IsDone = false;
         this.IsDeleted = false;
+        this.IsPostponed = false;
         Users = new List<User>();
     }
 

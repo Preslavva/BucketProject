@@ -1,143 +1,58 @@
 ﻿@using BucketProject.BLL.Business_Logic.Entity
 @using BucketProject.DAL.Models.Enums
 
-
 @{
-    var weekly = ViewBag.Weekly as Dictionary<string, Dictionary<GoalType, List<Goal>>>;
-    var monthly = ViewBag.Monthly as Dictionary<string, Dictionary<GoalType, List<Goal>>>;
-    var yearly = ViewBag.Yearly as Dictionary<string, Dictionary<GoalType, List<Goal>>>;
+    var grouped = ViewBag.GroupedGoals as Dictionary<Category, Dictionary<string, Dictionary<GoalType, List<Goal>>>>;
+    var username = ViewBag.Username as string;
 }
 
 <div class="container mt-4">
-    <h2 class="mb-4">Expired Goals</h2>
 
-    <!-- Weekly Goals -->
-    <h3 class="mt-4">Weekly Goals</h3>
-    @if (weekly != null && weekly.Any())
+    @if (grouped != null && grouped.Any())
     {
-        foreach (var week in weekly.OrderByDescending(w => w.Key))
+        foreach (var categoryGroup in grouped)
         {
-            <h4 class="mt-3">@week.Key</h4>
-            foreach (var typeGroup in week.Value)
-            {
-                <h5>@typeGroup.Key</h5>
-                <ul class="list-group mb-3">
-                    @foreach (var goal in typeGroup.Value)
-                    {
-                        <li class="list-group-item">
-                            <div class="d-flex justify-content-between">
-                                <div>
-                                    <strong>@goal.Description</strong><br />
-                                    <small class="text-muted">Deadline: @goal.Deadline?.ToShortDateString()</small>
-                                </div>
-                                <div class="text-end">
-                                    @if (goal.IsDone)
-                                    {
-                                        <span class="badge bg-success">Completed</span>
+            <h3 class="mt-5">@categoryGroup.Key.ToString() Goals</h3>
 
-                                        <br />
-                                        <small class="text-muted">on @goal.CompletedAt?.ToShortDateString()</small>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge bg-danger">Not Completed</span>
-                                    }
+            foreach (var timeGroup in categoryGroup.Value.OrderByDescending(g => g.Key))
+            {
+                <h4 class="mt-3">@timeGroup.Key</h4>
+
+                foreach (var typeGroup in timeGroup.Value)
+                {
+                    <h5>@typeGroup.Key</h5>
+                    <ul class="list-group mb-3">
+                        @foreach (var goal in typeGroup.Value)
+                        {
+                            <li class="list-group-item">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <strong>@goal.Description</strong><br />
+                                        <small class="text-muted">Deadline: @goal.Deadline?.ToShortDateString()</small>
+                                    </div>
+                                    <div class="text-end">
+                                        @if (goal.IsDone)
+                                        {
+                                            <span class="badge bg-success">Completed</span>
+
+                                            <br />
+                                            <small class="text-muted">on @goal.CompletedAt?.ToShortDateString()</small>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger">Not Completed</span>
+                                        }
+                                    </div>
                                 </div>
-                            </div>
-                        </li>
-                    }
-                </ul>
+                            </li>
+                        }
+                    </ul>
+                }
             }
         }
     }
     else
     {
-        <p class="text-muted">No weekly expired goals.</p>
-    }
-
-    <h3 class="mt-5">Monthly Goals</h3>
-    @if (monthly != null && monthly.Any())
-    {
-        foreach (var month in monthly.OrderByDescending(m => m.Key))
-        {
-            <h4 class="mt-3">@month.Key</h4>
-            foreach (var typeGroup in month.Value)
-            {
-                <h5>@typeGroup.Key</h5>
-                <ul class="list-group mb-3">
-                    @foreach (var goal in typeGroup.Value)
-                    {
-                        <li class="list-group-item">
-                            <div class="d-flex justify-content-between">
-                                <div>
-                                    <strong>@goal.Description</strong><br />
-                                    <small class="text-muted">Deadline: @goal.Deadline?.ToShortDateString()</small>
-                                </div>
-                                <div class="text-end">
-                                    @if (goal.IsDone)
-                                    {
-                                        <span class="badge bg-success">Completed</span>
-
-                                        <br />
-                                        <small class="text-muted">on @goal.CompletedAt?.ToShortDateString()</small>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge bg-danger">Not Completed</span>
-                                    }
-                                </div>
-                            </div>
-                        </li>
-                    }
-                </ul>
-            }
-        }
-    }
-    else
-    {
-        <p class="text-muted">No monthly expired goals.</p>
-    }
-
-    <h3 class="mt-5">Yearly Goals</h3>
-    @if (yearly != null && yearly.Any())
-    {
-        foreach (var year in yearly.OrderByDescending(y => y.Key))
-        {
-            <h4 class="mt-3">@year.Key</h4>
-            foreach (var typeGroup in year.Value)
-            {
-                <h5>@typeGroup.Key</h5>
-                <ul class="list-group mb-3">
-                    @foreach (var goal in typeGroup.Value)
-                    {
-                        <li class="list-group-item">
-                            <div class="d-flex justify-content-between">
-                                <div>
-                                    <strong>@goal.Description</strong><br />
-                                    <small class="text-muted">Deadline: @goal.Deadline?.ToShortDateString()</small>
-                                </div>
-                                <div class="text-end">
-                                    @if (goal.IsDone)
-                                    {
-                                        <span class="badge bg-success">Completed</span>
-
-                                        <br />
-                                        <small class="text-muted">on @goal.CompletedAt?.ToShortDateString()</small>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge bg-danger">Not Completed</span>
-                                    }
-                                </div>
-                            </div>
-                        </li>
-                    }
-                </ul>
-            }
-        }
-    }
-    else
-    {
-        <p class="text-muted">No yearly expired goals.</p>
+        <p class="text-muted">No expired goals found.</p>
     }
 </div>

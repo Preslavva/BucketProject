@@ -9,9 +9,16 @@ namespace BucketProject.BLL.Business_Logic.Strategies
 {
     internal class MonthDeadlineStrategy: IDeadlineStrategy
     {
-        public DateTime? GetDeadline(DateTime createdAt)
+        public DateTime? GetDeadline(DateTime createdAt,bool isPostponed)
         {
-            return new DateTime(createdAt.Year, createdAt.Month, 1).AddMonths(1);
+            if (!isPostponed)
+            {
+                return new DateTime(createdAt.Year, createdAt.Month, 1).AddMonths(1);
+            }
+            else
+            {
+                return new DateTime(createdAt.Year, createdAt.Month, 1).AddMonths(2);
+            }
         }
     }
 }

@@ -22,8 +22,12 @@ namespace BucketProject.BLL.Business_Logic.Services
 
         public User? LogIn(string username, string password)
         {
+            if (string.IsNullOrWhiteSpace(password))
+                throw new ArgumentException("Enter a password");
+
             return _userRepo.ValidateUser(username, password);
         }
+
 
         public bool Register(RegisterViewModel newUser)
         {

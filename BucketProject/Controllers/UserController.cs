@@ -50,19 +50,28 @@ namespace BucketProject.UI.BucketProject.Controllers
         [HttpPost]
         public IActionResult LogIn(string username, string password)
         {
-            User? loggedUser = _userService.LogIn(username, password);
+            try
+            {
+                User? loggedUser = _userService.LogIn(username, password);
 
-            if (loggedUser!=null)
-            {
-                HttpContext.Session.SetString("Username", loggedUser.Username);
-                return RedirectToAction("Index","Home");
+                if (loggedUser != null)
+                {
+                    HttpContext.Session.SetString("Username", loggedUser.Username);
+                    return RedirectToAction("Index", "Home");
+                }
+                else
+                {
+                    ViewBag.ErrorMessage = "Wrong username or password";
+                    return View();
+                }
             }
-            else
+            catch (ArgumentException ex)
             {
-                ViewBag.ErrorMessage = "Wrong username or password";
-                return View(loggedUser);
+                ViewBag.ErrorMessage = ex.Message;
+                return View();
             }
         }
+
 
 
         [HttpGet]

@@ -18,15 +18,14 @@ namespace BucketProject.Controllers
         {
             ViewBag.Username = HttpContext.Session.GetString("Username");
 
-            var (weekly, monthly, yearly) = _goalService.LoadGroupedExpiredGoals();
+            var groupedGoals = _goalService.LoadGroupedExpiredGoals();
 
-            ViewBag.Weekly = weekly ?? new Dictionary<string, Dictionary<GoalType, List<Goal>>>();
-            ViewBag.Monthly = monthly ?? new Dictionary<string, Dictionary<GoalType, List<Goal>>>();
-            ViewBag.Yearly = yearly ?? new Dictionary<string, Dictionary<GoalType, List<Goal>>>();
-
+            ViewBag.GroupedGoals = groupedGoals ??
+                new Dictionary<Category, Dictionary<string, Dictionary<GoalType, List<Goal>>>>();
 
             return View();
         }
+
 
     }
 }
