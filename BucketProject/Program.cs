@@ -1,6 +1,8 @@
 using BucketProject.DAL.Data.InterfacesRepo;
 using BucketProject.BLL.Business_Logic.Services;
 using BucketProject.BLL.Business_Logic.InterfacesService;
+using BucketProject.BLL.Business_Logic.Strategies;
+
 using BucketProject.DAL.Data.Repositories;
 using BucketProject.BLL.Business_Logic.Mapping;
 using BucketProject.BLL.Business_Logic.Entity;
@@ -23,6 +25,15 @@ builder.Services.AddScoped<IUserRepo,UserRepo>();
 builder.Services.AddScoped<IGoalService, GoalService>();
 builder.Services.AddScoped<IUserService,UserService>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
+
+builder.Services.AddScoped<NotificationService>();
+builder.Services.AddScoped<GoalService>(); // or IGoalService if you're using an interface
+
+
+
+
+
+
 
 builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
 

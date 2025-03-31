@@ -31,7 +31,7 @@ namespace BucketProject.UI.ViewModels.ViewModels
              public DateOnly CreatedAt { get; set; } = DateOnly.FromDateTime(DateTime.Today);
 
 
-        [Required]
+            [Required]
             [StringLength(100, MinimumLength = 6)]
             [DataType(DataType.Password)]
             [Display(Name = "Password")]

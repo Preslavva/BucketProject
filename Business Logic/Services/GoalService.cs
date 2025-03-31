@@ -60,6 +60,10 @@ namespace BucketProject.BLL.Business_Logic.Services
             _goalRepo.ChangeGoalStatus(goal, isDone);
         }
 
+        public void PostponeGoal(Goal goal)
+        {
+            _goalRepo.PostponeGoal(goal);
+        }
 
         public Dictionary<Category, Dictionary<string, Dictionary<GoalType, List<Goal>>>> LoadGroupedExpiredGoals()
         {

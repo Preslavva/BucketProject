@@ -10,6 +10,8 @@ namespace BucketProject.BLL.Business_Logic.InterfacesService
         List<Goal> LoadGoalsByCategory(Category category);
         void UpdateGoal(Goal goal, string description);
         void DeleteGoal(Goal goal);
+        void PostponeGoal(Goal goal);
+
         void ChangeGoalStatus(Goal goal, bool isDone);
 
         public Dictionary<Category, Dictionary<string, Dictionary<GoalType, List<Goal>>>> LoadGroupedExpiredGoals();

@@ -122,7 +122,60 @@ public class GoalRepo: Repository, IGoalRepo
 
         return goals;
     }
+    public List<Goal> LoadGoalsOfUser(int userId)
+    {
+        List<Goal> goals = new List<Goal>();
 
+        try
+        {
+            using (SqlConnection conn = GetSqlConnection())
+            {
+                conn.Open();
+
+                string queryGetGoals = @"SELECT g.Id, g.Category, g.[Description], g.IsDone, g.IsDeleted, g.CreatedAt, g.Deadline, g.Type, g.CompletedAt, g.IsPostponed
+                                     FROM Goal AS g
+                                     INNER JOIN User_Goal AS ug ON g.Id = ug.GoalId
+                                     WHERE ug.UserId = @UserId AND g.IsDeleted = @IsDeleted";
+
+                using (SqlCommand loadGoals = new SqlCommand(queryGetGoals, conn))
+                {
+                    loadGoals.Parameters.AddWithValue("@UserId", userId);
+                    loadGoals.Parameters.AddWithValue("@IsDeleted", false);
+
+                    using (SqlDataReader reader = loadGoals.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            goals.Add(new Goal
+                            {
+                                Id = reader.GetInt32(0),
+                                Category = Enum.Parse<Category>(reader.GetString(1)),
+                                Description = reader.GetString(2),
+                                IsDone = reader.GetBoolean(3),
+                                IsDeleted = reader.GetBoolean(4),
+                                CreatedAt = reader.GetDateTime(5),
+                                Deadline = reader.IsDBNull(6) ? (DateTime?)null : reader.GetDateTime(6),
+                                Type = Enum.Parse<GoalType>(reader.GetString(7)),
+                                CompletedAt = reader.IsDBNull(8) ? (DateTime?)null : reader.GetDateTime(8),
+                                IsPostponed = reader.GetBoolean(9)
+
+                            });
+                        }
+                    }
+                }
+            }
+        }
+        catch (SqlException sqlEx)
+        {
+            throw new Exception($"Database error occurred while loading goals: {sqlEx.Message}", sqlEx);
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"An unexpected error occurred in {MethodBase.GetCurrentMethod().Name}: {ex.Message}", ex);
+        }
+
+        return goals;
+    }
 
     public void ChangeGoalStatus(Goal goal, bool isDone)
     {
@@ -221,7 +274,7 @@ public class GoalRepo: Repository, IGoalRepo
         }
     }
 
-    public void PostponeGoal(Goal goal, DateTime deadline)
+    public void PostponeGoal(Goal goal)
     {
         try
         {
@@ -232,7 +285,7 @@ public class GoalRepo: Repository, IGoalRepo
 
                 using (SqlCommand changeStatus = new SqlCommand(queryPostponeGoal, conn))
                 {
-                    changeStatus.Parameters.AddWithValue("@Deadline", deadline);
+                    changeStatus.Parameters.AddWithValue("@Deadline", goal.Deadline);
                     changeStatus.Parameters.AddWithValue("@Id", goal.Id);
 
                     changeStatus.ExecuteNonQuery();
