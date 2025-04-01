@@ -5,6 +5,7 @@ using BucketProject.BLL.Business_Logic.Entity;
 using BucketProject.DAL.Models.Enums;
 using Microsoft.AspNetCore.Http;
 using System.Globalization;
+using BucketProject.BLL.Business_Logic.Strategies;
 
 
 namespace BucketProject.BLL.Business_Logic.Services
@@ -62,6 +63,9 @@ namespace BucketProject.BLL.Business_Logic.Services
 
         public void PostponeGoal(Goal goal)
         {
+            var strategy = DeadlineStrategyManager.GetStrategy(goal.Category);
+            goal.Deadline = strategy?.GetDeadline(goal.CreatedAt, true);
+            goal.IsPostponed = true;
             _goalRepo.PostponeGoal(goal);
         }
 

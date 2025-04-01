@@ -2,6 +2,7 @@
 using BucketProject.DAL.Models.Entities;
 
 using BucketProject.BLL.Business_Logic.Strategies;
+using System.Reflection.Metadata.Ecma335;
 
 namespace BucketProject.BLL.Business_Logic.Entity;
 
@@ -22,7 +23,11 @@ public class Goal
     {
         get
         {
-            return _deadline ??= DeadlineStrategyManager.GetStrategy(Category)?.GetDeadline(CreatedAt,IsPostponed);
+            if (_deadline==null)
+            {
+                _deadline=DeadlineStrategyManager.GetStrategy(Category)?.GetDeadline(CreatedAt, IsPostponed);
+            }
+            return _deadline;
         }
         set
         {

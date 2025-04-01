@@ -281,11 +281,12 @@ public class GoalRepo: Repository, IGoalRepo
             using (SqlConnection conn = GetSqlConnection())
             {
                 conn.Open();
-                string queryPostponeGoal = @"update Goal set Deadline = @Deadline where Id = @Id";
+                string queryPostponeGoal = @"update Goal set Deadline = @Deadline,IsPostponed=@IsPostponed where Id = @Id";
 
                 using (SqlCommand changeStatus = new SqlCommand(queryPostponeGoal, conn))
                 {
                     changeStatus.Parameters.AddWithValue("@Deadline", goal.Deadline);
+                    changeStatus.Parameters.AddWithValue("@IsPostponed", true);
                     changeStatus.Parameters.AddWithValue("@Id", goal.Id);
 
                     changeStatus.ExecuteNonQuery();

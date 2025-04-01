@@ -9,22 +9,29 @@ namespace BucketProject.BLL.Business_Logic.Strategies
 {
     public class YearNotificationStrategy : INotificationStrategy
     {
-        private int _daysLeft;
-
         public bool ShouldNotify(DateTime today, DateTime deadline)
         {
-            _daysLeft = (int)(deadline.Date - today.Date).TotalDays;
-            return _daysLeft <= 30 && _daysLeft >= 0;
+            int daysLeft = (int)(deadline.Date - today.Date).TotalDays;
+            return daysLeft <= 30 && daysLeft > 0;
         }
 
-        public string GetNotificationMessage(string goalTitle)
+        public string GetNotificationMessage(string goalTitle, DateTime deadline)
         {
-            return _daysLeft switch
+            int daysLeft = (int)(deadline.Date - DateTime.Today.Date).TotalDays;
+
+            if (daysLeft > 1)
             {
-                > 1 => $"Only {_daysLeft} days left to achieve your yearly goal \"{goalTitle}\"",
-                1 => $"Today is the last day for your yearly goal \"{goalTitle}\"",
-                _ => string.Empty
-            };
+                return $"Only {daysLeft} days left to achieve your yearly goal \"{goalTitle}\"!";
+            }
+            else if (daysLeft == 1)
+            {
+                return $"Today is the last day for your yearly goal \"{goalTitle}\"!";
+            }
+            else
+            {
+                return string.Empty;
+            }
         }
     }
 }
+

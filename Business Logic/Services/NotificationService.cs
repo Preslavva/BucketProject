@@ -23,9 +23,9 @@ namespace BucketProject.BLL.Business_Logic.Services
         }
 
 
-        public List<Goal> CheckAndNotify(DateTime today)
+        public List<(Goal goal, string message)> CheckAndNotify(DateTime today)
         {
-            var notifiableGoals = new List<Goal>();
+            var notifiableGoals = new List<(Goal goal, string message)>();
 
             string? username = _contextAccessor.HttpContext.Session.GetString("Username");
             if (username == null)
@@ -49,7 +49,9 @@ namespace BucketProject.BLL.Business_Logic.Services
 
                 if (deadline.HasValue && notificationStrategy.ShouldNotify(today, deadline.Value))
                 {
-                    notifiableGoals.Add(goal);
+                    string message = notificationStrategy.GetNotificationMessage(goal.Description, deadline.Value);
+
+                    notifiableGoals.Add((goal, message));
                 }
             }
 

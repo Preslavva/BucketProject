@@ -121,31 +121,6 @@ namespace BucketProjetc.UI.BucketProject.Controllers
             return RedirectToAction("BucketList");
         }
 
-        [HttpPost]
-        public IActionResult PostponeGoalWeek(Goal goal)
-        {
-            ViewBag.Username = HttpContext.Session.GetString("Username");
-            _goalService.PostponeGoal(goal);
-            return RedirectToAction("WeekGoals");
-
-        }
-
-        [HttpPost]
-        public IActionResult PostponeGoalMonth(Goal goal)
-        {
-            ViewBag.Username = HttpContext.Session.GetString("Username");
-            _goalService.PostponeGoal(goal);
-            return RedirectToAction("MonthGoals");
-
-        }
-        [HttpPost]
-        public IActionResult PostponeGoalYear(Goal goal)
-        {
-            ViewBag.Username = HttpContext.Session.GetString("Username");
-            _goalService.PostponeGoal(goal);
-            return RedirectToAction("YearGoals");
-
-        }
 
         [HttpGet]
         public IActionResult WeekGoals()

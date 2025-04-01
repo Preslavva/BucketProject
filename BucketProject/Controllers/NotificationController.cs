@@ -21,34 +21,33 @@ namespace BucketProject.BLL.Business_Logic.Controllers
         {
             ViewBag.Username = HttpContext.Session.GetString("Username");
 
-            List<Goal> goals = _notificationService.CheckAndNotify(DateTime.Today);
-            return View(goals);
+            var notifications = _notificationService.CheckAndNotify(DateTime.Today);
+            return View(notifications);
         }
         [HttpPost]
-        public IActionResult PostponeGoalWeek(Goal goal)
+        public IActionResult PostponeGoal(Goal goal)
         {
             ViewBag.Username = HttpContext.Session.GetString("Username");
             _goalService.PostponeGoal(goal);
-            return RedirectToAction("WeekGoals");
-
+            return RedirectToAction("Notification");
         }
 
-        [HttpPost]
-        public IActionResult PostponeGoalMonth(Goal goal)
-        {
-            ViewBag.Username = HttpContext.Session.GetString("Username");
-            _goalService.PostponeGoal(goal);
-            return RedirectToAction("MonthGoals");
+        //[HttpPost]
+        //public IActionResult PostponeGoalMonth(Goal goal)
+        //{
+        //    ViewBag.Username = HttpContext.Session.GetString("Username");
+        //    _goalService.PostponeGoal(goal);
+        //    return RedirectToAction("Notification");
 
-        }
-        [HttpPost]
-        public IActionResult PostponeGoalYear(Goal goal)
-        {
-            ViewBag.Username = HttpContext.Session.GetString("Username");
-            _goalService.PostponeGoal(goal);
-            return RedirectToAction("YearGoals");
+        //}
+        //[HttpPost]
+        //public IActionResult PostponeGoalYear(Goal goal)
+        //{
+        //    ViewBag.Username = HttpContext.Session.GetString("Username");
+        //    _goalService.PostponeGoal(goal);
+        //    return RedirectToAction("Notification");
 
-        }
+        //}
 
     }
 }

@@ -1,19 +1,35 @@
 ﻿@using BucketProject.BLL.Business_Logic.Entity
+@model List<(Goal goal, string message)>
 
-@model List<Goal>
+<h2>Hello, @ViewBag.Username! Here are your notifications:</h2>
 
-<h2>Notifications</h2>
-
-@if (Model == null || Model.Count == 0)
+@if (!Model.Any())
 {
-    <p>No notifications </p>
+    <div class="alert alert-success"> You have no goals to be notified about today!</div>
 }
 else
 {
     <ul class="list-group">
-        @foreach (Goal goal in Model)
+        @foreach (var item in Model)
         {
-            <li class="list-group-item">@goal.Description</li>
+            <li class="list-group-item">
+                <strong>@item.goal.Description</strong><br />
+                <span>@item.message</span>
+
+                <form asp-action="PostponeGoal" method="post" style="margin-top: 10px;">
+                    <input type="hidden" name="Id" value="@item.goal.Id" />
+                    <input type="hidden" name="Type" value="@item.goal.Type" />
+                    <input type="hidden" name="Description" value="@item.goal.Description" />
+                    <input type="hidden" name="Category" value="@item.goal.Category" />
+                    <input type="hidden" name="CreatedAt" value="@item.goal.CreatedAt.ToString("yyyy-MM-ddTHH:mm:ss")" />
+                    <input type="hidden" name="Deadline" value="@item.goal.Deadline?.ToString("yyyy-MM-ddTHH:mm:ss")" />
+                    <input type="hidden" name="IsPostponed" value="true" />
+                    <input type="hidden" name="IsDone" value="@item.goal.IsDone" />
+                    <input type="hidden" name="IsDeleted" value="@item.goal.IsDeleted" />
+
+                    <button type="submit" class="btn btn-warning btn-sm">Postpone</button>
+                </form>
+            </li>
         }
     </ul>
 }
