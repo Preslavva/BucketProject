@@ -17,4 +17,6 @@ namespace BucketProject.BLL.Business_Logic.Entity;
     void PostponeGoal(Goal goal);
     List<Goal> LoadExpiredGoalsOfUser(int userId);
     List<Goal> LoadGoalsOfUser(int userId);
+
+    Goal GetGoalById(int id);
 } 

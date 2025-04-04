@@ -5,23 +5,23 @@ namespace BucketProject.DAL.Models.Entities;
 
 public class User
 {
-    public int Id { get; set; }
-    public string Username { get; set; }
-    public string Email { get; set; }
-    public string Password { get; set; }
+    public int Id { get; private set; }
+    public string Username { get; private set; }
+    public string Email { get; private set; }
+    public string Password { get; private set; }
 
-    public byte[] Picture { get; set; }
+    public byte[] Picture { get; private set; }
 
-    public string Salt { get; set; }
+    public string Salt { get; private set; }
 
-    public string Nationality { get; set; }
+    public string Nationality { get; private set; }
 
     private DateOnly _dateOfBirth;
 
     public DateOnly DateOfBirth
     {
         get => _dateOfBirth;
-        set => _dateOfBirth = value;
+        private set => _dateOfBirth = value;
     }
 
     public int Age
@@ -43,9 +43,9 @@ public class User
     }
 
 
-    public string Gender { get; set; }
+    public string Gender { get; private set; }
 
-    public DateOnly CreatedAt { get; set; } = DateOnly.FromDateTime(DateTime.Today);
+    public DateOnly CreatedAt { get; private set; } = DateOnly.FromDateTime(DateTime.Today);
 
 
     // Constructor for database reading
@@ -75,5 +75,21 @@ public class User
         this.CreatedAt = DateOnly.FromDateTime(DateTime.Today);
     }
 
-    public User() { }
+    //public User() { }
+
+    public void UpdatePicture(byte[] newPicture)
+    {
+        Picture = newPicture;
+    }
+
+    public void ChangeEmail(string newEmail)
+    {
+        Email = newEmail;
+    }
+
+    public void ChangePassword(string newPassword, string newSalt)
+    {
+        Password = newPassword;
+        Salt = newSalt;
+    }
 }

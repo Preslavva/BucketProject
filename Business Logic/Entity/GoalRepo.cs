@@ -65,7 +65,69 @@ public class GoalRepo: Repository, IGoalRepo
             }
         }
     }
+    public Goal GetGoalById(int id)
+    {
 
+        try
+        {
+            using (SqlConnection conn = GetSqlConnection())
+            {
+                conn.Open();
+
+                string queryGetGoal = @"SELECT *
+                                     FROM Goal            
+                                     WHERE Id = @Id";
+
+                using (SqlCommand getGoal = new SqlCommand(queryGetGoal, conn))
+                {
+                    getGoal.Parameters.AddWithValue("@Id", id);
+                   
+
+                    using (SqlDataReader reader = getGoal.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            int goalId = reader.GetInt32(0);
+                            Category cat = Enum.Parse<Category>(reader.GetString(1));
+                            string description = reader.GetString(2);
+                            bool isDone = reader.GetBoolean(3);
+                            bool isDeleted = reader.GetBoolean(4);
+                            DateTime createdAt = reader.GetDateTime(5);
+                            DateTime? deadline = reader.IsDBNull(6) ? (DateTime?)null : reader.GetDateTime(6);
+                            GoalType type = Enum.Parse<GoalType>(reader.GetString(7));
+                            DateTime? completedAt = reader.IsDBNull(8) ? (DateTime?)null : reader.GetDateTime(8);
+                            bool isPostponed = reader.GetBoolean(9);
+
+                            return new Goal(
+                                goalId,
+                                cat,
+                                type,
+                                description,
+                                createdAt,
+                                deadline,
+                                completedAt,
+                                isDone,
+                                isDeleted,
+                                isPostponed
+                            );
+
+                    
+                        }
+                    }
+                }
+            }
+            return null;
+        }
+        catch (SqlException sqlEx)
+        {
+            throw new Exception($"Database error occurred while loading goals: {sqlEx.Message}", sqlEx);
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"An unexpected error occurred in {MethodBase.GetCurrentMethod().Name}: {ex.Message}", ex);
+        }
+
+    }
 
     public List<Goal> LoadGoalsOfUserbyCategory(int userId, Category category)
     {
@@ -92,20 +154,31 @@ public class GoalRepo: Repository, IGoalRepo
                     {
                         while (reader.Read())
                         {
-                            goals.Add(new Goal
-                            {
-                                Id = reader.GetInt32(0),
-                                Category = Enum.Parse<Category>(reader.GetString(1)),                    
-                                Description = reader.GetString(2),
-                                IsDone = reader.GetBoolean(3),
-                                IsDeleted = reader.GetBoolean(4),
-                                CreatedAt = reader.GetDateTime(5),
-                                Deadline = reader.IsDBNull(6) ? (DateTime?)null : reader.GetDateTime(6),
-                                Type = Enum.Parse<GoalType>(reader.GetString(7)),
-                                CompletedAt = reader.IsDBNull(8) ? (DateTime?)null : reader.GetDateTime(8),
-                                IsPostponed = reader.GetBoolean(9)
+                            int id = reader.GetInt32(0);
+                            Category cat = Enum.Parse<Category>(reader.GetString(1));
+                            string description = reader.GetString(2);
+                            bool isDone = reader.GetBoolean(3);
+                            bool isDeleted = reader.GetBoolean(4);
+                            DateTime createdAt = reader.GetDateTime(5);
+                            DateTime? deadline = reader.IsDBNull(6) ? (DateTime?)null : reader.GetDateTime(6);
+                            GoalType type = Enum.Parse<GoalType>(reader.GetString(7));
+                            DateTime? completedAt = reader.IsDBNull(8) ? (DateTime?)null : reader.GetDateTime(8);
+                            bool isPostponed = reader.GetBoolean(9);
 
-                            });
+                            Goal goal = new Goal(
+                                id,
+                                cat,
+                                type,
+                                description,
+                                createdAt,
+                                deadline,
+                                completedAt,
+                                isDone,
+                                isDeleted,
+                                isPostponed
+                            );
+
+                            goals.Add(goal);
                         }
                     }
                 }
@@ -146,20 +219,31 @@ public class GoalRepo: Repository, IGoalRepo
                     {
                         while (reader.Read())
                         {
-                            goals.Add(new Goal
-                            {
-                                Id = reader.GetInt32(0),
-                                Category = Enum.Parse<Category>(reader.GetString(1)),
-                                Description = reader.GetString(2),
-                                IsDone = reader.GetBoolean(3),
-                                IsDeleted = reader.GetBoolean(4),
-                                CreatedAt = reader.GetDateTime(5),
-                                Deadline = reader.IsDBNull(6) ? (DateTime?)null : reader.GetDateTime(6),
-                                Type = Enum.Parse<GoalType>(reader.GetString(7)),
-                                CompletedAt = reader.IsDBNull(8) ? (DateTime?)null : reader.GetDateTime(8),
-                                IsPostponed = reader.GetBoolean(9)
+                            int id = reader.GetInt32(0);
+                            Category cat = Enum.Parse<Category>(reader.GetString(1));
+                            string description = reader.GetString(2);
+                            bool isDone = reader.GetBoolean(3);
+                            bool isDeleted = reader.GetBoolean(4);
+                            DateTime createdAt = reader.GetDateTime(5);
+                            DateTime? deadline = reader.IsDBNull(6) ? (DateTime?)null : reader.GetDateTime(6);
+                            GoalType type = Enum.Parse<GoalType>(reader.GetString(7));
+                            DateTime? completedAt = reader.IsDBNull(8) ? (DateTime?)null : reader.GetDateTime(8);
+                            bool isPostponed = reader.GetBoolean(9);
 
-                            });
+                            Goal goal = new Goal(
+                                id,
+                                cat,
+                                type,
+                                description,
+                                createdAt,
+                                deadline,
+                                completedAt,
+                                isDone,
+                                isDeleted,
+                                isPostponed
+                            );
+
+                            goals.Add(goal);
                         }
                     }
                 }
@@ -360,22 +444,31 @@ public class GoalRepo: Repository, IGoalRepo
                     {
                         while (reader.Read())
                         {
-                            goals.Add(new Goal
-                            {
-                                Id = reader.GetInt32(0),
-                                Category = Enum.Parse<Category>(reader.GetString(1)),
-                                Description = reader.GetString(2),
-                                IsDone = reader.GetBoolean(3),
-                                IsDeleted = reader.GetBoolean(4),
-                                CreatedAt = reader.GetDateTime(5),
-                                Deadline = reader.IsDBNull(6) ? (DateTime?)null : reader.GetDateTime(6),
-                                Type = Enum.Parse<GoalType>(reader.GetString(7)),
-                                CompletedAt = reader.IsDBNull(8) ? (DateTime?)null : reader.GetDateTime(8),
-                                IsPostponed = reader.GetBoolean(9)
+                            int id = reader.GetInt32(0);
+                            Category cat = Enum.Parse<Category>(reader.GetString(1));
+                            string description = reader.GetString(2);
+                            bool isDone = reader.GetBoolean(3);
+                            bool isDeleted = reader.GetBoolean(4);
+                            DateTime createdAt = reader.GetDateTime(5);
+                            DateTime? deadline = reader.IsDBNull(6) ? (DateTime?)null : reader.GetDateTime(6);
+                            GoalType type = Enum.Parse<GoalType>(reader.GetString(7));
+                            DateTime? completedAt = reader.IsDBNull(8) ? (DateTime?)null : reader.GetDateTime(8);
+                            bool isPostponed = reader.GetBoolean(9);
 
+                            Goal goal = new Goal(
+                                id,
+                                cat,
+                                type,
+                                description,
+                                createdAt,
+                                deadline,
+                                completedAt,
+                                isDone,
+                                isDeleted,
+                                isPostponed
+                            );
 
-
-                            });
+                            goals.Add(goal);
                         }
                     }
                 }

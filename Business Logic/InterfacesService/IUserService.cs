@@ -11,7 +11,7 @@ namespace BucketProject.BLL.Business_Logic.InterfacesService
         bool Register(RegisterViewModel newUser);
         User? LogIn(string username, string password);
 
-        User GetUserByUsername();
+        UserViewModel GetUserByUsername();
 
         void UpdateUsername(string newUsername);
 

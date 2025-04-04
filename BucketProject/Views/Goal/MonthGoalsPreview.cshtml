@@ -1,13 +1,12 @@
-﻿@using BucketProject.BLL.Business_Logic.Entity
+﻿@using BucketProject.UI.ViewModels.ViewModels
+@model List<GoalViewModel>
 
-@model List<Goal>
+<h2>Monthly Goals</h2>
+
 
 @{
     Layout = null;
 }
-
-
-<h2>Monthly Goals</h2>
 
 
 @{
@@ -17,17 +16,18 @@
 }
 
 <p>
-    <strong>Completed:</strong> @accomplishedCount /
-     <strong>Total:</strong> @total –
-     <strong>Remaining:</strong> @remaining
+    <b>Completed:</b> @accomplishedCount /
+    <b>Total:</b> @total –
+    <b>Remaining:</b> @remaining
 </p>
 
 
-@foreach (Goal goal in Model)
+
+@foreach (GoalViewModel goal in Model)
 {
     <div class="goal-item" style="margin-bottom: 1em; padding: 0.5em; border: 1px solid #ccc;">
 
-        <form method="post" asp-action="EditGoalMonth" class="goal-form" style="display: inline;">
+        <form method="post" asp-action="EditMonthGoal" class="goal-form" style="display: inline;">
             <input type="hidden" name="Id" value="@goal.Id" />
             <input type="text" name="description" value="@goal.Description" required />
             <button type="submit">Save changes</button>
@@ -47,5 +47,3 @@
         </form>
     </div>
 }
-
-

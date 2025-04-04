@@ -19,18 +19,18 @@ namespace BucketProject.BLL.Business_Logic.Strategies
             {
                 DateTime today = DateTime.Today;
 
-                if (today == deadline.Date.AddDays(-2))
-                {
-                    return $"Only 2 days left to achieve your weekly goal \"{goalTitle}\". Keep going!";
-                }
-                else if (today == deadline.Date.AddDays(-1))
-                {
-                    return $"This is your last day to achieve your weekly goal \"{goalTitle}\"";
-                }
-                 else
-                 {
-                    return string.Empty;
-                 }
+            if (today == deadline.Date.AddDays(-2))
+            {
+                return $"Only 2 days left to achieve your weekly goal \"{goalTitle}\". Keep going!";
+            }
+            else if (today == deadline.Date.AddDays(-1))
+            {
+                return $"This is your last day to achieve your weekly goal \"{goalTitle}\"";
+            }
+            else
+            {
+                return string.Empty;
+            }
         }
         }
 

@@ -17,9 +17,7 @@ namespace BucketProject.UI.BucketProject.Controllers
         {
             _userService = userService;
             _passwordHasher = passwordHasher;
-
         }
-
 
         [HttpGet]
         public IActionResult Register()
@@ -79,9 +77,9 @@ namespace BucketProject.UI.BucketProject.Controllers
         {
             ViewBag.Username = HttpContext.Session.GetString("Username");
 
-            User user = _userService.GetUserByUsername();
+            UserViewModel userViewModel = _userService.GetUserByUsername();
 
-            return View(user);
+            return View(userViewModel);
         }
 
         [HttpPost]

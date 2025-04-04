@@ -6,72 +6,118 @@ using BucketProject.DAL.Models.Enums;
 using Microsoft.AspNetCore.Http;
 using System.Globalization;
 using BucketProject.BLL.Business_Logic.Strategies;
+using AutoMapper;
+using BucketProject.UI.ViewModels.ViewModels;
 
 
 namespace BucketProject.BLL.Business_Logic.Services
 {
-    public class GoalService: IGoalService
+    public class GoalService : IGoalService
     {
         private readonly IHttpContextAccessor _contextAccessor;
         private readonly IGoalRepo _goalRepo;
+        private readonly IMapper _mapper;
 
-        public GoalService(IGoalRepo goalRepo, IHttpContextAccessor contextAccessor)
+        public GoalService(IGoalRepo goalRepo, IHttpContextAccessor contextAccessor, IMapper mapper)
         {
             _goalRepo = goalRepo;
             _contextAccessor = contextAccessor;
+            _mapper = mapper;
         }
 
-        public void CreateGoal(Category category, GoalType type, string description)
-        {
-          string? username = _contextAccessor.HttpContext.Session.GetString("Username");
-
-            int id = _goalRepo.GetIdOfUser(username);
-            Goal newGoal = new Goal(category, type, description);
-            _goalRepo.InsertGoalAndAssignToUser(id, newGoal);
-        }
-
-        public List<Goal> LoadGoalsByCategory(Category category)
+        public void CreateGoal(GoalViewModel viewModel)
         {
             string? username = _contextAccessor.HttpContext.Session.GetString("Username");
-            int id = _goalRepo.GetIdOfUser(username);
+            int userId = _goalRepo.GetIdOfUser(username);
 
-            var allGoals = _goalRepo.LoadGoalsOfUserbyCategory(id, category);
+            Goal newGoal = _mapper.Map<Goal>(viewModel);
+
+            _goalRepo.InsertGoalAndAssignToUser(userId, newGoal);
+        }
+
+
+
+        public List<GoalViewModel> LoadGoalsByCategory(string category)
+        {
+            string? username = _contextAccessor.HttpContext.Session.GetString("Username");
+
+            if (string.IsNullOrEmpty(username))
+                throw new Exception("User not logged in.");
+
+            if (!Enum.TryParse<Category>(category, true, out var parsedCategory))
+                throw new ArgumentException($"Invalid category: {category}");
+
+            int userId = _goalRepo.GetIdOfUser(username);
+
+            var allGoals = _goalRepo.LoadGoalsOfUserbyCategory(userId, parsedCategory);
 
             var today = DateTime.Today;
 
             var nonExpiredGoals = allGoals
-                .Where(g => g.Deadline.HasValue && g.Deadline.Value.Date >= today)
+                .Where(g => !g.Deadline.HasValue || g.Deadline.Value.Date >= today)
                 .ToList();
 
-            return nonExpiredGoals;
+            var viewModelList = _mapper.Map<List<GoalViewModel>>(nonExpiredGoals);
+
+            return viewModelList;
         }
 
 
-        public void UpdateGoal(Goal goal, string description)
+
+
+        public void UpdateGoal(int goalId, GoalViewModel viewModel)
         {
-            _goalRepo.UpdateGoalDescription(goal, description);
+            Goal goal = _goalRepo.GetGoalById(goalId);
+            if (goal == null)
+                throw new Exception("Goal not found");
+
+            goal.UpdateDescription(viewModel.Description);
+
+            _goalRepo.UpdateGoalDescription(goal, viewModel.Description);
         }
-        public void DeleteGoal(Goal goal)
+
+        public void DeleteGoal(int goalId)
         {
+            Goal goal = _goalRepo.GetGoalById(goalId);
+            if (goal == null)
+                throw new Exception("Goal not found");
+
             _goalRepo.DeleteGoal(goal);
         }
-       
-        public void ChangeGoalStatus(Goal goal, bool isDone)
+
+
+        public void ChangeGoalStatus(int goalId, bool isDone)
         {
+            var goal = _goalRepo.GetGoalById(goalId);
+            if (goal == null)
+                throw new Exception("Goal not found");
+
+            if (isDone)
+                goal.MarkAsDone();
+            else
+                goal.UndoCompletion();
+
             _goalRepo.ChangeGoalStatus(goal, isDone);
         }
 
-        public void PostponeGoal(Goal goal)
+
+        public void PostponeGoal(int goalId)
         {
+            var goal = _goalRepo.GetGoalById(goalId);
+            if (goal == null)
+                throw new Exception("Goal not found");
+
             var strategy = DeadlineStrategyManager.GetStrategy(goal.Category);
-            goal.Deadline = strategy?.GetDeadline(goal.CreatedAt, true);
-            goal.IsPostponed = true;
+            goal.Postpone(strategy);
+
             _goalRepo.PostponeGoal(goal);
         }
 
-        public Dictionary<Category, Dictionary<string, Dictionary<GoalType, List<Goal>>>> LoadGroupedExpiredGoals()
+
+
+        public Dictionary<string, Dictionary<string, Dictionary<string, List<HistoryViewModel>>>> LoadGroupedExpiredGoals()
         {
-            var grouped = new Dictionary<Category, Dictionary<string, Dictionary<GoalType, List<Goal>>>>();
+            var grouped = new Dictionary<string, Dictionary<string, Dictionary<string, List<HistoryViewModel>>>>();
 
             string? username = _contextAccessor.HttpContext.Session.GetString("Username");
             if (string.IsNullOrEmpty(username))
@@ -83,10 +129,11 @@ namespace BucketProject.BLL.Business_Logic.Services
             foreach (var goal in expiredGoals)
             {
                 DateTime date = goal.Deadline!.Value.Date;
-                Category category = goal.Category;
+                string category = goal.Category.ToString();
+                string type = goal.Type.ToString();
                 string key;
 
-                switch (category)
+                switch (goal.Category)
                 {
                     case Category.Week:
                         DateTime startOfWeek = date.AddDays(-(int)date.DayOfWeek);
@@ -106,35 +153,33 @@ namespace BucketProject.BLL.Business_Logic.Services
                         continue;
                 }
 
-                AddToGroup(grouped, category, key, goal);
+                var mappedGoal = _mapper.Map<HistoryViewModel>(goal);
+                AddToGroup(grouped, category, key, type, mappedGoal);
             }
 
             return grouped;
         }
 
-
-
         private void AddToGroup(
-      Dictionary<Category, Dictionary<string, Dictionary<GoalType, List<Goal>>>> group,
-      Category category,
-      string key,
-      Goal goal)
+     Dictionary<string, Dictionary<string, Dictionary<string, List<HistoryViewModel>>>> group,
+     string category,
+     string key,
+     string type,
+     HistoryViewModel goal)
         {
             if (!group.ContainsKey(category))
-                group[category] = new Dictionary<string, Dictionary<GoalType, List<Goal>>>();
+                group[category] = new Dictionary<string, Dictionary<string, List<HistoryViewModel>>>();
 
             if (!group[category].ContainsKey(key))
-                group[category][key] = new Dictionary<GoalType, List<Goal>>();
-
-            var type = goal.Type;
+                group[category][key] = new Dictionary<string, List<HistoryViewModel>>();
 
             if (!group[category][key].ContainsKey(type))
-                group[category][key][type] = new List<Goal>();
+                group[category][key][type] = new List<HistoryViewModel>();
 
             group[category][key][type].Add(goal);
         }
 
-    }
 
+    }
 }
 

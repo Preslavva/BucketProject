@@ -1,20 +1,21 @@
 ﻿using BucketProject.BLL.Business_Logic.Entity;
 using BucketProject.DAL.Models.Enums;
+using BucketProject.UI.ViewModels.ViewModels;
 
 
 namespace BucketProject.BLL.Business_Logic.InterfacesService
 {
     public interface IGoalService
     {
-        void CreateGoal(Category category, GoalType type, string description);
-        List<Goal> LoadGoalsByCategory(Category category);
-        void UpdateGoal(Goal goal, string description);
-        void DeleteGoal(Goal goal);
-        void PostponeGoal(Goal goal);
+        void CreateGoal(GoalViewModel viewModel);
+        List<GoalViewModel> LoadGoalsByCategory(string category);
+        void UpdateGoal(int goalId, GoalViewModel viewModel);
+        void DeleteGoal(int goalId);
+        void PostponeGoal(int goalId);
 
-        void ChangeGoalStatus(Goal goal, bool isDone);
+        void ChangeGoalStatus(int goalId, bool isDone);
 
-        public Dictionary<Category, Dictionary<string, Dictionary<GoalType, List<Goal>>>> LoadGroupedExpiredGoals();
+        Dictionary<string, Dictionary<string, Dictionary<string, List<HistoryViewModel>>>> LoadGroupedExpiredGoals();
 
     }
 }

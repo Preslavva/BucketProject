@@ -37,6 +37,8 @@ builder.Services.AddScoped<GoalService>(); // or IGoalService if you're using an
 
 builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
 
+
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

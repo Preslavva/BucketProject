@@ -20,11 +20,9 @@ namespace BucketProject.Controllers
 
             var groupedGoals = _goalService.LoadGroupedExpiredGoals();
 
-            ViewBag.GroupedGoals = groupedGoals ??
-                new Dictionary<Category, Dictionary<string, Dictionary<GoalType, List<Goal>>>>();
-
-            return View();
+            return View(groupedGoals); 
         }
+
 
 
     }

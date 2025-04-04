@@ -11,13 +11,14 @@ namespace BucketProject.BLL.Business_Logic.Services
     {
         private readonly IHttpContextAccessor _contextAccessor;
         private readonly IUserRepo _userRepo;
-        private readonly IMapper _iMapper;
+        private readonly IMapper _mapper;
 
-        public UserService(IUserRepo userRepo, IHttpContextAccessor contextAccessor, IMapper iMapper)
+
+        public UserService(IUserRepo userRepo, IHttpContextAccessor contextAccessor, IMapper mapper)
         {
             _userRepo = userRepo;
             _contextAccessor = contextAccessor;
-            _iMapper = iMapper;
+            _mapper = mapper;
         }
 
         public User? LogIn(string username, string password)
@@ -31,17 +32,19 @@ namespace BucketProject.BLL.Business_Logic.Services
 
         public bool Register(RegisterViewModel newUser)
         {
-            User user = _iMapper.Map<User>(newUser);
+            User user = _mapper.Map<User>(newUser);
           return _userRepo.Register(user);
         }
 
-        public User GetUserByUsername()
+        public UserViewModel GetUserByUsername()
         {
             string? username = _contextAccessor.HttpContext.Session.GetString("Username");
 
             User user = _userRepo.GetUserByUsername(username);
+            UserViewModel viewModel = _mapper.Map<UserViewModel>(user);
 
-            return user;
+
+            return viewModel;
 
         }
 

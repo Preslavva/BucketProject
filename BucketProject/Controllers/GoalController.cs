@@ -1,123 +1,179 @@
-﻿using BucketProject.BLL.Business_Logic.Entity;
-using BucketProject.DAL.Models.Enums;
+﻿
 using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
 using BucketProject.BLL.Business_Logic.InterfacesService;
+using AutoMapper;
+using System.Net.Http.Headers;
+using System.Text.RegularExpressions;
+using System.Text;
+using Newtonsoft.Json;
+using BucketProject.BLL.Business_Logic.Entity;
+using BucketProject.UI.ViewModels.ViewModels;
 
-namespace BucketProjetc.UI.BucketProject.Controllers
+namespace BucketProject.UI.BucketProject.Controllers
 {
     public class GoalController : Controller
     {
         private readonly IGoalService _goalService;
-        public GoalController(IGoalService goalService)
+        private readonly IMapper _mapper;
+        private readonly IConfiguration _configuration;
+
+        public GoalController(IGoalService goalService, IMapper mapper, IConfiguration configuration)
         {
             _goalService = goalService;
+            _mapper = mapper;
+            _configuration = configuration;
         }
 
         [HttpPost]
-        public IActionResult CreateMonthGoal(GoalType type,string description)
+        public IActionResult CreateMonthGoal(GoalViewModel viewModel)
         {
             ViewBag.Username = HttpContext.Session.GetString("Username");
-            Category category = Category.Month;
-            _goalService.CreateGoal(category,type,description);
+
+            viewModel.Category = "Month";
+
+            if (!ModelState.IsValid)
+            {
+            ViewBag.AvailableTypes = GetAvailableTypes();
+
+            }
+
+            _goalService.CreateGoal(viewModel); 
+
             return RedirectToAction("MonthGoals");
         }
 
+
         [HttpPost]
-        public IActionResult CreateYearGoal(GoalType type,string description)
+        public IActionResult CreateYearGoal(GoalViewModel viewModel)
         {
             ViewBag.Username = HttpContext.Session.GetString("Username");
-            Category category = Category.Year;
-            _goalService.CreateGoal(category, type, description);
+
+            viewModel.Category = "Year";
+
+            if (!ModelState.IsValid)
+            {
+                ViewBag.AvailableTypes = GetAvailableTypes();
+
+            }
+
+            _goalService.CreateGoal(viewModel);
+
             return RedirectToAction("YearGoals");
         }
 
         [HttpPost]
-        public IActionResult CreateBucketListGoal(GoalType type,string description)
+        public IActionResult CreateBucketListGoal(GoalViewModel viewModel)
         {
             ViewBag.Username = HttpContext.Session.GetString("Username");
-            Category category = Category.Bucket_list;
-            _goalService.CreateGoal(category,type,description);
+
+            viewModel.Category = "Bucket_list";
+
+            if (!ModelState.IsValid)
+            {
+            ViewBag.AvailableTypes = GetAvailableTypes();
+
+            }
+
+            _goalService.CreateGoal(viewModel);
+
             return RedirectToAction("BucketList");
         }
 
         [HttpPost]
-        public IActionResult CreateWeekGoal(GoalType type,string goalDescription)
+        public IActionResult CreateWeekGoal(GoalViewModel viewModel)
         {
             ViewBag.Username = HttpContext.Session.GetString("Username");
+            viewModel.Category = "Week";
 
-            Category category = Category.Week;
-            _goalService.CreateGoal(category, type, goalDescription);
+            if (!ModelState.IsValid)
+            {
+                ViewBag.AvailableTypes = GetAvailableTypes();
 
+            }
+
+            _goalService.CreateGoal(viewModel);
             return RedirectToAction("WeekGoals");
         }
 
 
 
+
         [HttpPost]
-        public IActionResult EditGoalWeek(Goal goal, string description)
+        public IActionResult EditWeekGoal(GoalViewModel viewModel)
         {
             ViewBag.Username = HttpContext.Session.GetString("Username");
 
-            _goalService.UpdateGoal(goal, description);
+            _goalService.UpdateGoal(viewModel.Id, viewModel);
+
             return RedirectToAction("WeekGoals");
         }
 
-        [HttpPost]
-        public IActionResult EditGoalMonth(Goal goal, string description)
-        {
 
+        [HttpPost]
+        public IActionResult EditMonthGoal(GoalViewModel viewModel)
+        {
             ViewBag.Username = HttpContext.Session.GetString("Username");
-            _goalService.UpdateGoal(goal, description);
+
+            _goalService.UpdateGoal(viewModel.Id, viewModel);
+
             return RedirectToAction("MonthGoals");
         }
 
+
         [HttpPost]
-        public IActionResult EditGoalYear(Goal goal, string description)
+        public IActionResult EditYearGoal(GoalViewModel viewModel)
         {
             ViewBag.Username = HttpContext.Session.GetString("Username");
 
-            _goalService.UpdateGoal(goal, description);
+            _goalService.UpdateGoal(viewModel.Id, viewModel);
+
+            return RedirectToAction("YearGoals");
+        }
+
+
+        [HttpPost]
+        public IActionResult EdiBucketListGoal(GoalViewModel viewModel)
+        {
+
+            ViewBag.Username = HttpContext.Session.GetString("Username");
+
+            _goalService.UpdateGoal(viewModel.Id, viewModel);
+
             return RedirectToAction("YearGoals");
         }
 
         [HttpPost]
-        public IActionResult EditGoalBucketList(Goal goal, string description)
-        {
-
-            ViewBag.Username = HttpContext.Session.GetString("Username");
-            _goalService.UpdateGoal(goal, description);
-            return RedirectToAction("BucketList");
-        }
-
-        [HttpPost]
-        public IActionResult DeleteGoalWeek(Goal goal)
+        public IActionResult DeleteGoalWeek(int id)
         {
             ViewBag.Username = HttpContext.Session.GetString("Username");
-            _goalService.DeleteGoal(goal);
+
+            _goalService.DeleteGoal(id);
+
             return RedirectToAction("WeekGoals");
         }
 
+
         [HttpPost]
-        public IActionResult DeleteGoalYear(Goal goal)
+        public IActionResult DeleteGoalYear(int id)
         {
             ViewBag.Username = HttpContext.Session.GetString("Username");
-            _goalService.DeleteGoal(goal);
+            _goalService.DeleteGoal(id);
             return RedirectToAction("YearGoals");
         }
         [HttpPost]
-        public IActionResult DeleteGoalMonth(Goal goal)
+        public IActionResult DeleteGoalMonth(int id)
         {
             ViewBag.Username = HttpContext.Session.GetString("Username");
-            _goalService.DeleteGoal(goal);
+            _goalService.DeleteGoal(id);
             return RedirectToAction("MonthGoals");
         }
 
         [HttpPost]
-        public IActionResult DeleteGoalBucketList(Goal goal)
+        public IActionResult DeleteGoalBucketList(int id)
         {
             ViewBag.Username = HttpContext.Session.GetString("Username");
-            _goalService.DeleteGoal(goal);
+            _goalService.DeleteGoal(id);
             return RedirectToAction("BucketList");
         }
 
@@ -126,52 +182,60 @@ namespace BucketProjetc.UI.BucketProject.Controllers
         public IActionResult WeekGoals()
         {
             ViewBag.Username = HttpContext.Session.GetString("Username");
-            Category weekCategory = Category.Week;
-            List<Goal> goals = _goalService.LoadGoalsByCategory(weekCategory);
 
-            return View(goals);
+            List<GoalViewModel> goals = _goalService.LoadGoalsByCategory("Week");
+            ViewBag.AvailableTypes = GetAvailableTypes();
+
+
+            return View(goals); 
         }
+
+
 
         [HttpGet]
         public IActionResult MonthGoals()
         {
             ViewBag.Username = HttpContext.Session.GetString("Username");
-            List<Goal> goals = _goalService.LoadGoalsByCategory(Category.Month);
+
+            List<GoalViewModel> goals = _goalService.LoadGoalsByCategory("Month");
+
+            ViewBag.AvailableTypes = GetAvailableTypes();
+
 
             return View(goals);
         }
 
         [HttpPost]
-        public IActionResult ChangeGoalStatusWeek(Goal goal, bool isDone)
+        public IActionResult ChangeGoalStatusWeek(int id, bool isDone)
         {
             ViewBag.Username = HttpContext.Session.GetString("Username");
-            _goalService.ChangeGoalStatus(goal, isDone);
+            _goalService.ChangeGoalStatus(id, isDone);
             return RedirectToAction("WeekGoals");
 
         }
 
         [HttpPost]
-        public IActionResult ChangeGoalStatusMonth(Goal goal, bool isDone)
+        public IActionResult ChangeGoalStatusMonth(int id, bool isDone)
         {
             ViewBag.Username = HttpContext.Session.GetString("Username");
-            _goalService.ChangeGoalStatus(goal, isDone);
+            _goalService.ChangeGoalStatus(id, isDone);
             return RedirectToAction("MonthGoals");
 
         }
         [HttpPost]
-        public IActionResult ChangeGoalStatusYear(Goal goal, bool isDone)
+        public IActionResult ChangeGoalStatusYear(int id, bool isDone)
         {
             ViewBag.Username = HttpContext.Session.GetString("Username");
-            _goalService.ChangeGoalStatus(goal, isDone);
+            _goalService.ChangeGoalStatus(id, isDone);
             return RedirectToAction("YearGoals");
 
         }
 
         [HttpPost]
-        public IActionResult ChangeGoalStatusBucketList(Goal goal, bool isDone)
+        public IActionResult ChangeGoalStatusBucketList(int id, bool isDone)
         {
             ViewBag.Username = HttpContext.Session.GetString("Username");
-            _goalService.ChangeGoalStatus(goal, isDone);
+            _goalService.ChangeGoalStatus(id, isDone);
             return RedirectToAction("BucketList");
 
         }
@@ -181,7 +245,11 @@ namespace BucketProjetc.UI.BucketProject.Controllers
         public IActionResult YearGoals()
         {
             ViewBag.Username = HttpContext.Session.GetString("Username");
-            List<Goal> goals = _goalService.LoadGoalsByCategory(Category.Year);
+
+
+            List<GoalViewModel> goals = _goalService.LoadGoalsByCategory("Year");
+            ViewBag.AvailableTypes = GetAvailableTypes();
+
 
             return View(goals);
         }
@@ -190,7 +258,12 @@ namespace BucketProjetc.UI.BucketProject.Controllers
         public IActionResult BucketList()
         {
             ViewBag.Username = HttpContext.Session.GetString("Username");
-            List<Goal> goals = _goalService.LoadGoalsByCategory(Category.Bucket_list);
+
+
+            List<GoalViewModel> goals = _goalService.LoadGoalsByCategory("Bucket_list");
+
+
+            ViewBag.AvailableTypes = GetAvailableTypes();
 
             return View(goals);
         }
@@ -199,8 +272,9 @@ namespace BucketProjetc.UI.BucketProject.Controllers
         public IActionResult WeekGoalsPreview()
         {
             ViewBag.Username = HttpContext.Session.GetString("Username");
-            Category weekCategory = Category.Week;
-            List<Goal> goals = _goalService.LoadGoalsByCategory(weekCategory);
+
+
+            List<GoalViewModel> goals = _goalService.LoadGoalsByCategory("Week");
 
             return View(goals);
         }
@@ -209,8 +283,9 @@ namespace BucketProjetc.UI.BucketProject.Controllers
         public IActionResult MonthGoalsPreview()
         {
             ViewBag.Username = HttpContext.Session.GetString("Username");
-            Category weekCategory = Category.Month;
-            List<Goal> goals = _goalService.LoadGoalsByCategory(weekCategory);
+
+
+            List<GoalViewModel> goals = _goalService.LoadGoalsByCategory("Month");
 
             return View(goals);
         }
@@ -219,11 +294,74 @@ namespace BucketProjetc.UI.BucketProject.Controllers
         public IActionResult YearGoalsPreview()
         {
             ViewBag.Username = HttpContext.Session.GetString("Username");
-            Category weekCategory = Category.Year;
-            List<Goal> goals = _goalService.LoadGoalsByCategory(weekCategory);
+
+
+            List<GoalViewModel> goals = _goalService.LoadGoalsByCategory("Year");
 
             return View(goals);
         }
 
+        [HttpPost]
+        public async Task<IActionResult> BreakDownGoal(Goal goal)
+        {
+            if (goal == null || string.IsNullOrWhiteSpace(goal.Description))
+                return BadRequest("Invalid goal submitted.");
+
+            var prompt = $"Break down the following goal into 4 smaller, actionable sub-goals:\n\"{goal.Description}\"";
+
+            var apiKey = _configuration["OpenAI:ApiKey"];
+            using var client = new HttpClient();
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
+
+            var requestBody = new
+            {
+                model = "gpt-3.5-turbo",
+                messages = new[]
+                {
+            new { role = "user", content = prompt }
+        }
+            };
+
+            var content = new StringContent(JsonConvert.SerializeObject(requestBody), Encoding.UTF8, "application/json");
+            var response = await client.PostAsync("https://api.openai.com/v1/chat/completions", content);
+
+            if (!response.IsSuccessStatusCode)
+                return BadRequest("OpenAI call failed.");
+
+            var resultJson = await response.Content.ReadAsStringAsync();
+            dynamic result = JsonConvert.DeserializeObject(resultJson);
+            string breakdownText = result.choices[0].message.content;
+
+            var subGoals = Regex.Split(breakdownText.Trim(), @"\n\d+\.\s")
+                                .Where(s => !string.IsNullOrWhiteSpace(s))
+                                .ToList();
+
+            TempData["SubGoals"] = JsonConvert.SerializeObject(subGoals);
+            TempData["SubGoalForId"] = goal.Id;
+
+            return RedirectToAction("WeekGoals");
+        }
+
+        private List<string> GetAvailableTypes()
+        {
+            return new List<string>
+    {
+          "Fitness",
+            "Career",
+            "Education",
+            "Finance",
+            "Organization",
+            "Relationships",
+            "Social",
+            "Travel",
+            "Hobbies",
+            "Psychology",
+            "Digital",
+            "Order"
+    };
+        }
+
     }
+
+   
 }

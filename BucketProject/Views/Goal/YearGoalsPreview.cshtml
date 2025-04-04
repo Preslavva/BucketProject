@@ -1,7 +1,5 @@
-﻿@using BucketProject.BLL.Business_Logic.Entity
-@using BucketProject.DAL.Models.Enums
-
-@model List<Goal>
+﻿@using BucketProject.UI.ViewModels.ViewModels
+@model List<GoalViewModel>
 
 @{
     Layout = null;
@@ -23,20 +21,22 @@
 </p>
 
 
-@foreach (Goal goal in Model)
+
+@foreach (GoalViewModel goal in Model)
 {
     <div class="goal-item" style="margin-bottom: 1em; padding: 0.5em; border: 1px solid #ccc;">
 
         <form method="post" asp-action="EditGoalYear" class="goal-form" style="display: inline;">
             <input type="hidden" name="Id" value="@goal.Id" />
-            <input type="text" name="description" value="@goal.Description" required />
+            <input type="text" name="Description" value="@goal.Description" required />
             <button type="submit">Save changes</button>
         </form>
 
         <form method="post" asp-action="ChangeGoalStatusYear" id="goalForm-@goal.Id" style="display: inline;">
             <input type="hidden" name="Id" value="@goal.Id" />
+            <input type="hidden" name="IsDone" value="false" />
             <label style="margin-left: 10px;">
-                <input type="checkbox" name="isDone" value="true" @(goal.IsDone ? "checked" : "") onchange="this.form.submit()" />
+                <input type="checkbox" name="IsDone" value="true" @(goal.IsDone ? "checked" : "") onchange="this.form.submit()" />
                 Done
             </label>
         </form>
@@ -45,5 +45,7 @@
             <input type="hidden" name="Id" value="@goal.Id" />
             <button type="submit" class="delete-btn" style="margin-left: 10px;">Delete goal</button>
         </form>
+
     </div>
 }
+

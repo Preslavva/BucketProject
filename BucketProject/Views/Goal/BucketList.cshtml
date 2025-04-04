@@ -1,7 +1,5 @@
-﻿@using BucketProject.BLL.Business_Logic.Entity
-@using BucketProject.DAL.Models.Enums
-
-@model List<Goal>
+﻿@using BucketProject.UI.ViewModels.ViewModels
+@model List<GoalViewModel>
 
 <h2>Bucket List</h2>
 
@@ -12,17 +10,18 @@
 }
 
 <p>
-     <strong>Completed:</strong> @accomplishedCount /
-     <strong>Total:</strong> @total –
-     <strong>Remaining:</strong> @remaining
+    <strong>Completed:</strong> @accomplishedCount /
+    <strong>Total:</strong> @total –
+    <strong>Remaining:</strong> @remaining
 </p>
 
 <form method="post" asp-controller="Goal" asp-action="CreateBucketListGoal">
-    <input type="text" id="goal" name="Description" placeholder="Enter your goal..." required />
+    <input type="text" name="Description" placeholder="Enter your goal..." required />
+    <input type="hidden" name="Category" value="Week" />
 
-    <select name="type" required>
+    <select name="Type" required>
         <option value="" disabled selected>Select goal type</option>
-        @foreach (GoalType type in Enum.GetValues(typeof(GoalType)))
+        @foreach (var type in (List<string>)ViewBag.AvailableTypes ?? new List<string>())
         {
             <option value="@type">@type</option>
         }
@@ -31,17 +30,21 @@
     <button type="submit">Add Goal</button>
 </form>
 
+
 <hr />
 
-@foreach (Goal goal in Model)
+
+
+@foreach (GoalViewModel goal in Model)
 {
     <div class="goal-item" style="margin-bottom: 1em; padding: 0.5em; border: 1px solid #ccc;">
 
-        <form method="post" asp-action="EditGoalBucketList" class="goal-form" style="display: inline;">
+        <form method="post" asp-action="EditBucketListGoal" class="goal-form" style="display: inline;">
             <input type="hidden" name="Id" value="@goal.Id" />
-            <input type="text" name="description" value="@goal.Description" required />
+            <input type="text" name="Description" value="@goal.Description" required />
             <button type="submit">Save changes</button>
         </form>
+
 
         <form method="post" asp-action="ChangeGoalStatusBucketList" id="goalForm-@goal.Id" style="display: inline;">
             <input type="hidden" name="Id" value="@goal.Id" />
@@ -55,5 +58,7 @@
             <input type="hidden" name="Id" value="@goal.Id" />
             <button type="submit" class="delete-btn" style="margin-left: 10px;">Delete goal</button>
         </form>
+
     </div>
 }
+

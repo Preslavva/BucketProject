@@ -3,10 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using BucketProject.BLL.Business_Logic.Entity;
+using BucketProject.UI.ViewModels.ViewModels;
 using BucketProject.BLL.Business_Logic.Strategies;
+using BucketProject.BLL.Business_Logic.Entity;
+
+
 using Microsoft.AspNetCore.Http;
 using BucketProject.DAL.Models.Enums;
+using AutoMapper;
 
 namespace BucketProject.BLL.Business_Logic.Services
 {
@@ -15,21 +19,23 @@ namespace BucketProject.BLL.Business_Logic.Services
 
         private readonly IHttpContextAccessor _contextAccessor;
         private readonly IGoalRepo _goalRepo;
+        private readonly IMapper _mapper;
 
-        public NotificationService(IGoalRepo goalRepo, IHttpContextAccessor contextAccessor)
+        public NotificationService(IGoalRepo goalRepo, IHttpContextAccessor contextAccessor, IMapper mapper)
         {
             _goalRepo = goalRepo;
             _contextAccessor = contextAccessor;
+            _mapper = mapper;
         }
 
 
-        public List<(Goal goal, string message)> CheckAndNotify(DateTime today)
+        public List<NotificationViewModel> CheckAndNotify(DateTime today)
         {
-            var notifiableGoals = new List<(Goal goal, string message)>();
+            var notifications = new List<NotificationViewModel>();
 
             string? username = _contextAccessor.HttpContext.Session.GetString("Username");
             if (username == null)
-                return notifiableGoals;
+                return notifications;
 
             int userId = _goalRepo.GetIdOfUser(username);
             List<Goal> goals = _goalRepo.LoadGoalsOfUser(userId);
@@ -51,11 +57,15 @@ namespace BucketProject.BLL.Business_Logic.Services
                 {
                     string message = notificationStrategy.GetNotificationMessage(goal.Description, deadline.Value);
 
-                    notifiableGoals.Add((goal, message));
+                    var viewModel = _mapper.Map<NotificationViewModel>(goal);
+                    viewModel.Message = message;
+                    viewModel.Deadline = deadline;
+
+                    notifications.Add(viewModel);
                 }
             }
 
-            return notifiableGoals;
+            return notifications;
         }
 
     }

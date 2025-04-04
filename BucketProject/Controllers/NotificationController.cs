@@ -24,30 +24,14 @@ namespace BucketProject.BLL.Business_Logic.Controllers
             var notifications = _notificationService.CheckAndNotify(DateTime.Today);
             return View(notifications);
         }
+
         [HttpPost]
-        public IActionResult PostponeGoal(Goal goal)
+        public IActionResult PostponeGoal(int id)
         {
             ViewBag.Username = HttpContext.Session.GetString("Username");
-            _goalService.PostponeGoal(goal);
+            _goalService.PostponeGoal(id);
             return RedirectToAction("Notification");
         }
-
-        //[HttpPost]
-        //public IActionResult PostponeGoalMonth(Goal goal)
-        //{
-        //    ViewBag.Username = HttpContext.Session.GetString("Username");
-        //    _goalService.PostponeGoal(goal);
-        //    return RedirectToAction("Notification");
-
-        //}
-        //[HttpPost]
-        //public IActionResult PostponeGoalYear(Goal goal)
-        //{
-        //    ViewBag.Username = HttpContext.Session.GetString("Username");
-        //    _goalService.PostponeGoal(goal);
-        //    return RedirectToAction("Notification");
-
-        //}
 
     }
 }

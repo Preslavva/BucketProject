@@ -1,18 +1,16 @@
-﻿@using BucketProject.BLL.Business_Logic.Entity
-@using BucketProject.DAL.Models.Enums
+﻿@model Dictionary<string, Dictionary<string, Dictionary<string, List<HistoryViewModel>>>>
+@using BucketProject.UI.ViewModels.ViewModels
 
 @{
-    var grouped = ViewBag.GroupedGoals as Dictionary<Category, Dictionary<string, Dictionary<GoalType, List<Goal>>>>;
     var username = ViewBag.Username as string;
 }
 
 <div class="container mt-4">
-
-    @if (grouped != null && grouped.Any())
+    @if (Model != null && Model.Any())
     {
-        foreach (var categoryGroup in grouped)
+        foreach (var categoryGroup in Model)
         {
-            <h3 class="mt-5">@categoryGroup.Key.ToString() Goals</h3>
+            <h3 class="mt-5">@categoryGroup.Key Goals</h3>
 
             foreach (var timeGroup in categoryGroup.Value.OrderByDescending(g => g.Key))
             {
