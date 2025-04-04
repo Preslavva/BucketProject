@@ -5,11 +5,14 @@ using System.Text;
 using System.Threading.Tasks;
 using BucketProject.UI.ViewModels.ViewModels;
 using BucketProject.BLL.Business_Logic.Strategies;
-using BucketProject.BLL.Business_Logic.Entity;
+using BucketProject.BLL.Business_Logic.Domain;
+using BucketProject.DAL.Data.InterfacesRepo;
+using BucketProject.DAL.Models.Entities;
+
+
 
 
 using Microsoft.AspNetCore.Http;
-using BucketProject.DAL.Models.Enums;
 using AutoMapper;
 
 namespace BucketProject.BLL.Business_Logic.Services
@@ -38,8 +41,14 @@ namespace BucketProject.BLL.Business_Logic.Services
                 return notifications;
 
             int userId = _goalRepo.GetIdOfUser(username);
-            List<Goal> goals = _goalRepo.LoadGoalsOfUser(userId);
 
+            // Step 1: Load raw entities from repo
+            List<GoalEntity> goalEntities = _goalRepo.LoadGoalsOfUser(userId);
+
+            // Step 2: Map to domain models
+            List<Goal> goals = _mapper.Map<List<Goal>>(goalEntities);
+
+            // Step 3: Business logic
             foreach (Goal goal in goals)
             {
                 if (goal.IsDone)

@@ -22,9 +22,6 @@ namespace BucketProject.UI.ViewModels.ViewModels
         [Required]
         public string Description { get; set; }
         public bool IsDone { get; set; }
-       // public bool IsDeleted { get; set; }
-
-      //  public List<string> AvailableTypes { get; set; } = new();
    
     }
 }

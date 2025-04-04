@@ -1,11 +1,13 @@
 ﻿using System.Reflection;
 using BucketProject.DAL.Data.InterfacesRepo;
+using BucketProject.DAL.Data.Repositories;
+using BucketProject.DAL.Models.Entities;
 using BucketProject.DAL.Models.Enums;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace BucketProject.BLL.Business_Logic.Entity;
+namespace BucketProject.DAL.Data.Repositories;
 
 public class GoalRepo: Repository, IGoalRepo
 {
@@ -15,7 +17,7 @@ public class GoalRepo: Repository, IGoalRepo
     { 
     }
 
-    public void InsertGoalAndAssignToUser(int userId, Goal goal)
+    public void InsertGoalAndAssignToUser(int userId, GoalEntity goal)
     {
         using (SqlConnection conn = GetSqlConnection())
         {
@@ -65,7 +67,7 @@ public class GoalRepo: Repository, IGoalRepo
             }
         }
     }
-    public Goal GetGoalById(int id)
+    public GoalEntity GetGoalById(int id)
     {
 
         try
@@ -98,7 +100,7 @@ public class GoalRepo: Repository, IGoalRepo
                             DateTime? completedAt = reader.IsDBNull(8) ? (DateTime?)null : reader.GetDateTime(8);
                             bool isPostponed = reader.GetBoolean(9);
 
-                            return new Goal(
+                            return new GoalEntity(
                                 goalId,
                                 cat,
                                 type,
@@ -129,9 +131,9 @@ public class GoalRepo: Repository, IGoalRepo
 
     }
 
-    public List<Goal> LoadGoalsOfUserbyCategory(int userId, Category category)
+    public List<GoalEntity> LoadGoalsOfUserbyCategory(int userId, Category category)
     {
-        List<Goal> goals = new List<Goal>();
+        List<GoalEntity> goals = new List<GoalEntity>();
 
         try
         {
@@ -165,7 +167,7 @@ public class GoalRepo: Repository, IGoalRepo
                             DateTime? completedAt = reader.IsDBNull(8) ? (DateTime?)null : reader.GetDateTime(8);
                             bool isPostponed = reader.GetBoolean(9);
 
-                            Goal goal = new Goal(
+                            GoalEntity goal = new GoalEntity(
                                 id,
                                 cat,
                                 type,
@@ -195,9 +197,9 @@ public class GoalRepo: Repository, IGoalRepo
 
         return goals;
     }
-    public List<Goal> LoadGoalsOfUser(int userId)
+    public List<GoalEntity> LoadGoalsOfUser(int userId)
     {
-        List<Goal> goals = new List<Goal>();
+        List<GoalEntity> goals = new List<GoalEntity>();
 
         try
         {
@@ -230,7 +232,7 @@ public class GoalRepo: Repository, IGoalRepo
                             DateTime? completedAt = reader.IsDBNull(8) ? (DateTime?)null : reader.GetDateTime(8);
                             bool isPostponed = reader.GetBoolean(9);
 
-                            Goal goal = new Goal(
+                            GoalEntity goal = new GoalEntity(
                                 id,
                                 cat,
                                 type,
@@ -261,7 +263,7 @@ public class GoalRepo: Repository, IGoalRepo
         return goals;
     }
 
-    public void ChangeGoalStatus(Goal goal, bool isDone)
+    public void ChangeGoalStatus(GoalEntity goal)
     {
         try
         {
@@ -274,7 +276,7 @@ public class GoalRepo: Repository, IGoalRepo
 
                 using (SqlCommand changeStatus = new SqlCommand(queryChangeStatus, conn))
                 {
-                    changeStatus.Parameters.AddWithValue("@IsDone", isDone);
+                    changeStatus.Parameters.AddWithValue("@IsDone", goal.IsDone);
                     changeStatus.Parameters.AddWithValue("@Id", goal.Id);
                     changeStatus.Parameters.AddWithValue("@CompletedAt", goal.CompletedAt ?? (object)DBNull.Value);
 
@@ -296,7 +298,7 @@ public class GoalRepo: Repository, IGoalRepo
     }
 
 
-    public void UpdateGoalDescription(Goal goal, string description)
+    public void UpdateGoalDescription(GoalEntity goal)
     {
         try
         {
@@ -309,7 +311,7 @@ public class GoalRepo: Repository, IGoalRepo
 
                 using (SqlCommand changeStatus = new SqlCommand(queryChangeStatus, conn))
                 {
-                    changeStatus.Parameters.AddWithValue("@Description", description);
+                    changeStatus.Parameters.AddWithValue("@Description", goal.Description);
                     changeStatus.Parameters.AddWithValue("@Id", goal.Id);
 
 
@@ -328,7 +330,7 @@ public class GoalRepo: Repository, IGoalRepo
         }
     }
 
-    public void DeleteGoal(Goal goal)
+    public void DeleteGoal(GoalEntity goal)
     {
         try
         {
@@ -358,7 +360,7 @@ public class GoalRepo: Repository, IGoalRepo
         }
     }
 
-    public void PostponeGoal(Goal goal)
+    public void PostponeGoal(GoalEntity goal)
     {
         try
         {
@@ -417,9 +419,9 @@ public class GoalRepo: Repository, IGoalRepo
         }
     }
 
-    public List<Goal> LoadExpiredGoalsOfUser(int userId)
+    public List<GoalEntity> LoadExpiredGoalsOfUser(int userId)
     {
-        List<Goal> goals = new List<Goal>();
+        List<GoalEntity> goals = new List<GoalEntity>();
 
         try
         {
@@ -455,7 +457,7 @@ public class GoalRepo: Repository, IGoalRepo
                             DateTime? completedAt = reader.IsDBNull(8) ? (DateTime?)null : reader.GetDateTime(8);
                             bool isPostponed = reader.GetBoolean(9);
 
-                            Goal goal = new Goal(
+                            GoalEntity goal = new GoalEntity(
                                 id,
                                 cat,
                                 type,

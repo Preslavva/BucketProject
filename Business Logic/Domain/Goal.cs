@@ -2,10 +2,9 @@
 using BucketProject.DAL.Models.Entities;
 
 using BucketProject.BLL.Business_Logic.Strategies;
-using System.Reflection.Metadata.Ecma335;
 using BucketProject.BLL.Business_Logic.InterfacesService;
 
-namespace BucketProject.BLL.Business_Logic.Entity;
+namespace BucketProject.BLL.Business_Logic.Domain;
 
 public class Goal
 {

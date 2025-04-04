@@ -1,13 +1,14 @@
 ﻿using System.Security.Claims;
 using BucketProject.BLL.Business_Logic.InterfacesService;
 using BucketProject.DAL.Data.InterfacesRepo;
-using BucketProject.BLL.Business_Logic.Entity;
 using BucketProject.DAL.Models.Enums;
 using Microsoft.AspNetCore.Http;
 using System.Globalization;
 using BucketProject.BLL.Business_Logic.Strategies;
 using AutoMapper;
 using BucketProject.UI.ViewModels.ViewModels;
+using BucketProject.DAL.Models.Entities;
+using BucketProject.BLL.Business_Logic.Domain;
 
 
 namespace BucketProject.BLL.Business_Logic.Services
@@ -31,8 +32,9 @@ namespace BucketProject.BLL.Business_Logic.Services
             int userId = _goalRepo.GetIdOfUser(username);
 
             Goal newGoal = _mapper.Map<Goal>(viewModel);
+            GoalEntity goalEntity = _mapper.Map<GoalEntity>(newGoal);
 
-            _goalRepo.InsertGoalAndAssignToUser(userId, newGoal);
+            _goalRepo.InsertGoalAndAssignToUser(userId, goalEntity);
         }
 
 
@@ -40,7 +42,6 @@ namespace BucketProject.BLL.Business_Logic.Services
         public List<GoalViewModel> LoadGoalsByCategory(string category)
         {
             string? username = _contextAccessor.HttpContext.Session.GetString("Username");
-
             if (string.IsNullOrEmpty(username))
                 throw new Exception("User not logged in.");
 
@@ -49,36 +50,44 @@ namespace BucketProject.BLL.Business_Logic.Services
 
             int userId = _goalRepo.GetIdOfUser(username);
 
-            var allGoals = _goalRepo.LoadGoalsOfUserbyCategory(userId, parsedCategory);
+            // Get raw data from DAL
+            var allEntities = _goalRepo.LoadGoalsOfUserbyCategory(userId, parsedCategory);
 
+            // Map to domain
+            var allGoals = _mapper.Map<List<Goal>>(allEntities);
+
+            // Apply business rule (filter expired)
             var today = DateTime.Today;
-
             var nonExpiredGoals = allGoals
                 .Where(g => !g.Deadline.HasValue || g.Deadline.Value.Date >= today)
                 .ToList();
 
-            var viewModelList = _mapper.Map<List<GoalViewModel>>(nonExpiredGoals);
-
-            return viewModelList;
+            // Map to view model
+            return _mapper.Map<List<GoalViewModel>>(nonExpiredGoals);
         }
+
 
 
 
 
         public void UpdateGoal(int goalId, GoalViewModel viewModel)
         {
-            Goal goal = _goalRepo.GetGoalById(goalId);
-            if (goal == null)
+            GoalEntity entityGoal = _goalRepo.GetGoalById(goalId);
+            if (entityGoal == null)
                 throw new Exception("Goal not found");
 
-            goal.UpdateDescription(viewModel.Description);
+            Goal goal = _mapper.Map<Goal>(entityGoal);
 
-            _goalRepo.UpdateGoalDescription(goal, viewModel.Description);
+            goal.UpdateDescription(viewModel.Description);
+            entityGoal = _mapper.Map<GoalEntity>(goal);
+
+            _goalRepo.UpdateGoalDescription(entityGoal);
         }
+
 
         public void DeleteGoal(int goalId)
         {
-            Goal goal = _goalRepo.GetGoalById(goalId);
+            GoalEntity goal = _goalRepo.GetGoalById(goalId);
             if (goal == null)
                 throw new Exception("Goal not found");
 
@@ -88,30 +97,39 @@ namespace BucketProject.BLL.Business_Logic.Services
 
         public void ChangeGoalStatus(int goalId, bool isDone)
         {
-            var goal = _goalRepo.GetGoalById(goalId);
-            if (goal == null)
+            GoalEntity entityGoal = _goalRepo.GetGoalById(goalId);
+            if (entityGoal == null)
                 throw new Exception("Goal not found");
+
+            Goal goal = _mapper.Map<Goal>(entityGoal);
 
             if (isDone)
                 goal.MarkAsDone();
             else
                 goal.UndoCompletion();
 
-            _goalRepo.ChangeGoalStatus(goal, isDone);
+            entityGoal = _mapper.Map<GoalEntity>(goal);
+
+            _goalRepo.ChangeGoalStatus(entityGoal);
         }
 
 
         public void PostponeGoal(int goalId)
         {
-            var goal = _goalRepo.GetGoalById(goalId);
-            if (goal == null)
+            GoalEntity entityGoal = _goalRepo.GetGoalById(goalId);
+            if (entityGoal == null)
                 throw new Exception("Goal not found");
+
+            Goal goal = _mapper.Map<Goal>(entityGoal);
 
             var strategy = DeadlineStrategyManager.GetStrategy(goal.Category);
             goal.Postpone(strategy);
 
-            _goalRepo.PostponeGoal(goal);
+            entityGoal = _mapper.Map<GoalEntity>(goal);
+
+            _goalRepo.PostponeGoal(entityGoal);
         }
+
 
 
 
@@ -124,11 +142,18 @@ namespace BucketProject.BLL.Business_Logic.Services
                 return grouped;
 
             int userId = _goalRepo.GetIdOfUser(username);
-            var expiredGoals = _goalRepo.LoadExpiredGoalsOfUser(userId);
+
+            // 1. Get expired goal entities
+            var expiredEntities = _goalRepo.LoadExpiredGoalsOfUser(userId);
+
+            // 2. Map to domain
+            var expiredGoals = _mapper.Map<List<Goal>>(expiredEntities);
 
             foreach (var goal in expiredGoals)
             {
-                DateTime date = goal.Deadline!.Value.Date;
+                if (!goal.Deadline.HasValue) continue;
+
+                DateTime date = goal.Deadline.Value.Date;
                 string category = goal.Category.ToString();
                 string type = goal.Type.ToString();
                 string key;
@@ -159,6 +184,7 @@ namespace BucketProject.BLL.Business_Logic.Services
 
             return grouped;
         }
+
 
         private void AddToGroup(
      Dictionary<string, Dictionary<string, Dictionary<string, List<HistoryViewModel>>>> group,

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
-using BucketProject.BLL.Business_Logic.Entity;
+using BucketProject.BLL.Business_Logic.Domain;
 using BucketProject.DAL.Models.Entities;
 using BucketProject.DAL.Models.Enums;
 using BucketProject.UI.ViewModels.ViewModels;
@@ -18,6 +18,9 @@ namespace BucketProject.BLL.Business_Logic.Mapping
             CreateMap<RegisterViewModel, User>();
 
             CreateMap<User, UserViewModel>();
+
+            CreateMap<GoalEntity, Goal>().ReverseMap();
+
 
 
             CreateMap<Goal, GoalViewModel>()
