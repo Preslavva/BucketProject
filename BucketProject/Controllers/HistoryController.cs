@@ -16,8 +16,6 @@ namespace BucketProject.Controllers
 
         public IActionResult History()
         {
-            ViewBag.Username = HttpContext.Session.GetString("Username");
-
             var groupedGoals = _goalService.LoadGroupedExpiredGoals();
 
             return View(groupedGoals); 

@@ -75,7 +75,6 @@ namespace BucketProject.UI.BucketProject.Controllers
         [HttpGet]
         public IActionResult Account()
         {
-            ViewBag.Username = HttpContext.Session.GetString("Username");
 
             UserViewModel userViewModel = _userService.GetUserByUsername();
 

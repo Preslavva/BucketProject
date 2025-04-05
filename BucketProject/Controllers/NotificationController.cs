@@ -19,7 +19,6 @@ namespace BucketProject.BLL.Business_Logic.Controllers
         [HttpGet]
         public IActionResult Notification()
         {
-            ViewBag.Username = HttpContext.Session.GetString("Username");
 
             var notifications = _notificationService.CheckAndNotify(DateTime.Today);
             return View(notifications);
@@ -28,7 +27,6 @@ namespace BucketProject.BLL.Business_Logic.Controllers
         [HttpPost]
         public IActionResult PostponeGoal(int id)
         {
-            ViewBag.Username = HttpContext.Session.GetString("Username");
             _goalService.PostponeGoal(id);
             return RedirectToAction("Notification");
         }
