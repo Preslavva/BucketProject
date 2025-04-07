@@ -1,15 +1,21 @@
 using BucketProject.DAL.Data.InterfacesRepo;
 using BucketProject.BLL.Business_Logic.Services;
 using BucketProject.BLL.Business_Logic.InterfacesService;
-using BucketProject.BLL.Business_Logic.Strategies;
+using BucketProject.Infrastructure.AI;
 
 using BucketProject.DAL.Data.Repositories;
 using BucketProject.BLL.Business_Logic.Mapping;
+using BucketProjetc.BLL.Business_Logic.InterfacesService;
+using Microsoft.Extensions.Configuration;
+using System.Runtime;
+
+
 
 
 
 
 var builder = WebApplication.CreateBuilder(args);
+
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
@@ -29,7 +35,8 @@ builder.Services.AddScoped<NotificationService>();
 builder.Services.AddScoped<GoalService>(); // or IGoalService if you're using an interface
 
 
-
+builder.Services.AddScoped<IAIClient,AIClient>();
+builder.Services.AddHttpClient();
 
 
 

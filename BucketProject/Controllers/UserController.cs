@@ -46,11 +46,11 @@ namespace BucketProject.UI.BucketProject.Controllers
         }
 
         [HttpPost]
-        public IActionResult LogIn(string username, string password)
+        public IActionResult LogIn(LogInViewModel user)
         {
             try
             {
-                User? loggedUser = _userService.LogIn(username, password);
+                User? loggedUser = _userService.LogIn(user.Username, user.Password);
 
                 if (loggedUser != null)
                 {

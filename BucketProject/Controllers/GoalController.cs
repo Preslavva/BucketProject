@@ -162,29 +162,46 @@ namespace BucketProject.UI.BucketProject.Controllers
         }
 
 
+        //[HttpGet]
+        //public IActionResult WeekGoals()
+        //{
+        //    List<GoalViewModel> goals = _goalService.LoadGoalsByCategory("Week");
+
+        //    foreach (GoalViewModel goal in goals)
+        //    {
+                
+        //        goal.Children = _goalService.LoadChildGoalsOfGoal(goal.Id);
+        //    }
+
+        //    ViewBag.AvailableTypes = GetAvailableTypes();
+
+        //    return View(goals);
+        //}
+
+
+
+
         [HttpGet]
         public IActionResult WeekGoals()
         {
-            List<GoalViewModel> goals = _goalService.LoadGoalsByCategory("Week");
-            ViewBag.AvailableTypes = GetAvailableTypes();
+            List<GoalViewModel> allGoals = _goalService.LoadGoalsByCategory("Week");
 
+            List<GoalViewModel> parentGoals = allGoals
+                .Where(g => g.ParentGoalId == null)
+                .ToList();
 
-            return View(goals); 
-        }
-
-
-
-        [HttpGet]
-        public IActionResult MonthGoals()
-        {
-
-            List<GoalViewModel> goals = _goalService.LoadGoalsByCategory("Month");
+            foreach (GoalViewModel goal in parentGoals)
+            {
+                goal.Children = allGoals
+                    .Where(g => g.ParentGoalId == goal.Id)
+                    .ToList();
+            }
 
             ViewBag.AvailableTypes = GetAvailableTypes();
 
-
-            return View(goals);
+            return View(parentGoals);
         }
+
 
         [HttpPost]
         public IActionResult ChangeGoalStatusWeek(int id, bool isDone)
@@ -241,9 +258,23 @@ namespace BucketProject.UI.BucketProject.Controllers
 
         [HttpGet]
         public IActionResult WeekGoalsPreview()
-        { 
-            List<GoalViewModel> goals = _goalService.LoadGoalsByCategory("Week");
-            return View(goals);
+        {
+            List<GoalViewModel> allGoals = _goalService.LoadGoalsByCategory("Week");
+
+            List<GoalViewModel> parentGoals = allGoals
+                .Where(g => g.ParentGoalId == null)
+                .ToList();
+
+            foreach (GoalViewModel goal in parentGoals)
+            {
+                goal.Children = allGoals
+                    .Where(g => g.ParentGoalId == goal.Id)
+                    .ToList();
+            }
+
+            ViewBag.AvailableTypes = GetAvailableTypes();
+
+            return View(parentGoals);
         }
 
         [HttpGet]
@@ -262,46 +293,16 @@ namespace BucketProject.UI.BucketProject.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> BreakDownGoal(Goal goal)
+        public async Task<IActionResult> BreakDownGoal(int id)
         {
-            if (goal == null || string.IsNullOrWhiteSpace(goal.Description))
-                return BadRequest("Invalid goal submitted.");
+             var subGoals = await _goalService.BreakDownGoalAsync(id);
 
-            var prompt = $"Break down the following goal into 4 smaller, actionable sub-goals:\n\"{goal.Description}\"";
+                TempData["SubGoals"] = JsonConvert.SerializeObject(subGoals);
+                TempData["SubGoalForId"] = id;
 
-            var apiKey = _configuration["OpenAI:ApiKey"];
-            using var client = new HttpClient();
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
-
-            var requestBody = new
-            {
-                model = "gpt-3.5-turbo",
-                messages = new[]
-                {
-            new { role = "user", content = prompt }
+                return RedirectToAction("WeekGoals"); 
+           
         }
-            };
-
-            var content = new StringContent(JsonConvert.SerializeObject(requestBody), Encoding.UTF8, "application/json");
-            var response = await client.PostAsync("https://api.openai.com/v1/chat/completions", content);
-
-            if (!response.IsSuccessStatusCode)
-                return BadRequest("OpenAI call failed.");
-
-            var resultJson = await response.Content.ReadAsStringAsync();
-            dynamic result = JsonConvert.DeserializeObject(resultJson);
-            string breakdownText = result.choices[0].message.content;
-
-            var subGoals = Regex.Split(breakdownText.Trim(), @"\n\d+\.\s")
-                                .Where(s => !string.IsNullOrWhiteSpace(s))
-                                .ToList();
-
-            TempData["SubGoals"] = JsonConvert.SerializeObject(subGoals);
-            TempData["SubGoalForId"] = goal.Id;
-
-            return RedirectToAction("WeekGoals");
-        }
-
         private List<string> GetAvailableTypes()
         {
             return new List<string>

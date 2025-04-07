@@ -12,7 +12,11 @@ namespace BucketProject.BLL.Business_Logic.Strategies
         public DateTime? GetDeadline(DateTime createdAt, bool isPostponed)
         {
             int daysUntilNextMonday = ((int)DayOfWeek.Monday - (int)createdAt.DayOfWeek + 7) % 7;
-            DateTime nextMonday = createdAt.Date.AddDays(daysUntilNextMonday).Date;
+
+            if (daysUntilNextMonday == 0)
+                daysUntilNextMonday = 7;
+
+            DateTime nextMonday = createdAt.Date.AddDays(daysUntilNextMonday);
 
             if (!isPostponed)
             {
@@ -20,8 +24,9 @@ namespace BucketProject.BLL.Business_Logic.Strategies
             }
             else
             {
-                return nextMonday.AddDays(7);
+                return nextMonday.AddDays(7); 
             }
         }
+
     }
 }

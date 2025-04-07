@@ -9,6 +9,12 @@ using AutoMapper;
 using BucketProject.UI.ViewModels.ViewModels;
 using BucketProject.DAL.Models.Entities;
 using BucketProject.BLL.Business_Logic.Domain;
+using System.Net.Http.Headers;
+using System.Text.RegularExpressions;
+using System.Text;
+using Microsoft.Extensions.Configuration;
+using BucketProjetc.BLL.Business_Logic.InterfacesService;
+
 
 
 namespace BucketProject.BLL.Business_Logic.Services
@@ -18,12 +24,16 @@ namespace BucketProject.BLL.Business_Logic.Services
         private readonly IHttpContextAccessor _contextAccessor;
         private readonly IGoalRepo _goalRepo;
         private readonly IMapper _mapper;
+        private readonly IConfiguration _configuration;
+        private readonly IAIClient _aIClient;
 
-        public GoalService(IGoalRepo goalRepo, IHttpContextAccessor contextAccessor, IMapper mapper)
+        public GoalService(IGoalRepo goalRepo, IHttpContextAccessor contextAccessor, IMapper mapper, IConfiguration configuration, IAIClient aIClient)
         {
             _goalRepo = goalRepo;
             _contextAccessor = contextAccessor;
             _mapper = mapper;
+            _configuration = configuration;
+            _aIClient = aIClient;
         }
 
         public void CreateGoal(GoalViewModel viewModel)
@@ -50,24 +60,27 @@ namespace BucketProject.BLL.Business_Logic.Services
 
             int userId = _goalRepo.GetIdOfUser(username);
 
-            // Get raw data from DAL
-            var allEntities = _goalRepo.LoadGoalsOfUserbyCategory(userId, parsedCategory);
+            List<GoalEntity> allEntities = _goalRepo.LoadGoalsOfUserbyCategory(userId, parsedCategory);
 
-            // Map to domain
-            var allGoals = _mapper.Map<List<Goal>>(allEntities);
+            List<Goal> allGoals = _mapper.Map<List<Goal>>(allEntities);
 
-            // Apply business rule (filter expired)
             var today = DateTime.Today;
-            var nonExpiredGoals = allGoals
+            List<Goal> nonExpiredGoals = allGoals
                 .Where(g => !g.Deadline.HasValue || g.Deadline.Value.Date >= today)
                 .ToList();
 
-            // Map to view model
             return _mapper.Map<List<GoalViewModel>>(nonExpiredGoals);
         }
 
 
+        public List<GoalViewModel> LoadChildGoalsOfGoal(int goalId)
+        {
+            List<GoalEntity> allEntities = _goalRepo.LoadChildGoalsOfGoals(goalId);
 
+            List<Goal> allGoals = _mapper.Map<List<Goal>>(allEntities);
+
+            return _mapper.Map<List<GoalViewModel>>(allGoals);
+        }
 
 
         public void UpdateGoal(int goalId, GoalViewModel viewModel)
@@ -143,13 +156,11 @@ namespace BucketProject.BLL.Business_Logic.Services
 
             int userId = _goalRepo.GetIdOfUser(username);
 
-            // 1. Get expired goal entities
-            var expiredEntities = _goalRepo.LoadExpiredGoalsOfUser(userId);
+            List<GoalEntity> expiredEntities = _goalRepo.LoadExpiredGoalsOfUser(userId);
 
-            // 2. Map to domain
-            var expiredGoals = _mapper.Map<List<Goal>>(expiredEntities);
+            List<Goal> expiredGoals = _mapper.Map<List<Goal>>(expiredEntities);
 
-            foreach (var goal in expiredGoals)
+            foreach (Goal goal in expiredGoals)
             {
                 if (!goal.Deadline.HasValue) continue;
 
@@ -178,7 +189,7 @@ namespace BucketProject.BLL.Business_Logic.Services
                         continue;
                 }
 
-                var mappedGoal = _mapper.Map<HistoryViewModel>(goal);
+                HistoryViewModel mappedGoal = _mapper.Map<HistoryViewModel>(goal);
                 AddToGroup(grouped, category, key, type, mappedGoal);
             }
 
@@ -205,7 +216,25 @@ namespace BucketProject.BLL.Business_Logic.Services
             group[category][key][type].Add(goal);
         }
 
+        public async Task<List<GoalViewModel>> BreakDownGoalAsync(int goalId)
+        {
+            GoalEntity entity = _goalRepo.GetGoalById(goalId);
+            if (entity == null || string.IsNullOrWhiteSpace(entity.Description))
+                throw new ArgumentException("Invalid goal.");
 
+            Goal goal = _mapper.Map<Goal>(entity);
+
+            List<string> subGoalDescriptions = await _aIClient.BreakDownTextIntoGoalsAsync(goal.Description, goal.Category);
+
+            List<GoalViewModel> subGoals = subGoalDescriptions.Select(desc =>
+            {
+                var vm = _mapper.Map<GoalViewModel>(goal);
+                vm.Description = desc;
+                return vm;
+            }).ToList();
+
+            return subGoals;
+        }
     }
 }
 

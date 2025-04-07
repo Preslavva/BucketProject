@@ -17,7 +17,7 @@
 
 <form method="post" asp-controller="Goal" asp-action="CreateYearGoal">
     <input type="text" name="Description" placeholder="Enter your goal..." required />
-    <input type="hidden" name="Category" value="Week" />
+    <input type="hidden" name="Category" value="Year" />
 
     <select name="Type" required>
         <option value="" disabled selected>Select goal type</option>
@@ -29,7 +29,6 @@
 
     <button type="submit">Add Goal</button>
 </form>
-
 
 <hr />
 

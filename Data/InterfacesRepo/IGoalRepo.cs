@@ -21,4 +21,5 @@ namespace BucketProject.DAL.Data.InterfacesRepo;
     List<GoalEntity> LoadGoalsOfUser(int userId);
 
     GoalEntity GetGoalById(int id);
+    List<GoalEntity> LoadChildGoalsOfGoals(int goalId);
 } 

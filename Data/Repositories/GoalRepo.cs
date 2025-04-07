@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Data;
+using System.Reflection;
 using BucketProject.DAL.Data.InterfacesRepo;
 using BucketProject.DAL.Data.Repositories;
 using BucketProject.DAL.Models.Entities;
@@ -27,9 +28,9 @@ public class GoalRepo: Repository, IGoalRepo
                 try
                 {
                     string insertGoalQuery = @"
-                    INSERT INTO Goal (Category, Description, Type, Deadline, IsDone, IsDeleted, CreatedAt, CompletedAt, IsPostponed)
+                    INSERT INTO Goal (Category, Description, Type, Deadline, IsDone, IsDeleted, CreatedAt, CompletedAt, IsPostponed, ParentGoalId)
                     OUTPUT INSERTED.Id
-                    VALUES (@Category, @Description, @Type, @Deadline, @IsDone, @IsDeleted, @CreatedAt, @CompletedAt, @IsPostponed);";
+                    VALUES (@Category, @Description, @Type, @Deadline, @IsDone, @IsDeleted, @CreatedAt, @CompletedAt, @IsPostponed, @ParentGoalId);";
 
                     int goalId;
 
@@ -39,11 +40,15 @@ public class GoalRepo: Repository, IGoalRepo
                         insertGoalCmd.Parameters.AddWithValue("@Description", goal.Description);
                         insertGoalCmd.Parameters.AddWithValue("@Type", goal.Type.ToString());
                         insertGoalCmd.Parameters.AddWithValue("@Deadline", goal.Deadline ?? (object)DBNull.Value);
-                        insertGoalCmd.Parameters.AddWithValue("@IsDone", false);
-                        insertGoalCmd.Parameters.AddWithValue("@IsDeleted", false);
+                        insertGoalCmd.Parameters.AddWithValue("@IsDone", goal.IsDone);
+                        insertGoalCmd.Parameters.AddWithValue("@IsDeleted", goal.IsDeleted);
                         insertGoalCmd.Parameters.AddWithValue("@CreatedAt", goal.CreatedAt);
                         insertGoalCmd.Parameters.AddWithValue("@CompletedAt", goal.CompletedAt ?? (object)DBNull.Value);
-                        insertGoalCmd.Parameters.AddWithValue("@IsPostponed", false);
+                        insertGoalCmd.Parameters.AddWithValue("@IsPostponed", goal.IsPostponed);
+                        insertGoalCmd.Parameters.Add("@ParentGoalId", SqlDbType.Int).Value =
+    goal.ParentGoalId ?? (object)DBNull.Value;
+
+
 
 
                         goalId = (int)insertGoalCmd.ExecuteScalar();
@@ -62,8 +67,9 @@ public class GoalRepo: Repository, IGoalRepo
                 catch (Exception ex)
                 {
                     transaction.Rollback();
-     
+
                 }
+
             }
         }
     }
@@ -99,6 +105,8 @@ public class GoalRepo: Repository, IGoalRepo
                             GoalType type = Enum.Parse<GoalType>(reader.GetString(7));
                             DateTime? completedAt = reader.IsDBNull(8) ? (DateTime?)null : reader.GetDateTime(8);
                             bool isPostponed = reader.GetBoolean(9);
+                            int? parentGoalId = reader.IsDBNull(10) ? (int?)null : reader.GetInt32(10);
+
 
                             return new GoalEntity(
                                 goalId,
@@ -110,7 +118,8 @@ public class GoalRepo: Repository, IGoalRepo
                                 completedAt,
                                 isDone,
                                 isDeleted,
-                                isPostponed
+                                isPostponed,
+                                parentGoalId
                             );
 
                     
@@ -141,7 +150,7 @@ public class GoalRepo: Repository, IGoalRepo
             {
                 conn.Open();
 
-                string queryGetGoals = @"SELECT g.Id, g.Category, g.[Description], g.IsDone, g.IsDeleted, g.CreatedAt, g.Deadline, g.Type, g.CompletedAt, g.IsPostponed
+                string queryGetGoals = @"SELECT g.Id, g.Category, g.[Description], g.IsDone, g.IsDeleted, g.CreatedAt, g.Deadline, g.Type, g.CompletedAt, g.IsPostponed, g.ParentGoalId
                                      FROM Goal AS g
                                      INNER JOIN User_Goal AS ug ON g.Id = ug.GoalId
                                      WHERE g.Category = @Category AND ug.UserId = @UserId AND g.IsDeleted = @IsDeleted";
@@ -166,6 +175,9 @@ public class GoalRepo: Repository, IGoalRepo
                             GoalType type = Enum.Parse<GoalType>(reader.GetString(7));
                             DateTime? completedAt = reader.IsDBNull(8) ? (DateTime?)null : reader.GetDateTime(8);
                             bool isPostponed = reader.GetBoolean(9);
+                            int? parentGoalId = reader.IsDBNull(10) ? (int?)null : reader.GetInt32(10);
+
+
 
                             GoalEntity goal = new GoalEntity(
                                 id,
@@ -177,7 +189,8 @@ public class GoalRepo: Repository, IGoalRepo
                                 completedAt,
                                 isDone,
                                 isDeleted,
-                                isPostponed
+                                isPostponed,
+                                parentGoalId
                             );
 
                             goals.Add(goal);
@@ -207,7 +220,7 @@ public class GoalRepo: Repository, IGoalRepo
             {
                 conn.Open();
 
-                string queryGetGoals = @"SELECT g.Id, g.Category, g.[Description], g.IsDone, g.IsDeleted, g.CreatedAt, g.Deadline, g.Type, g.CompletedAt, g.IsPostponed
+                string queryGetGoals = @"SELECT g.Id, g.Category, g.[Description], g.IsDone, g.IsDeleted, g.CreatedAt, g.Deadline, g.Type, g.CompletedAt, g.IsPostponed, g.ParentGoalId
                                      FROM Goal AS g
                                      INNER JOIN User_Goal AS ug ON g.Id = ug.GoalId
                                      WHERE ug.UserId = @UserId AND g.IsDeleted = @IsDeleted";
@@ -231,6 +244,9 @@ public class GoalRepo: Repository, IGoalRepo
                             GoalType type = Enum.Parse<GoalType>(reader.GetString(7));
                             DateTime? completedAt = reader.IsDBNull(8) ? (DateTime?)null : reader.GetDateTime(8);
                             bool isPostponed = reader.GetBoolean(9);
+                            int? parentGoalId = reader.IsDBNull(10) ? (int?)null : reader.GetInt32(10);
+
+
 
                             GoalEntity goal = new GoalEntity(
                                 id,
@@ -242,7 +258,8 @@ public class GoalRepo: Repository, IGoalRepo
                                 completedAt,
                                 isDone,
                                 isDeleted,
-                                isPostponed
+                                isPostponed,
+                                parentGoalId
                             );
 
                             goals.Add(goal);
@@ -263,6 +280,73 @@ public class GoalRepo: Repository, IGoalRepo
         return goals;
     }
 
+    public List<GoalEntity> LoadChildGoalsOfGoals(int goalId)
+    {
+        List<GoalEntity> goals = new List<GoalEntity>();
+
+        try
+        {
+            using (SqlConnection conn = GetSqlConnection())
+            {
+                conn.Open();
+
+                string queryGetGoal = @"SELECT *
+                                     FROM Goal            
+                                     WHERE ParentGoalId = @Id";
+
+                using (SqlCommand getGoal = new SqlCommand(queryGetGoal, conn))
+                {
+                    getGoal.Parameters.AddWithValue("@Id", goalId);
+
+
+                    using (SqlDataReader reader = getGoal.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            int id = reader.GetInt32(0);
+                            Category cat = Enum.Parse<Category>(reader.GetString(1));
+                            string description = reader.GetString(2);
+                            bool isDone = reader.GetBoolean(3);
+                            bool isDeleted = reader.GetBoolean(4);
+                            DateTime createdAt = reader.GetDateTime(5);
+                            DateTime? deadline = reader.IsDBNull(6) ? (DateTime?)null : reader.GetDateTime(6);
+                            GoalType type = Enum.Parse<GoalType>(reader.GetString(7));
+                            DateTime? completedAt = reader.IsDBNull(8) ? (DateTime?)null : reader.GetDateTime(8);
+                            bool isPostponed = reader.GetBoolean(9);
+                            int? parentGoalId = reader.IsDBNull(10) ? (int?)null : reader.GetInt32(10);
+
+
+                            GoalEntity goal = new GoalEntity(
+                               id,
+                               cat,
+                               type,
+                               description,
+                               createdAt,
+                               deadline,
+                               completedAt,
+                               isDone,
+                               isDeleted,
+                               isPostponed,
+                               parentGoalId
+                           );
+
+                            goals.Add(goal);
+                        }
+                    }
+                    }
+                }
+            
+            return null;
+        }
+        catch (SqlException sqlEx)
+        {
+            throw new Exception($"Database error occurred while loading goals: {sqlEx.Message}", sqlEx);
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"An unexpected error occurred in {MethodBase.GetCurrentMethod().Name}: {ex.Message}", ex);
+        }
+    }
     public void ChangeGoalStatus(GoalEntity goal)
     {
         try
@@ -429,7 +513,7 @@ public class GoalRepo: Repository, IGoalRepo
             {
                 conn.Open();
 
-                string queryGetGoals = @"SELECT g.Id, g.Category, g.[Description], g.IsDone, g.IsDeleted, g.CreatedAt, g.Deadline, g.Type, g.CompletedAt, g.IsPostponed
+                string queryGetGoals = @"SELECT g.Id, g.Category, g.[Description], g.IsDone, g.IsDeleted, g.CreatedAt, g.Deadline, g.Type, g.CompletedAt, g.IsPostponed, g.ParentGoalId
                                      FROM Goal AS g
                                      INNER JOIN User_Goal AS ug ON g.Id = ug.GoalId
                                      WHERE ug.UserId = @UserId AND g.IsDeleted = @IsDeleted AND g.Deadline < CAST(GETDATE() AS DATE)
@@ -456,6 +540,9 @@ public class GoalRepo: Repository, IGoalRepo
                             GoalType type = Enum.Parse<GoalType>(reader.GetString(7));
                             DateTime? completedAt = reader.IsDBNull(8) ? (DateTime?)null : reader.GetDateTime(8);
                             bool isPostponed = reader.GetBoolean(9);
+                            int? parentGoalId = reader.IsDBNull(10) ? (int?)null : reader.GetInt32(10);
+
+
 
                             GoalEntity goal = new GoalEntity(
                                 id,
@@ -467,7 +554,8 @@ public class GoalRepo: Repository, IGoalRepo
                                 completedAt,
                                 isDone,
                                 isDeleted,
-                                isPostponed
+                                isPostponed,
+                                parentGoalId
                             );
 
                             goals.Add(goal);

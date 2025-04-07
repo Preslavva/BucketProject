@@ -10,21 +10,21 @@ namespace BucketProject.DAL.Data.Repositories
 {
     public class PasswordHasher: IPasswordHasher
     {
-        private const int SaltSize = 16;
-        private const int KeySize = 32; 
-        private const int Iterations = 100000;
+        private const int saltSize = 16;
+        private const int keySize = 32; 
+        private const int iterations = 100000;
 
         public (string hash, string salt) HashPassword(string password)
         {
-            byte[] saltBytes = new byte[SaltSize];
+            byte[] saltBytes = new byte[saltSize];
             using (var rng = RandomNumberGenerator.Create())
             {
                 rng.GetBytes(saltBytes);
             }
 
-            using (var pbkdf2 = new Rfc2898DeriveBytes(password, saltBytes, Iterations, HashAlgorithmName.SHA256))
+            using (var pbkdf2 = new Rfc2898DeriveBytes(password, saltBytes, iterations, HashAlgorithmName.SHA256))
             {
-                byte[] hashBytes = pbkdf2.GetBytes(KeySize);
+                byte[] hashBytes = pbkdf2.GetBytes(keySize);
                 return (
                     Convert.ToBase64String(hashBytes),
                     Convert.ToBase64String(saltBytes)
@@ -36,9 +36,9 @@ namespace BucketProject.DAL.Data.Repositories
         {
             byte[] saltBytes = Convert.FromBase64String(storedSalt);
 
-            using (var pbkdf2 = new Rfc2898DeriveBytes(password, saltBytes, Iterations, HashAlgorithmName.SHA256))
+            using (var pbkdf2 = new Rfc2898DeriveBytes(password, saltBytes, iterations, HashAlgorithmName.SHA256))
             {
-                byte[] hashBytes = pbkdf2.GetBytes(KeySize);
+                byte[] hashBytes = pbkdf2.GetBytes(keySize);
                 string computedHash = Convert.ToBase64String(hashBytes);
                 return storedHash == computedHash;
             }
