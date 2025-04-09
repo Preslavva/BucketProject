@@ -1,12 +1,22 @@
-﻿
-@model List<GoalViewModel>
+﻿@model List<GoalViewModel>
+@using Newtonsoft.Json
 
 <h2>Yearly Goals</h2>
 
 @{
-    int total = Model.Count;
-    int accomplishedCount = Model.Count(g => g.IsDone);
+    int total = Model.Sum(g => 1 + (g.Children?.Count ?? 0));
+    int accomplishedCount = Model.Sum(g =>
+        (g.IsDone ? 1 : 0) +
+        (g.Children?.Count(c => c.IsDone) ?? 0)
+    );
     int remaining = total - accomplishedCount;
+
+
+    var brokenDownGoals = TempData["SubGoals"] != null
+        ? JsonConvert.DeserializeObject<List<GoalViewModel>>(TempData["SubGoals"].ToString())
+        : new List<GoalViewModel>();
+
+    string subGoalForId = TempData["SubGoalForId"]?.ToString();
 }
 
 <p>
@@ -32,17 +42,16 @@
 
 <hr />
 
-
 @foreach (GoalViewModel goal in Model)
 {
     <div class="goal-item" style="margin-bottom: 1em; padding: 0.5em; border: 1px solid #ccc;">
+
 
         <form method="post" asp-action="EditYearGoal" class="goal-form" style="display: inline;">
             <input type="hidden" name="Id" value="@goal.Id" />
             <input type="text" name="Description" value="@goal.Description" required />
             <button type="submit">Save changes</button>
         </form>
-
 
         <form method="post" asp-action="ChangeGoalStatusYear" id="goalForm-@goal.Id" style="display: inline;">
             <input type="hidden" name="Id" value="@goal.Id" />
@@ -54,9 +63,64 @@
 
         <form method="post" asp-action="DeleteGoalYear" style="display: inline;">
             <input type="hidden" name="Id" value="@goal.Id" />
-            <button type="submit" class="delete-btn" style="margin-left: 10px;">Delete goal</button>
+            <button type="submit" class="delete-btn" style="margin-left: 10px;">Delete</button>
         </form>
 
+        <form method="post" asp-action="BreakDownGoalYear" asp-controller="Goal" style="display: inline;">
+            <input type="hidden" name="id" value="@goal.Id" />
+            <button type="submit" class="btn btn-secondary" style="margin-left: 10px;">Break Down</button>
+        </form>
+
+        @if (subGoalForId == goal.Id.ToString() && brokenDownGoals.Count > 0)
+        {
+            <div style="margin-top: 1em; padding: 0.5em; background-color: #f9f9f9;">
+                <h5>Breakdown</h5>
+                <div id="subGoalContainer-@goal.Id">
+                    @for (int i = 0; i < brokenDownGoals.Count; i++)
+                    {
+                        <div class="sub-goal-entry" style="display: flex; align-items: center; gap: 10px; margin-bottom: 0.5em;">
+                            <form method="post" asp-controller="Goal" asp-action="CreateYearGoal" style="display:flex; align-items:center; gap:10px;">
+                                <input type="text" name="Description" value="@brokenDownGoals[i].Description" class="form-control w-100" />
+                                <input type="hidden" name="Category" value="Month" />
+                                <input type="hidden" name="Type" value="@goal.Type" />
+                                <input type="hidden" name="ParentGoalId" value="@goal.Id" />
+                                <button type="submit" class="btn btn-sm btn-success">Add Goal</button>
+                            </form>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+
+        @if (goal.Children?.Any() == true)
+        {
+            <div class="sub-goals" style="margin-left: 2em; margin-top: 1em; border-left: 2px dashed #ccc; padding-left: 1em;">
+                @foreach (var sub in goal.Children)
+                {
+                    <div class="sub-goal" style="margin-bottom: 0.5em;">
+
+                        <form method="post" asp-action="EditYearGoal" style="display: inline;">
+                            <input type="hidden" name="Id" value="@sub.Id" />
+                            <input type="text" name="Description" value="@sub.Description" required />
+                            <button type="submit">Save changes</button>
+                        </form>
+
+                        <form method="post" asp-action="ChangeGoalStatusYear" style="display: inline;">
+                            <input type="hidden" name="Id" value="@sub.Id" />
+                            <label style="margin-left: 10px;">
+                                <input type="checkbox" name="isDone" value="true" @(sub.IsDone ? "checked" : "") onchange="this.form.submit()" />
+                                Done
+                            </label>
+                        </form>
+
+                        <form method="post" asp-action="DeleteGoalYear" style="display: inline;">
+                            <input type="hidden" name="Id" value="@sub.Id" />
+                            <button type="submit" class="delete-btn" style="margin-left: 10px;">Delete</button>
+                        </form>
+
+                    </div>
+                }
+            </div>
+        }
     </div>
 }
-

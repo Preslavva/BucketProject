@@ -12,8 +12,6 @@ using System.Runtime;
 
 
 
-
-
 var builder = WebApplication.CreateBuilder(args);
 
 

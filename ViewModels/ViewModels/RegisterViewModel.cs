@@ -18,7 +18,7 @@ namespace BucketProject.UI.ViewModels.ViewModels
             [Required]
             [DataType(DataType.Date)]
             [Display(Name = "Date of Birth")]
-            public DateTime DateOfBirth { get; set; }
+            public DateOnly DateOfBirth { get; set; }
             
             [Required]
             [Display(Name = "Nationality")]

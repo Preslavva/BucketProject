@@ -32,29 +32,24 @@ namespace BucketProject.BLL.Business_Logic.Services
         }
 
 
-        public List<NotificationViewModel> CheckAndNotify(DateTime today)
+        public List<GoalDomain> CheckAndNotify(DateTime today)
         {
-            var notifications = new List<NotificationViewModel>();
+            var notifications = new List<GoalDomain>();
 
             string? username = _contextAccessor.HttpContext.Session.GetString("Username");
             if (username == null)
                 return notifications;
 
             int userId = _goalRepo.GetIdOfUser(username);
+            List<Goal> goalEntities = _goalRepo.LoadGoalsOfUser(userId);
+            List<GoalDomain> goals = _mapper.Map<List<GoalDomain>>(goalEntities);
 
-            // Step 1: Load raw entities from repo
-            List<GoalEntity> goalEntities = _goalRepo.LoadGoalsOfUser(userId);
-
-            // Step 2: Map to domain models
-            List<Goal> goals = _mapper.Map<List<Goal>>(goalEntities);
-
-            // Step 3: Business logic
-            foreach (Goal goal in goals)
+            foreach (GoalDomain goal in goals)
             {
                 if (goal.IsDone)
                     continue;
 
-                var deadlineStrategy = DeadlineStrategyManager.GetStrategy(goal.Category);
+                var deadlineStrategy = DeadlineStrategyDeterminator.GetStrategy(goal.Category);
                 var notificationStrategy = NotificationStrategyManager.GetStrategy(goal.Category);
 
                 if (deadlineStrategy == null || notificationStrategy == null)
@@ -64,19 +59,11 @@ namespace BucketProject.BLL.Business_Logic.Services
 
                 if (deadline.HasValue && notificationStrategy.ShouldNotify(today, deadline.Value))
                 {
-                    string message = notificationStrategy.GetNotificationMessage(goal.Description, deadline.Value);
-
-                    var viewModel = _mapper.Map<NotificationViewModel>(goal);
-                    viewModel.Message = message;
-                    viewModel.Deadline = deadline;
-
-                    notifications.Add(viewModel);
+                    notifications.Add(goal); // return domain goal only
                 }
             }
 
             return notifications;
         }
-
     }
-
-}
+    }

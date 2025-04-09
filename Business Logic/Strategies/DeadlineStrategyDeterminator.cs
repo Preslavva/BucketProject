@@ -8,7 +8,7 @@ using BucketProject.DAL.Models.Enums;
 
 namespace BucketProject.BLL.Business_Logic.Strategies
 {
-    public static class DeadlineStrategyManager
+    public static class DeadlineStrategyDeterminator
     {
         public static IDeadlineStrategy? GetStrategy(Category category)
         {

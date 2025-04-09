@@ -6,7 +6,7 @@ using BucketProject.BLL.Business_Logic.InterfacesService;
 
 namespace BucketProject.BLL.Business_Logic.Domain;
 
-public class Goal
+public class GoalDomain
 {
     public int Id { get; private set; }
     public Category Category { get; private set; }
@@ -25,7 +25,7 @@ public class Goal
         {
             if (_deadline==null)
             {
-                _deadline=DeadlineStrategyManager.GetStrategy(Category)?.GetDeadline(CreatedAt, IsPostponed);
+                _deadline=DeadlineStrategyDeterminator.GetStrategy(Category)?.GetDeadline(CreatedAt, IsPostponed);
             }
             return _deadline;
         }
@@ -62,7 +62,7 @@ public class Goal
 
     public int? ParentGoalId { get; private set; }
 
-    public List<Goal> Children { get; private set; } = new();
+    public List<GoalDomain> Children { get; private set; } = new();
 
     public List<User> Users { get; private set; }
 

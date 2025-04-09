@@ -7,7 +7,7 @@ using BucketProject.DAL.Models.Enums;
 
 namespace BucketProject.DAL.Models.Entities
 {
-    public class GoalEntity
+    public class Goal
     {
         public int Id { get; set; }
         public Category Category { get; set; }
@@ -25,11 +25,11 @@ namespace BucketProject.DAL.Models.Entities
         public bool IsPostponed { get; set; }
         public int? ParentGoalId { get; set; }
 
-        public List<GoalEntity> Children { get; private set; } = new();
+        public List<Goal> Children { get; private set; } = new();
 
         public List<User> Users { get; set; } = new List<User>();
 
-        public GoalEntity(int id, Category category, GoalType type, string description, DateTime createdAt, DateTime? deadline, DateTime? completedAt, bool isDone, bool isDeleted, bool isPostponed, int? parentGoalId)
+        public Goal(int id, Category category, GoalType type, string description, DateTime createdAt, DateTime? deadline, DateTime? completedAt, bool isDone, bool isDeleted, bool isPostponed, int? parentGoalId)
         {
             this.Id = id;
             this.Category = category;

@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using BucketProject.DAL.Models.Entities;
 using BucketProject.BLL.Business_Logic.InterfacesService;
+using BucketProject.BLLBusiness_Logic.Domain;
 using BucketProject.UI.ViewModels.ViewModels;
 using BucketProject.DAL.Data.InterfacesRepo;
 using System.Security.Claims;
+using AutoMapper;
 
 
 namespace BucketProject.UI.BucketProject.Controllers
@@ -12,11 +14,13 @@ namespace BucketProject.UI.BucketProject.Controllers
     {
         private readonly IUserService _userService;
         private readonly IPasswordHasher _passwordHasher;
+        private readonly IMapper _mapper;
         
-        public UserController(IUserService userService, IPasswordHasher passwordHasher)
+        public UserController(IUserService userService, IPasswordHasher passwordHasher, IMapper mapper)
         {
             _userService = userService;
             _passwordHasher = passwordHasher;
+            _mapper = mapper;
         }
 
         [HttpGet]
@@ -28,7 +32,8 @@ namespace BucketProject.UI.BucketProject.Controllers
         [HttpPost]
         public IActionResult Register(RegisterViewModel user)
         {
-            if (_userService.Register(user))
+            UserDomain newUser = _mapper.Map<UserDomain>(user);
+            if (_userService.Register(newUser))
             {
                 return RedirectToAction("LogIn","User");
             }
@@ -50,7 +55,8 @@ namespace BucketProject.UI.BucketProject.Controllers
         {
             try
             {
-                User? loggedUser = _userService.LogIn(user.Username, user.Password);
+                UserDomain loggedUser = _mapper.Map<UserDomain>(user);
+                loggedUser = _userService.LogIn(user.Username, user.Password);
 
                 if (loggedUser != null)
                 {

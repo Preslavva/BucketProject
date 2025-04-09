@@ -1,5 +1,5 @@
 ﻿
-using BucketProject.DAL.Models.Entities;
+using BucketProject.BLL.Business_Logic.Domain;
 using BucketProject.UI.ViewModels.ViewModels;
 
 
@@ -7,17 +7,17 @@ namespace BucketProject.BLL.Business_Logic.InterfacesService
 {
     public interface IGoalService
     {
-        void CreateGoal(GoalViewModel viewModel);
-        List<GoalViewModel> LoadGoalsByCategory(string category);
-        void UpdateGoal(int goalId, GoalViewModel viewModel);
+        void CreateGoal(GoalDomain goal);
+        List<GoalDomain> LoadGoalsByCategory(string category);
+        void UpdateGoal(int goalId, GoalDomain goalDomain);
         void DeleteGoal(int goalId);
         void PostponeGoal(int goalId);
 
         void ChangeGoalStatus(int goalId, bool isDone);
 
-        Dictionary<string, Dictionary<string, Dictionary<string, List<HistoryViewModel>>>> LoadGroupedExpiredGoals();
-        Task<List<GoalViewModel>> BreakDownGoalAsync(int goalId);
-        List<GoalViewModel> LoadChildGoalsOfGoal(int goalId);
+        Dictionary<string, Dictionary<string, Dictionary<string, List<GoalDomain>>>> LoadGroupedExpiredGoals();
+        Task<List<GoalDomain>> BreakDownGoalAsync(int goalId);
+        //List<GoalViewModel> LoadChildGoalsOfGoal(int goalId);
 
     }
 }

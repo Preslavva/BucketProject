@@ -1,4 +1,7 @@
 ﻿using BucketProject.BLL.Business_Logic.InterfacesService;
+using BucketProject.BLLBusiness_Logic.Domain;
+
+
 using BucketProject.DAL.Data.InterfacesRepo;
 using BucketProject.DAL.Models.Entities;
 using BucketProject.UI.ViewModels.ViewModels;
@@ -21,18 +24,24 @@ namespace BucketProject.BLL.Business_Logic.Services
             _mapper = mapper;
         }
 
-        public User? LogIn(string username, string password)
+        public UserDomain? LogIn(string username, string password)
         {
             if (string.IsNullOrWhiteSpace(password))
                 throw new ArgumentException("Enter a password");
 
-            return _userRepo.ValidateUser(username, password);
+            User user = _userRepo.ValidateUser(username, password);
+
+            if (user == null)
+                return null;
+
+            return _mapper.Map<UserDomain>(user); 
         }
 
 
-        public bool Register(RegisterViewModel newUser)
+
+        public bool Register(UserDomain userDomain)
         {
-            User user = _mapper.Map<User>(newUser);
+          User user = _mapper.Map<User>(userDomain);
           return _userRepo.Register(user);
         }
 

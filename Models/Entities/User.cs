@@ -24,23 +24,23 @@ public class User
         private set => _dateOfBirth = value;
     }
 
-    public int Age
-    {
-        get
-        {
-            var today = DateOnly.FromDateTime(DateTime.Today);
-            var age = today.Year - _dateOfBirth.Year;
-            if (_dateOfBirth > today.AddYears(-age))
-            {
-                age--;
-            }
-            return age;
-        }
-        set
-        {
-            _dateOfBirth = DateOnly.FromDateTime(DateTime.Today.AddYears(-value));
-        }
-    }
+    //public int Age
+    //{
+    //    get
+    //    {
+    //        var today = DateOnly.FromDateTime(DateTime.Today);
+    //        var age = today.Year - _dateOfBirth.Year;
+    //        if (_dateOfBirth > today.AddYears(-age))
+    //        {
+    //            age--;
+    //        }
+    //        return age;
+    //    }
+    //    set
+    //    {
+    //        _dateOfBirth = DateOnly.FromDateTime(DateTime.Today.AddYears(-value));
+    //    }
+    //}
 
 
     public string Gender { get; private set; }
@@ -75,7 +75,7 @@ public class User
         this.CreatedAt = DateOnly.FromDateTime(DateTime.Today);
     }
 
-    //public User() { }
+    public User() { }
 
     public void UpdatePicture(byte[] newPicture)
     {

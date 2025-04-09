@@ -31,21 +31,6 @@
     <strong>Remaining:</strong> @remaining
 </p>
 
-<form method="post" asp-controller="Goal" asp-action="CreateWeekGoal">
-    <input type="text" name="Description" placeholder="Enter your goal..." required />
-    <input type="hidden" name="Category" value="Week" />
-
-    <select name="Type" required>
-        <option value="" disabled selected>Select goal type</option>
-        @foreach (var type in (List<string>)ViewBag.AvailableTypes ?? new List<string>())
-        {
-            <option value="@type">@type</option>
-        }
-    </select>
-
-    <button type="submit">Add Goal</button>
-</form>
-
 <hr />
 
 @foreach (GoalViewModel goal in Model)
@@ -72,7 +57,7 @@
             <button type="submit" class="delete-btn" style="margin-left: 10px;">Delete</button>
         </form>
 
-        <form method="post" asp-action="BreakDownGoal" asp-controller="Goal" style="display: inline;">
+        <form method="post" asp-action="BreakDownGoalWeek" asp-controller="Goal" style="display: inline;">
             <input type="hidden" name="id" value="@goal.Id" />
             <button type="submit" class="btn btn-secondary" style="margin-left: 10px;">Break Down</button>
         </form>

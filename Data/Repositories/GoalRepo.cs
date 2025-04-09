@@ -18,7 +18,7 @@ public class GoalRepo: Repository, IGoalRepo
     { 
     }
 
-    public void InsertGoalAndAssignToUser(int userId, GoalEntity goal)
+    public void InsertGoalAndAssignToUser(int userId, Goal goal)
     {
         using (SqlConnection conn = GetSqlConnection())
         {
@@ -73,7 +73,7 @@ public class GoalRepo: Repository, IGoalRepo
             }
         }
     }
-    public GoalEntity GetGoalById(int id)
+    public Goal GetGoalById(int id)
     {
 
         try
@@ -108,7 +108,7 @@ public class GoalRepo: Repository, IGoalRepo
                             int? parentGoalId = reader.IsDBNull(10) ? (int?)null : reader.GetInt32(10);
 
 
-                            return new GoalEntity(
+                            return new Goal(
                                 goalId,
                                 cat,
                                 type,
@@ -140,9 +140,9 @@ public class GoalRepo: Repository, IGoalRepo
 
     }
 
-    public List<GoalEntity> LoadGoalsOfUserbyCategory(int userId, Category category)
+    public List<Goal> LoadGoalsOfUserbyCategory(int userId, Category category)
     {
-        List<GoalEntity> goals = new List<GoalEntity>();
+        List<Goal> goals = new List<Goal>();
 
         try
         {
@@ -179,7 +179,7 @@ public class GoalRepo: Repository, IGoalRepo
 
 
 
-                            GoalEntity goal = new GoalEntity(
+                            Goal goal = new Goal(
                                 id,
                                 cat,
                                 type,
@@ -210,9 +210,9 @@ public class GoalRepo: Repository, IGoalRepo
 
         return goals;
     }
-    public List<GoalEntity> LoadGoalsOfUser(int userId)
+    public List<Goal> LoadGoalsOfUser(int userId)
     {
-        List<GoalEntity> goals = new List<GoalEntity>();
+        List<Goal> goals = new List<Goal>();
 
         try
         {
@@ -248,7 +248,7 @@ public class GoalRepo: Repository, IGoalRepo
 
 
 
-                            GoalEntity goal = new GoalEntity(
+                            Goal goal = new Goal(
                                 id,
                                 cat,
                                 type,
@@ -280,9 +280,9 @@ public class GoalRepo: Repository, IGoalRepo
         return goals;
     }
 
-    public List<GoalEntity> LoadChildGoalsOfGoals(int goalId)
+    public List<Goal> LoadChildGoalsOfGoals(int goalId)
     {
-        List<GoalEntity> goals = new List<GoalEntity>();
+        List<Goal> goals = new List<Goal>();
 
         try
         {
@@ -316,7 +316,7 @@ public class GoalRepo: Repository, IGoalRepo
                             int? parentGoalId = reader.IsDBNull(10) ? (int?)null : reader.GetInt32(10);
 
 
-                            GoalEntity goal = new GoalEntity(
+                            Goal goal = new Goal(
                                id,
                                cat,
                                type,
@@ -347,7 +347,7 @@ public class GoalRepo: Repository, IGoalRepo
             throw new Exception($"An unexpected error occurred in {MethodBase.GetCurrentMethod().Name}: {ex.Message}", ex);
         }
     }
-    public void ChangeGoalStatus(GoalEntity goal)
+    public void ChangeGoalStatus(Goal goal)
     {
         try
         {
@@ -382,7 +382,7 @@ public class GoalRepo: Repository, IGoalRepo
     }
 
 
-    public void UpdateGoalDescription(GoalEntity goal)
+    public void UpdateGoalDescription(Goal goal)
     {
         try
         {
@@ -414,7 +414,7 @@ public class GoalRepo: Repository, IGoalRepo
         }
     }
 
-    public void DeleteGoal(GoalEntity goal)
+    public void DeleteGoal(Goal goal)
     {
         try
         {
@@ -444,7 +444,7 @@ public class GoalRepo: Repository, IGoalRepo
         }
     }
 
-    public void PostponeGoal(GoalEntity goal)
+    public void PostponeGoal(Goal goal)
     {
         try
         {
@@ -503,9 +503,9 @@ public class GoalRepo: Repository, IGoalRepo
         }
     }
 
-    public List<GoalEntity> LoadExpiredGoalsOfUser(int userId)
+    public List<Goal> LoadExpiredGoalsOfUser(int userId)
     {
-        List<GoalEntity> goals = new List<GoalEntity>();
+        List<Goal> goals = new List<Goal>();
 
         try
         {
@@ -544,7 +544,7 @@ public class GoalRepo: Repository, IGoalRepo
 
 
 
-                            GoalEntity goal = new GoalEntity(
+                            Goal goal = new Goal(
                                 id,
                                 cat,
                                 type,

@@ -1,14 +1,16 @@
 ﻿
 using BucketProject.DAL.Models.Entities;
+
 using BucketProject.UI.ViewModels.ViewModels;
 using Microsoft.AspNetCore.Http;
+using BucketProject.BLLBusiness_Logic.Domain;
 
 namespace BucketProject.BLL.Business_Logic.InterfacesService
 {
     public interface IUserService
     {
-        bool Register(RegisterViewModel newUser);
-        User? LogIn(string username, string password);
+        bool Register(UserDomain user);
+        UserDomain? LogIn(string username, string password);
 
         UserViewModel GetUserByUsername();
 
