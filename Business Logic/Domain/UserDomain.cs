@@ -22,6 +22,8 @@ namespace BucketProject.BLLBusiness_Logic.Domain
 
             public DateOnly CreatedAt { get; set; } 
             public string Password { get; set; }
+            
+           public byte[] Picture { get; set; }
            
         }
 

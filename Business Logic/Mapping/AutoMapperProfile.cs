@@ -21,11 +21,9 @@ namespace BucketProject.BLL.Business_Logic.Mapping
             CreateMap<UserDomain, User>();
             CreateMap<User, UserDomain>();
 
+            CreateMap<UserDomain, UserViewModel>();
 
             CreateMap<LogInViewModel, UserDomain>();
-
-
-            CreateMap<User, UserViewModel>();
 
             CreateMap<Goal, GoalDomain>().ReverseMap();
 

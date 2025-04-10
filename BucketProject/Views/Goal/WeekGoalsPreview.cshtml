@@ -1,11 +1,9 @@
 ﻿@model List<GoalViewModel>
 @using Newtonsoft.Json
-
 @{
     Layout = "_Layout";
     ViewBag.HideHeaderFooter = true;
 }
-
 
 <h2>Weekly Goals</h2>
 
@@ -18,11 +16,18 @@
     int remaining = total - accomplishedCount;
 
 
+
     var brokenDownGoals = TempData["SubGoals"] != null
         ? JsonConvert.DeserializeObject<List<GoalViewModel>>(TempData["SubGoals"].ToString())
         : new List<GoalViewModel>();
 
     string subGoalForId = TempData["SubGoalForId"]?.ToString();
+
+    if (brokenDownGoals.Any())
+        TempData["SubGoals"] = JsonConvert.SerializeObject(brokenDownGoals);
+
+    if (!string.IsNullOrEmpty(subGoalForId))
+        TempData["SubGoalForId"] = subGoalForId;
 }
 
 <p>
@@ -30,6 +35,7 @@
     <strong>Total:</strong> @total –
     <strong>Remaining:</strong> @remaining
 </p>
+
 
 <hr />
 
@@ -67,18 +73,27 @@
             <div style="margin-top: 1em; padding: 0.5em; background-color: #f9f9f9;">
                 <h5>Breakdown</h5>
                 <div id="subGoalContainer-@goal.Id">
-                    @for (int i = 0; i < brokenDownGoals.Count; i++)
+                    @foreach (var sub in brokenDownGoals)
                     {
                         <div class="sub-goal-entry" style="display: flex; align-items: center; gap: 10px; margin-bottom: 0.5em;">
-                            <form method="post" asp-controller="Goal" asp-action="CreateWeekGoal" style="display:flex; align-items:center; gap:10px;">
-                                <input type="text" name="Description" value="@brokenDownGoals[i].Description" class="form-control w-100" />
+
+                            <form method="post" asp-controller="Goal" asp-action="CreateWeekGoal" style="display: flex; align-items: center; gap: 10px;">
+                                <input type="text" name="Description" value="@sub.Description" class="form-control w-100" />
+                                <input type="hidden" name="OriginalDescription" value="@sub.Description" />
                                 <input type="hidden" name="Category" value="Week" />
                                 <input type="hidden" name="Type" value="@goal.Type" />
                                 <input type="hidden" name="ParentGoalId" value="@goal.Id" />
                                 <button type="submit" class="btn btn-sm btn-success">Add Goal</button>
                             </form>
+
+                            <form method="post" asp-controller="Goal" asp-action="RemoveSubGoalFromBreakdownWeek" style="display:inline;">
+                                <input type="hidden" name="description" value="@sub.Description" />
+                                <button type="submit" class="btn btn-sm btn-danger">Remove</button>
+                            </form>
+
                         </div>
                     }
+
                 </div>
             </div>
         }

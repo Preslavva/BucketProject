@@ -45,15 +45,15 @@ namespace BucketProject.BLL.Business_Logic.Services
           return _userRepo.Register(user);
         }
 
-        public UserViewModel GetUserByUsername()
+        public UserDomain GetUserByUsername()
         {
             string? username = _contextAccessor.HttpContext.Session.GetString("Username");
 
             User user = _userRepo.GetUserByUsername(username);
-            UserViewModel viewModel = _mapper.Map<UserViewModel>(user);
+            UserDomain userDomain = _mapper.Map<UserDomain>(user);
 
 
-            return viewModel;
+            return userDomain;
 
         }
 

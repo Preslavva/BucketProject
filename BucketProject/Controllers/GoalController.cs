@@ -25,20 +25,52 @@ namespace BucketProject.UI.BucketProject.Controllers
             _configuration = configuration;
         }
 
+        
         [HttpPost]
         public IActionResult CreateMonthGoal(GoalViewModel viewModel)
         {
-            GoalDomain newGoal = _mapper.Map<GoalDomain>(viewModel);
-
             viewModel.Category = "Month";
 
             if (!ModelState.IsValid)
             {
-            ViewBag.AvailableTypes = GetAvailableTypes();
-
+                ViewBag.AvailableTypes = GetAvailableTypes();
+                TempData.Keep("SubGoals");
+                TempData.Keep("SubGoalForId");
+                return RedirectToAction("WeekGoals");
             }
 
-            _goalService.CreateGoal(newGoal); 
+            var domainModel = _mapper.Map<GoalDomain>(viewModel);
+            _goalService.CreateGoal(domainModel);
+
+            if (TempData.ContainsKey("SubGoals"))
+            {
+                var raw = TempData["SubGoals"]?.ToString();
+                if (!string.IsNullOrWhiteSpace(raw))
+                {
+                    var subGoals = JsonConvert.DeserializeObject<List<GoalViewModel>>(raw);
+
+                    var updated = subGoals
+                        .Where(g => !string.Equals(
+                            g.Description?.Trim(),
+                            viewModel.Description?.Trim(),
+                            StringComparison.OrdinalIgnoreCase))
+                        .ToList();
+
+                    if (updated.Any())
+                    {
+                        TempData["SubGoals"] = JsonConvert.SerializeObject(updated);
+                        TempData.Keep("SubGoals");
+
+                        TempData["SubGoalForId"] = viewModel.ParentGoalId?.ToString();
+                        TempData.Keep("SubGoalForId");
+                    }
+                    else
+                    {
+                        TempData.Remove("SubGoals");
+                        TempData.Remove("SubGoalForId");
+                    }
+                }
+            }
 
             return RedirectToAction("MonthGoals");
         }
@@ -47,17 +79,48 @@ namespace BucketProject.UI.BucketProject.Controllers
         [HttpPost]
         public IActionResult CreateYearGoal(GoalViewModel viewModel)
         {
-            GoalDomain newGoal = _mapper.Map<GoalDomain>(viewModel);
-
             viewModel.Category = "Year";
 
             if (!ModelState.IsValid)
             {
                 ViewBag.AvailableTypes = GetAvailableTypes();
-
+                TempData.Keep("SubGoals");
+                TempData.Keep("SubGoalForId");
+                return RedirectToAction("WeekGoals");
             }
 
-            _goalService.CreateGoal(newGoal);
+            var domainModel = _mapper.Map<GoalDomain>(viewModel);
+            _goalService.CreateGoal(domainModel);
+
+            if (TempData.ContainsKey("SubGoals"))
+            {
+                var raw = TempData["SubGoals"]?.ToString();
+                if (!string.IsNullOrWhiteSpace(raw))
+                {
+                    var subGoals = JsonConvert.DeserializeObject<List<GoalViewModel>>(raw);
+
+                    var updated = subGoals
+                        .Where(g => !string.Equals(
+                            g.Description?.Trim(),
+                            viewModel.Description?.Trim(),
+                            StringComparison.OrdinalIgnoreCase))
+                        .ToList();
+
+                    if (updated.Any())
+                    {
+                        TempData["SubGoals"] = JsonConvert.SerializeObject(updated);
+                        TempData.Keep("SubGoals");
+
+                        TempData["SubGoalForId"] = viewModel.ParentGoalId?.ToString();
+                        TempData.Keep("SubGoalForId");
+                    }
+                    else
+                    {
+                        TempData.Remove("SubGoals");
+                        TempData.Remove("SubGoalForId");
+                    }
+                }
+            }
 
             return RedirectToAction("YearGoals");
         }
@@ -65,17 +128,48 @@ namespace BucketProject.UI.BucketProject.Controllers
         [HttpPost]
         public IActionResult CreateBucketListGoal(GoalViewModel viewModel)
         {
-            GoalDomain newGoal = _mapper.Map<GoalDomain>(viewModel);
-
-            viewModel.Category = "Bucket_list";
+            viewModel.Category = "Week";
 
             if (!ModelState.IsValid)
             {
-            ViewBag.AvailableTypes = GetAvailableTypes();
-
+                ViewBag.AvailableTypes = GetAvailableTypes();
+                TempData.Keep("SubGoals");
+                TempData.Keep("SubGoalForId");
+                return RedirectToAction("WeekGoals");
             }
 
-            _goalService.CreateGoal(newGoal);
+            var domainModel = _mapper.Map<GoalDomain>(viewModel);
+            _goalService.CreateGoal(domainModel);
+
+            if (TempData.ContainsKey("SubGoals"))
+            {
+                var raw = TempData["SubGoals"]?.ToString();
+                if (!string.IsNullOrWhiteSpace(raw))
+                {
+                    var subGoals = JsonConvert.DeserializeObject<List<GoalViewModel>>(raw);
+
+                    var updated = subGoals
+                        .Where(g => !string.Equals(
+                            g.Description?.Trim(),
+                            viewModel.Description?.Trim(),
+                            StringComparison.OrdinalIgnoreCase))
+                        .ToList();
+
+                    if (updated.Any())
+                    {
+                        TempData["SubGoals"] = JsonConvert.SerializeObject(updated);
+                        TempData.Keep("SubGoals");
+
+                        TempData["SubGoalForId"] = viewModel.ParentGoalId?.ToString();
+                        TempData.Keep("SubGoalForId");
+                    }
+                    else
+                    {
+                        TempData.Remove("SubGoals");
+                        TempData.Remove("SubGoalForId");
+                    }
+                }
+            }
 
             return RedirectToAction("BucketList");
         }
@@ -83,20 +177,51 @@ namespace BucketProject.UI.BucketProject.Controllers
         [HttpPost]
         public IActionResult CreateWeekGoal(GoalViewModel viewModel)
         {
-            GoalDomain newGoal = _mapper.Map<GoalDomain>(viewModel);
-
             viewModel.Category = "Week";
 
             if (!ModelState.IsValid)
             {
                 ViewBag.AvailableTypes = GetAvailableTypes();
-
+                TempData.Keep("SubGoals");
+                TempData.Keep("SubGoalForId");
+                return RedirectToAction("WeekGoals");
             }
 
-            _goalService.CreateGoal(newGoal);
+            var domainModel = _mapper.Map<GoalDomain>(viewModel);
+            _goalService.CreateGoal(domainModel);
+
+            if (TempData.ContainsKey("SubGoals"))
+            {
+                var raw = TempData["SubGoals"]?.ToString();
+                if (!string.IsNullOrWhiteSpace(raw))
+                {
+                    var subGoals = JsonConvert.DeserializeObject<List<GoalViewModel>>(raw);
+
+                    var updated = subGoals
+                        .Where(g => !string.Equals(
+                            g.Description?.Trim(),
+                            viewModel.Description?.Trim(),
+                            StringComparison.OrdinalIgnoreCase))
+                        .ToList();
+
+                    if (updated.Any())
+                    {
+                        TempData["SubGoals"] = JsonConvert.SerializeObject(updated);
+                        TempData.Keep("SubGoals");
+
+                        TempData["SubGoalForId"] = viewModel.ParentGoalId?.ToString();
+                        TempData.Keep("SubGoalForId");
+                    }
+                    else
+                    {
+                        TempData.Remove("SubGoals");
+                        TempData.Remove("SubGoalForId");
+                    }
+                }
+            }
+
             return RedirectToAction("WeekGoals");
         }
-
 
 
 
@@ -441,8 +566,119 @@ namespace BucketProject.UI.BucketProject.Controllers
             "Order"
     };
         }
+        [HttpPost]
+        public IActionResult RemoveSubGoalFromBreakdownWeek(string description)
+        {
+            if (TempData["SubGoals"] is string json)
+            {
+                var subGoals = JsonConvert.DeserializeObject<List<GoalViewModel>>(json);
+                var updated = subGoals
+                    .Where(g => !string.Equals(
+                        g.Description?.Trim(),
+                        description?.Trim(),
+                        StringComparison.OrdinalIgnoreCase))
+                    .ToList();
 
-    }
+                if (updated.Any())
+                {
+                    TempData["SubGoals"] = JsonConvert.SerializeObject(updated);
+                    TempData.Keep("SubGoals");
+                }
+                else
+                {
+                    TempData.Remove("SubGoals");
+                    TempData.Remove("SubGoalForId");
+                }
+            }
+
+            return RedirectToAction("WeekGoals");
+        }
 
    
+     [HttpPost]
+        public IActionResult RemoveSubGoalFromBreakdownMonth(string description)
+        {
+            if (TempData["SubGoals"] is string json)
+            {
+                var subGoals = JsonConvert.DeserializeObject<List<GoalViewModel>>(json);
+                var updated = subGoals
+                    .Where(g => !string.Equals(
+                        g.Description?.Trim(),
+                        description?.Trim(),
+                        StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+
+                if (updated.Any())
+                {
+                    TempData["SubGoals"] = JsonConvert.SerializeObject(updated);
+                    TempData.Keep("SubGoals");
+                }
+                else
+                {
+                    TempData.Remove("SubGoals");
+                    TempData.Remove("SubGoalForId");
+                }
+            }
+
+            return RedirectToAction("MonthGoals");
+        }
+        [HttpPost]
+        public IActionResult RemoveSubGoalFromBreakdownYear(string description)
+        {
+            if (TempData["SubGoals"] is string json)
+            {
+                var subGoals = JsonConvert.DeserializeObject<List<GoalViewModel>>(json);
+                var updated = subGoals
+                    .Where(g => !string.Equals(
+                        g.Description?.Trim(),
+                        description?.Trim(),
+                        StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+
+                if (updated.Any())
+                {
+                    TempData["SubGoals"] = JsonConvert.SerializeObject(updated);
+                    TempData.Keep("SubGoals");
+                }
+                else
+                {
+                    TempData.Remove("SubGoals");
+                    TempData.Remove("SubGoalForId");
+                }
+            }
+
+            return RedirectToAction("YearGoals");
+        }
+        [HttpPost]
+        public IActionResult RemoveSubGoalFromBreakdownBucketList(string description)
+        {
+            if (TempData["SubGoals"] is string json)
+            {
+                var subGoals = JsonConvert.DeserializeObject<List<GoalViewModel>>(json);
+                var updated = subGoals
+                    .Where(g => !string.Equals(
+                        g.Description?.Trim(),
+                        description?.Trim(),
+                        StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+
+                if (updated.Any())
+                {
+                    TempData["SubGoals"] = JsonConvert.SerializeObject(updated);
+                    TempData.Keep("SubGoals");
+                }
+                else
+                {
+                    TempData.Remove("SubGoals");
+                    TempData.Remove("SubGoalForId");
+                }
+            }
+
+            return RedirectToAction("BucketList");
+        }
+
+    }
 }
+
+
+

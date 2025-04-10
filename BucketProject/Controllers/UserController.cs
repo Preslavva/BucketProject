@@ -82,7 +82,9 @@ namespace BucketProject.UI.BucketProject.Controllers
         public IActionResult Account()
         {
 
-            UserViewModel userViewModel = _userService.GetUserByUsername();
+            UserDomain userDomain = _userService.GetUserByUsername();
+
+            UserViewModel userViewModel = _mapper.Map<UserViewModel>(userDomain);
 
             return View(userViewModel);
         }

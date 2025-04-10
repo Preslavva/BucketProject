@@ -12,7 +12,7 @@ namespace BucketProject.BLL.Business_Logic.InterfacesService
         bool Register(UserDomain user);
         UserDomain? LogIn(string username, string password);
 
-        UserViewModel GetUserByUsername();
+        UserDomain GetUserByUsername();
 
         void UpdateUsername(string newUsername);
 
