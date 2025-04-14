@@ -28,7 +28,6 @@ namespace BucketProject.UI.ViewModels.ViewModels
             [Display(Name = "Gender")]
             public string Gender { get; set; }
 
-
             [Required]
             [StringLength(50, MinimumLength = 6)]
             [DataType(DataType.Password)]

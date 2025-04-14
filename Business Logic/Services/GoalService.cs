@@ -178,7 +178,7 @@ namespace BucketProject.BLL.Business_Logic.Services
         {
             return category switch
             {
-                Category.Week => $"Week {date.AddDays((int)date.DayOfWeek-5):dd.MM.yyyy} - {date:dd.MM.yyyy}",
+                Category.Week => $"Week {date.AddDays((int)date.DayOfWeek-6):dd.MM.yyyy} - {date:dd.MM.yyyy}",
                 Category.Month => $"{date:MMMM yyyy}",
                 Category.Year => $"{date.Year}",
                 _ => "Other"

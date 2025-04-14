@@ -43,18 +43,27 @@ public class GoalDomain
         get => _isDone;
         private set
         {
-            _isDone = value;
+            
+            if (_isDone != value)
+            {
+                _isDone = value;
 
-            if (_isDone)
-            {
-                CompletedAt = DateTime.Now;
-            }
-            else
-            {
-                CompletedAt = null;
+                if (_isDone)
+                {
+                    
+                    if (CompletedAt == null)
+                    {
+                        CompletedAt = DateTime.Now;
+                    }
+                }
+                else
+                {
+                    CompletedAt = null;
+                }
             }
         }
     }
+
 
     public bool IsDeleted { get; private set; }
 

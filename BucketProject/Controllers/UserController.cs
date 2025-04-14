@@ -30,26 +30,6 @@ namespace BucketProject.UI.BucketProject.Controllers
         }
 
         [HttpPost]
-        //public IActionResult Register(RegisterViewModel user)
-        //{
-        //    if (!ModelState.IsValid)
-        //    {
-        //        return View(user);
-        //    }
-
-        //    UserDomain newUser = _mapper.Map<UserDomain>(user);
-
-        //    if (_userService.Register(newUser))
-        //    {
-        //        return RedirectToAction("LogIn", "User");
-        //    }
-        //    else
-        //    {
-        //        ModelState.AddModelError(string.Empty, "Username or email is already taken");
-        //        return View(user);
-        //    }
-        //}
-
         public IActionResult Register(RegisterViewModel user)
         {
             if (!ModelState.IsValid)
