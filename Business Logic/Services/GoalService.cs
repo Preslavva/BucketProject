@@ -130,9 +130,9 @@ namespace BucketProject.BLL.Business_Logic.Services
             _goalRepo.PostponeGoal(entityGoal);
         }
 
-
-
-
+        //the first string represents the time category
+        //the second string represents the grouping key
+        //the third string is the type of goal
         public Dictionary<string, Dictionary<string, Dictionary<string, List<GoalDomain>>>> LoadGroupedExpiredGoals()
         {
             var grouped = new Dictionary<string, Dictionary<string, Dictionary<string, List<GoalDomain>>>>();
@@ -145,7 +145,8 @@ namespace BucketProject.BLL.Business_Logic.Services
             List<Goal> expiredEntities = _goalRepo.LoadExpiredGoalsOfUser(userId);
             List<GoalDomain> expiredGoals = _mapper.Map<List<GoalDomain>>(expiredEntities);
 
-            var childGoalsLookup = expiredGoals
+            // thie dictionary holds int value for the ParentGoalId and List<GoalDomain> with the goals that share the same parent goal
+            var childGoals = expiredGoals
                 .Where(g => g.ParentGoalId.HasValue)
                 .GroupBy(g => g.ParentGoalId.Value)
                 .ToDictionary(g => g.Key, g => g.ToList());
@@ -162,9 +163,9 @@ namespace BucketProject.BLL.Business_Logic.Services
  
                 AddToGroup(grouped, category, key, type, goal);
 
-                if (childGoalsLookup.ContainsKey(goal.Id))
+                if (childGoals.ContainsKey(goal.Id))
                 {
-                    foreach (var child in childGoalsLookup[goal.Id])
+                    foreach (var child in childGoals[goal.Id])
                     {
                         AddToGroup(grouped, category, key, type, child);
                     }

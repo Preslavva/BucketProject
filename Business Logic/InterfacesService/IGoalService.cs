@@ -17,7 +17,6 @@ namespace BucketProject.BLL.Business_Logic.InterfacesService
 
         Dictionary<string, Dictionary<string, Dictionary<string, List<GoalDomain>>>> LoadGroupedExpiredGoals();
         Task<List<GoalDomain>> BreakDownGoalAsync(int goalId);
-        //List<GoalViewModel> LoadChildGoalsOfGoal(int goalId);
 
     }
 }

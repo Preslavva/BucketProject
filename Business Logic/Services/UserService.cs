@@ -7,6 +7,7 @@ using BucketProject.DAL.Models.Entities;
 using BucketProject.UI.ViewModels.ViewModels;
 using Microsoft.AspNetCore.Http;
 using AutoMapper;
+using Microsoft.IdentityModel.Tokens;
 
 namespace BucketProject.BLL.Business_Logic.Services
 {
@@ -41,6 +42,7 @@ namespace BucketProject.BLL.Business_Logic.Services
 
         public bool Register(UserDomain userDomain)
         {
+           
           User user = _mapper.Map<User>(userDomain);
           return _userRepo.Register(user);
         }

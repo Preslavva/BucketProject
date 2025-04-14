@@ -39,7 +39,7 @@ namespace BucketProject.UI.BucketProject.Controllers
                 return RedirectToAction("WeekGoals");
             }
 
-            var domainModel = _mapper.Map<GoalDomain>(viewModel);
+            GoalDomain domainModel = _mapper.Map<GoalDomain>(viewModel);
             _goalService.CreateGoal(domainModel);
 
             if (TempData.ContainsKey("SubGoals"))
@@ -89,7 +89,7 @@ namespace BucketProject.UI.BucketProject.Controllers
                 return RedirectToAction("WeekGoals");
             }
 
-            var domainModel = _mapper.Map<GoalDomain>(viewModel);
+            GoalDomain domainModel = _mapper.Map<GoalDomain>(viewModel);
             _goalService.CreateGoal(domainModel);
 
             if (TempData.ContainsKey("SubGoals"))
@@ -138,7 +138,7 @@ namespace BucketProject.UI.BucketProject.Controllers
                 return RedirectToAction("WeekGoals");
             }
 
-            var domainModel = _mapper.Map<GoalDomain>(viewModel);
+            GoalDomain domainModel = _mapper.Map<GoalDomain>(viewModel);
             _goalService.CreateGoal(domainModel);
 
             if (TempData.ContainsKey("SubGoals"))
@@ -187,7 +187,7 @@ namespace BucketProject.UI.BucketProject.Controllers
                 return RedirectToAction("WeekGoals");
             }
 
-            var domainModel = _mapper.Map<GoalDomain>(viewModel);
+            GoalDomain domainModel = _mapper.Map<GoalDomain>(viewModel);
             _goalService.CreateGoal(domainModel);
 
             if (TempData.ContainsKey("SubGoals"))

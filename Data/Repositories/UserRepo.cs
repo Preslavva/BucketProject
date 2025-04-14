@@ -22,9 +22,7 @@ namespace BucketProject.DAL.Data.Repositories
 
         public bool Register(User user)
         {
-            try
-            {
-                using SqlConnection connection = GetSqlConnection();
+               using SqlConnection connection = GetSqlConnection();
                 connection.Open();
 
                 string checkSql = @"SELECT COUNT(*) FROM [User] WHERE [Username] = @Username or Email = @Email";
@@ -55,17 +53,9 @@ namespace BucketProject.DAL.Data.Repositories
                 insertCommand.Parameters.AddWithValue("@CreatedAt", user.CreatedAt);
 
 
-
-
-
-
                 insertCommand.ExecuteNonQuery();
                 return true;
-            }
-            catch (Exception ex)
-            {
-                throw new ApplicationException("Error registering user: " + ex.Message);
-            }
+            
         }
 
         public User? ValidateUser(string username, string password)
@@ -119,7 +109,7 @@ namespace BucketProject.DAL.Data.Repositories
             }
             catch (Exception ex)
             {
-                throw new Exception($"An unexpected error occurred in {MethodBase.GetCurrentMethod().Name}: {ex.Message}", ex);
+                throw new Exception($"An unexpected error occurred : {ex.Message}", ex);
             }
 
             return null;
@@ -152,7 +142,7 @@ namespace BucketProject.DAL.Data.Repositories
             }
             catch (Exception ex)
             {
-                throw new Exception($"An unexpected error occurred in {MethodBase.GetCurrentMethod().Name}: {ex.Message}", ex);
+                throw new Exception($"An unexpected error occurred in: {ex.Message}", ex);
             }
         }
 
@@ -181,7 +171,7 @@ namespace BucketProject.DAL.Data.Repositories
             }
             catch (Exception ex)
             {
-                throw new Exception($"An unexpected error occurred in {MethodBase.GetCurrentMethod().Name}: {ex.Message}", ex);
+                throw new Exception($"An unexpected error occurred in: {ex.Message}", ex);
             }
         }
         public void UpdateEmail(User user, string email)
@@ -238,7 +228,7 @@ namespace BucketProject.DAL.Data.Repositories
             }
             catch (Exception ex)
             {
-                throw new Exception($"An unexpected error occurred in {MethodBase.GetCurrentMethod().Name}: {ex.Message}", ex);
+                throw new Exception($"An unexpected error occurred : {ex.Message}", ex);
             }
         }
         public int GetIdOfUserU(string username)
@@ -266,7 +256,7 @@ namespace BucketProject.DAL.Data.Repositories
             }
             catch (Exception ex)
             {
-                throw new Exception($"An unexpected error occurred in {MethodBase.GetCurrentMethod().Name}: {ex.Message}", ex);
+                throw new Exception($"An unexpected error occurred: {ex.Message}", ex);
             }
         }
 
@@ -316,7 +306,7 @@ namespace BucketProject.DAL.Data.Repositories
             }
             catch (Exception ex)
             {
-                throw new Exception($"An unexpected error occurred in {MethodBase.GetCurrentMethod().Name}: {ex.Message}", ex);
+                throw new Exception($"An unexpected error occurred: {ex.Message}", ex);
         }
             return null;
         }

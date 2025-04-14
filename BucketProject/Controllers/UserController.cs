@@ -30,19 +30,52 @@ namespace BucketProject.UI.BucketProject.Controllers
         }
 
         [HttpPost]
+        //public IActionResult Register(RegisterViewModel user)
+        //{
+        //    if (!ModelState.IsValid)
+        //    {
+        //        return View(user);
+        //    }
+
+        //    UserDomain newUser = _mapper.Map<UserDomain>(user);
+
+        //    if (_userService.Register(newUser))
+        //    {
+        //        return RedirectToAction("LogIn", "User");
+        //    }
+        //    else
+        //    {
+        //        ModelState.AddModelError(string.Empty, "Username or email is already taken");
+        //        return View(user);
+        //    }
+        //}
+
         public IActionResult Register(RegisterViewModel user)
         {
-            UserDomain newUser = _mapper.Map<UserDomain>(user);
-            if (_userService.Register(newUser))
+            if (!ModelState.IsValid)
             {
-                return RedirectToAction("LogIn","User");
-            }
-            else
-            {
-                ViewBag.ErrorMessage = "Username or email is already taken";
                 return View(user);
             }
+
+            UserDomain newUser = _mapper.Map<UserDomain>(user);
+
+            try
+            {
+                if (_userService.Register(newUser))
+                {
+                    return RedirectToAction("LogIn", "User");
+                }
+            }
+            catch (ApplicationException ex)
+            {
+
+                ModelState.AddModelError(string.Empty, ex.Message);
+                return View(user);
+            }
+            return View(user);
+
         }
+
 
         [HttpGet]
         public IActionResult LogIn()

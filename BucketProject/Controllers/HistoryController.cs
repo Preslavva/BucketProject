@@ -48,8 +48,5 @@ namespace BucketProject.Controllers
             return View(groupedViewModels);
         }
 
-
-
-
     }
 }

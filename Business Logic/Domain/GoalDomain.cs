@@ -66,35 +66,6 @@ public class GoalDomain
 
     public List<User> Users { get; private set; }
 
-    ////for reading from database
-    //public Goal(int id, Category category, GoalType type, string description, DateTime createdAt, DateTime? deadline, DateTime? completedAt, bool isDone, bool isDeleted, bool isPostponed)
-    //{
-    //    this.Id = id;
-    //    this.Category = category;
-    //    this.Description = description;
-    //    this.CreatedAt = createdAt;
-    //    this.Deadline = deadline;
-    //    this.IsDone = isDone;
-    //    this.IsDeleted = isDeleted;
-    //    this.Type = type;
-    //    this.CompletedAt = completedAt;
-    //    this.IsPostponed = isPostponed;
-       
-    //}
-
-    ////saving to database
-    //public Goal(Category category, GoalType type, string description)
-    //{
-    //    this.Category = category;
-    //    this.Type = type;
-    //    this.Description = description;
-    //    this.CreatedAt = DateTime.Now;
-    //    this.IsDone = false;
-    //    this.IsDeleted = false;
-    //    this.IsPostponed = false;
-    //    Users = new List<User>();
-    //}
-
 
     public void MarkAsDone()
     {

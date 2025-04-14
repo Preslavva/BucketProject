@@ -7,17 +7,11 @@
 
 <h2>Register</h2>
 
-@if (!string.IsNullOrWhiteSpace(ViewBag.ErrorMessage))
-{
-    <div class="alert alert-danger" role="alert">
-        <strong>@ViewBag.ErrorMessage</strong>
-    </div>
-}
+@Html.ValidationSummary(true, "", new { @class = "alert alert-danger" })
 
 <div class="row">
     <div class="col-md-4">
         <form asp-controller="User" asp-action="Register" method="post">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
             <div class="form-group">
                 <label asp-for="Username" class="control-label">Username:</label>

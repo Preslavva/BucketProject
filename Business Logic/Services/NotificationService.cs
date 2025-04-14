@@ -34,7 +34,7 @@ namespace BucketProject.BLL.Business_Logic.Services
 
         public List<GoalDomain> CheckAndNotify(DateTime today)
         {
-            var notifications = new List<GoalDomain>();
+            List<GoalDomain> notifications = new List<GoalDomain>();
 
             string? username = _contextAccessor.HttpContext.Session.GetString("Username");
             if (username == null)
@@ -59,7 +59,7 @@ namespace BucketProject.BLL.Business_Logic.Services
 
                 if (deadline.HasValue && notificationStrategy.ShouldNotify(today, deadline.Value))
                 {
-                    notifications.Add(goal); // return domain goal only
+                    notifications.Add(goal); 
                 }
             }
 
