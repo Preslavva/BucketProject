@@ -6,7 +6,7 @@ using BucketProject.BLL.Business_Logic.InterfacesService;
 
 namespace BucketProject.BLL.Business_Logic.Domain;
 
-public class GoalDomain
+public class Goal
 {
     public int Id { get; private set; }
     public Category Category { get; private set; }
@@ -71,9 +71,9 @@ public class GoalDomain
 
     public int? ParentGoalId { get; private set; }
 
-    public List<GoalDomain> Children { get; private set; } = new();
+    public List<Goal> Children { get; private set; } = new();
 
-    public List<User> Users { get; private set; }
+    public List<UserEntity> Users { get; private set; }
 
 
     public void MarkAsDone()
@@ -107,7 +107,7 @@ public class GoalDomain
         Deadline = deadline;
     }
 
-    public void AddUser(User user)
+    public void AddUser(UserEntity user)
     {
         if (!Users.Contains(user))
         {

@@ -35,19 +35,19 @@ namespace BucketProject.BLL.Business_Logic.Services
         }
 
 
-        public void CreateGoal(GoalDomain goalDomain)
+        public void CreateGoal(Goal goalDomain)
         {
             string? username = _contextAccessor.HttpContext.Session.GetString("Username");
             int userId = _goalRepo.GetIdOfUser(username);
 
-            Goal goal = _mapper.Map<Goal>(goalDomain);
+            GoalEntity goal = _mapper.Map<GoalEntity>(goalDomain);
 
             _goalRepo.InsertGoalAndAssignToUser(userId, goal);
         }
 
 
 
-        public List<GoalDomain> LoadGoalsByCategory(string category)
+        public List<Goal> LoadGoalsByCategory(string category)
         {
             string? username = _contextAccessor.HttpContext.Session.GetString("Username");
             if (string.IsNullOrEmpty(username))
@@ -58,9 +58,9 @@ namespace BucketProject.BLL.Business_Logic.Services
 
             int userId = _goalRepo.GetIdOfUser(username);
 
-            List<Goal> allEntities = _goalRepo.LoadGoalsOfUserbyCategory(userId, parsedCategory);
+            List<GoalEntity> allEntities = _goalRepo.LoadGoalsOfUserbyCategory(userId, parsedCategory);
 
-            List<GoalDomain> allGoals = _mapper.Map<List<GoalDomain>>(allEntities);
+            List<Goal> allGoals = _mapper.Map<List<Goal>>(allEntities);
 
             var today = DateTime.Today;
             return allGoals
@@ -72,7 +72,7 @@ namespace BucketProject.BLL.Business_Logic.Services
       
 
 
-        public void UpdateGoal(int goalId, GoalDomain goalDomain)
+        public void UpdateGoal(int goalId, Goal goalDomain)
         {
             var entityGoal = _goalRepo.GetGoalById(goalId);
             if (entityGoal == null)
@@ -87,7 +87,7 @@ namespace BucketProject.BLL.Business_Logic.Services
 
         public void DeleteGoal(int goalId)
         {
-            Goal goal = _goalRepo.GetGoalById(goalId);
+            GoalEntity goal = _goalRepo.GetGoalById(goalId);
             if (goal == null)
                 throw new Exception("Goal not found");
 
@@ -97,18 +97,18 @@ namespace BucketProject.BLL.Business_Logic.Services
 
         public void ChangeGoalStatus(int goalId, bool isDone)
         {
-            Goal entityGoal = _goalRepo.GetGoalById(goalId);
+            GoalEntity entityGoal = _goalRepo.GetGoalById(goalId);
             if (entityGoal == null)
                 throw new Exception("Goal not found");
 
-            GoalDomain goal = _mapper.Map<GoalDomain>(entityGoal);
+            Goal goal = _mapper.Map<Goal>(entityGoal);
 
             if (isDone)
                 goal.MarkAsDone();
             else
                 goal.UndoCompletion();
 
-            entityGoal = _mapper.Map<Goal>(goal);
+            entityGoal = _mapper.Map<GoalEntity>(goal);
 
             _goalRepo.ChangeGoalStatus(entityGoal);
         }
@@ -116,16 +116,16 @@ namespace BucketProject.BLL.Business_Logic.Services
 
         public void PostponeGoal(int goalId)
         {
-            Goal entityGoal = _goalRepo.GetGoalById(goalId);
+            GoalEntity entityGoal = _goalRepo.GetGoalById(goalId);
             if (entityGoal == null)
                 throw new Exception("Goal not found");
 
-            GoalDomain goal = _mapper.Map<GoalDomain>(entityGoal);
+            Goal goal = _mapper.Map<Goal>(entityGoal);
 
             var strategy = DeadlineStrategyDeterminator.GetStrategy(goal.Category);
             goal.Postpone(strategy);
 
-            entityGoal = _mapper.Map<Goal>(goal);
+            entityGoal = _mapper.Map<GoalEntity>(goal);
 
             _goalRepo.PostponeGoal(entityGoal);
         }
@@ -133,17 +133,17 @@ namespace BucketProject.BLL.Business_Logic.Services
         //the first string represents the time category
         //the second string represents the grouping key
         //the third string is the type of goal
-        public Dictionary<string, Dictionary<string, Dictionary<string, List<GoalDomain>>>> LoadGroupedExpiredGoals()
+        public Dictionary<string, Dictionary<string, Dictionary<string, List<Goal>>>> LoadGroupedExpiredGoals()
         {
-            var grouped = new Dictionary<string, Dictionary<string, Dictionary<string, List<GoalDomain>>>>();
+            var grouped = new Dictionary<string, Dictionary<string, Dictionary<string, List<Goal>>>>();
 
             string? username = _contextAccessor.HttpContext.Session.GetString("Username");
             if (string.IsNullOrEmpty(username))
                 return grouped;
 
             int userId = _goalRepo.GetIdOfUser(username);
-            List<Goal> expiredEntities = _goalRepo.LoadExpiredGoalsOfUser(userId);
-            List<GoalDomain> expiredGoals = _mapper.Map<List<GoalDomain>>(expiredEntities);
+            List<GoalEntity> expiredEntities = _goalRepo.LoadExpiredGoalsOfUser(userId);
+            List<Goal> expiredGoals = _mapper.Map<List<Goal>>(expiredEntities);
 
             // thie dictionary holds int value for the ParentGoalId and List<GoalDomain> with the goals that share the same parent goal
             var childGoals = expiredGoals
@@ -151,7 +151,7 @@ namespace BucketProject.BLL.Business_Logic.Services
                 .GroupBy(g => g.ParentGoalId.Value)
                 .ToDictionary(g => g.Key, g => g.ToList());
 
-            foreach (GoalDomain goal in expiredGoals.Where(g => g.ParentGoalId == null))
+            foreach (Goal goal in expiredGoals.Where(g => g.ParentGoalId == null))
             {
                 if (!goal.Deadline.HasValue) continue;
 
@@ -188,37 +188,37 @@ namespace BucketProject.BLL.Business_Logic.Services
 
 
         private void AddToGroup(
-     Dictionary<string, Dictionary<string, Dictionary<string, List<GoalDomain>>>> group,
+     Dictionary<string, Dictionary<string, Dictionary<string, List<Goal>>>> group,
      string category,
      string key,
      string type,
-     GoalDomain goal)
+     Goal goal)
         {
             if (!group.ContainsKey(category))
-                group[category] = new Dictionary<string, Dictionary<string, List<GoalDomain>>>();
+                group[category] = new Dictionary<string, Dictionary<string, List<Goal>>>();
 
             if (!group[category].ContainsKey(key))
-                group[category][key] = new Dictionary<string, List<GoalDomain>>();
+                group[category][key] = new Dictionary<string, List<Goal>>();
 
             if (!group[category][key].ContainsKey(type))
-                group[category][key][type] = new List<GoalDomain>();
+                group[category][key][type] = new List<Goal>();
 
             group[category][key][type].Add(goal);
         }
 
-        public async Task<List<GoalDomain>> BreakDownGoalAsync(int goalId)
+        public async Task<List<Goal>> BreakDownGoalAsync(int goalId)
         {
-            Goal entity = _goalRepo.GetGoalById(goalId);
+            GoalEntity entity = _goalRepo.GetGoalById(goalId);
             if (entity == null || string.IsNullOrWhiteSpace(entity.Description))
                 throw new ArgumentException("Invalid goal.");
 
-            GoalDomain goal = _mapper.Map<GoalDomain>(entity);
+            Goal goal = _mapper.Map<Goal>(entity);
 
             List<string> subGoalDescriptions = await _aIClient.BreakDownTextIntoGoalsAsync(goal.Description, goal.Category);
 
-            List<GoalDomain> subGoals = subGoalDescriptions.Select(desc =>
+            List<Goal> subGoals = subGoalDescriptions.Select(desc =>
             {
-                GoalDomain subGoal = _mapper.Map<GoalDomain>(entity);
+                Goal subGoal = _mapper.Map<Goal>(entity);
 
                 subGoal.UpdateDescription(desc);
                 return subGoal;

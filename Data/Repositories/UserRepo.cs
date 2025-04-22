@@ -20,7 +20,7 @@ namespace BucketProject.DAL.Data.Repositories
             _passwordHasher = passwordHasher;
         }
 
-        public bool Register(User user)
+        public bool Register(UserEntity user)
         {
                using SqlConnection connection = GetSqlConnection();
                 connection.Open();
@@ -58,7 +58,7 @@ namespace BucketProject.DAL.Data.Repositories
             
         }
 
-        public User? ValidateUser(string username, string password)
+        public UserEntity? ValidateUser(string username, string password)
         {
             try
             {
@@ -84,7 +84,7 @@ namespace BucketProject.DAL.Data.Repositories
 
                                 if (isValid)
                                 {
-                                    return new User(
+                                    return new UserEntity(
                                       (int)reader["UserId"],
                                       reader["Username"].ToString(),
                                       reader["Email"].ToString(),
@@ -117,7 +117,7 @@ namespace BucketProject.DAL.Data.Repositories
 
 
 
-        public void AddPhoto(User user, byte[] picture)
+        public void AddPhoto(UserEntity user, byte[] picture)
         {
             try
             {
@@ -146,7 +146,7 @@ namespace BucketProject.DAL.Data.Repositories
             }
         }
 
-        public void UpdateName(User user, string username)
+        public void UpdateName(UserEntity user, string username)
         {
             try
             {
@@ -174,7 +174,7 @@ namespace BucketProject.DAL.Data.Repositories
                 throw new Exception($"An unexpected error occurred in: {ex.Message}", ex);
             }
         }
-        public void UpdateEmail(User user, string email)
+        public void UpdateEmail(UserEntity user, string email)
         {
             try
             {
@@ -261,7 +261,7 @@ namespace BucketProject.DAL.Data.Repositories
         }
 
 
-        public User? GetUserByUsername(string username)
+        public UserEntity? GetUserByUsername(string username)
         {
             try
             {
@@ -282,7 +282,7 @@ namespace BucketProject.DAL.Data.Repositories
                         {
                             if (reader.Read())
                             {
-                                return new User(
+                                return new UserEntity(
                                  id: (int)reader["UserId"],
                                  username: reader["Username"].ToString(),
                                  email: reader["Email"].ToString(),

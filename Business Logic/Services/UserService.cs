@@ -30,7 +30,7 @@ namespace BucketProject.BLL.Business_Logic.Services
             if (string.IsNullOrWhiteSpace(password))
                 throw new ArgumentException("Enter a password");
 
-            User user = _userRepo.ValidateUser(username, password);
+            UserEntity user = _userRepo.ValidateUser(username, password);
 
             if (user == null)
                 return null;
@@ -43,7 +43,7 @@ namespace BucketProject.BLL.Business_Logic.Services
         public bool Register(UserDomain userDomain)
         {
            
-          User user = _mapper.Map<User>(userDomain);
+          UserEntity user = _mapper.Map<UserEntity>(userDomain);
           return _userRepo.Register(user);
         }
 
@@ -51,7 +51,7 @@ namespace BucketProject.BLL.Business_Logic.Services
         {
             string? username = _contextAccessor.HttpContext.Session.GetString("Username");
 
-            User user = _userRepo.GetUserByUsername(username);
+            UserEntity user = _userRepo.GetUserByUsername(username);
             UserDomain userDomain = _mapper.Map<UserDomain>(user);
 
 
@@ -63,7 +63,7 @@ namespace BucketProject.BLL.Business_Logic.Services
         {
             string? username = _contextAccessor.HttpContext.Session.GetString("Username");
 
-            User user = _userRepo.GetUserByUsername(username);
+            UserEntity user = _userRepo.GetUserByUsername(username);
 
             _contextAccessor.HttpContext.Session.SetString("Username", newUsername);
 
@@ -78,7 +78,7 @@ namespace BucketProject.BLL.Business_Logic.Services
             string? username = _contextAccessor.HttpContext?.Session.GetString("Username");
 
 
-            User? user = _userRepo.GetUserByUsername(username);
+            UserEntity? user = _userRepo.GetUserByUsername(username);
 
             using (var memoryStream = new MemoryStream())
             {

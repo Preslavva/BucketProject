@@ -3,7 +3,7 @@ using BucketProject.DAL.Models.Enums;
 
 namespace BucketProject.DAL.Models.Entities;
 
-public class User
+public class UserEntity
 {
     public int Id { get; private set; }
     public string Username { get; private set; }
@@ -22,7 +22,7 @@ public class User
     public DateOnly CreatedAt { get; private set; } = DateOnly.FromDateTime(DateTime.Today);
 
 
-    public User(int id, string username, string email, string password, byte[] picture, string salt, string nationality, DateOnly dateOfBirth, string gender, DateOnly createdAt)
+    public UserEntity(int id, string username, string email, string password, byte[] picture, string salt, string nationality, DateOnly dateOfBirth, string gender, DateOnly createdAt)
     {
         this.Id = id;
         this.Username = username;
@@ -38,7 +38,7 @@ public class User
 
   
 
-    public User() { }
+    public UserEntity() { }
 
     public void UpdatePicture(byte[] newPicture)
     {

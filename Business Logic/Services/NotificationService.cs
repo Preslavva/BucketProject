@@ -32,19 +32,19 @@ namespace BucketProject.BLL.Business_Logic.Services
         }
 
 
-        public List<GoalDomain> CheckAndNotify(DateTime today)
+        public List<Goal> CheckAndNotify(DateTime today)
         {
-            List<GoalDomain> notifications = new List<GoalDomain>();
+            List<Goal> notifications = new List<Goal>();
 
             string? username = _contextAccessor.HttpContext.Session.GetString("Username");
             if (username == null)
                 return notifications;
 
             int userId = _goalRepo.GetIdOfUser(username);
-            List<Goal> goalEntities = _goalRepo.LoadGoalsOfUser(userId);
-            List<GoalDomain> goals = _mapper.Map<List<GoalDomain>>(goalEntities);
+            List<GoalEntity> goalEntities = _goalRepo.LoadGoalsOfUser(userId);
+            List<Goal> goals = _mapper.Map<List<Goal>>(goalEntities);
 
-            foreach (GoalDomain goal in goals)
+            foreach (Goal goal in goals)
             {
                 if (goal.IsDone)
                     continue;

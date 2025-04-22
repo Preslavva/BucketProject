@@ -10,16 +10,16 @@ namespace BucketProject.DAL.Data.InterfacesRepo;
     public interface IGoalRepo
     {
     int GetIdOfUser(string username);
-    void InsertGoalAndAssignToUser(int userId, Goal goal);
-    List<Goal> LoadGoalsOfUserbyCategory(int userId, Category category);
-    void UpdateGoalDescription(Goal goal);
-    void DeleteGoal(Goal goal);
-    void ChangeGoalStatus(Goal goal);
+    void InsertGoalAndAssignToUser(int userId, GoalEntity goal);
+    List<GoalEntity> LoadGoalsOfUserbyCategory(int userId, Category category);
+    void UpdateGoalDescription(GoalEntity goal);
+    void DeleteGoal(GoalEntity goal);
+    void ChangeGoalStatus(GoalEntity goal);
 
-    void PostponeGoal(Goal goal);
-    List<Goal> LoadExpiredGoalsOfUser(int userId);
-    List<Goal> LoadGoalsOfUser(int userId);
+    void PostponeGoal(GoalEntity goal);
+    List<GoalEntity> LoadExpiredGoalsOfUser(int userId);
+    List<GoalEntity> LoadGoalsOfUser(int userId);
 
-    Goal GetGoalById(int id);
-    List<Goal> LoadChildGoalsOfGoals(int goalId);
+    GoalEntity GetGoalById(int id);
+    List<GoalEntity> LoadChildGoalsOfGoals(int goalId);
 } 

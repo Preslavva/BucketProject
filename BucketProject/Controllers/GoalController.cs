@@ -36,20 +36,20 @@ namespace BucketProject.UI.BucketProject.Controllers
                 ViewBag.AvailableTypes = GetAvailableTypes();
                 TempData.Keep("SubGoals");
                 TempData.Keep("SubGoalForId");
-                return RedirectToAction("WeekGoals");
+                return RedirectToAction("MonthGoals");
             }
 
-            GoalDomain domainModel = _mapper.Map<GoalDomain>(viewModel);
+            Goal domainModel = _mapper.Map<Goal>(viewModel);
             _goalService.CreateGoal(domainModel);
 
             if (TempData.ContainsKey("SubGoals"))
             {
-                var raw = TempData["SubGoals"]?.ToString();
+                string? raw = TempData["SubGoals"]?.ToString();
                 if (!string.IsNullOrWhiteSpace(raw))
                 {
-                    var subGoals = JsonConvert.DeserializeObject<List<GoalViewModel>>(raw);
+                    List<GoalViewModel>? subGoals = JsonConvert.DeserializeObject<List<GoalViewModel>>(raw);
 
-                    var updated = subGoals
+                    List<GoalViewModel> updated = subGoals
                         .Where(g => !string.Equals(
                             g.Description?.Trim(),
                             viewModel.Description?.Trim(),
@@ -86,20 +86,20 @@ namespace BucketProject.UI.BucketProject.Controllers
                 ViewBag.AvailableTypes = GetAvailableTypes();
                 TempData.Keep("SubGoals");
                 TempData.Keep("SubGoalForId");
-                return RedirectToAction("WeekGoals");
+                return RedirectToAction("YearGoals");
             }
 
-            GoalDomain domainModel = _mapper.Map<GoalDomain>(viewModel);
+            Goal domainModel = _mapper.Map<Goal>(viewModel);
             _goalService.CreateGoal(domainModel);
 
             if (TempData.ContainsKey("SubGoals"))
             {
-                var raw = TempData["SubGoals"]?.ToString();
+                string? raw = TempData["SubGoals"]?.ToString();
                 if (!string.IsNullOrWhiteSpace(raw))
                 {
-                    var subGoals = JsonConvert.DeserializeObject<List<GoalViewModel>>(raw);
+                    List<GoalViewModel>? subGoals = JsonConvert.DeserializeObject<List<GoalViewModel>>(raw);
 
-                    var updated = subGoals
+                    List<GoalViewModel> updated = subGoals
                         .Where(g => !string.Equals(
                             g.Description?.Trim(),
                             viewModel.Description?.Trim(),
@@ -135,20 +135,20 @@ namespace BucketProject.UI.BucketProject.Controllers
                 ViewBag.AvailableTypes = GetAvailableTypes();
                 TempData.Keep("SubGoals");
                 TempData.Keep("SubGoalForId");
-                return RedirectToAction("WeekGoals");
+                return RedirectToAction("BucketListGoals");
             }
 
-            GoalDomain domainModel = _mapper.Map<GoalDomain>(viewModel);
+            Goal domainModel = _mapper.Map<Goal>(viewModel);
             _goalService.CreateGoal(domainModel);
 
             if (TempData.ContainsKey("SubGoals"))
             {
-                var raw = TempData["SubGoals"]?.ToString();
+                string? raw = TempData["SubGoals"]?.ToString();
                 if (!string.IsNullOrWhiteSpace(raw))
                 {
-                    var subGoals = JsonConvert.DeserializeObject<List<GoalViewModel>>(raw);
+                    List<GoalViewModel>? subGoals = JsonConvert.DeserializeObject<List<GoalViewModel>>(raw);
 
-                    var updated = subGoals
+                    List<GoalViewModel> updated = subGoals
                         .Where(g => !string.Equals(
                             g.Description?.Trim(),
                             viewModel.Description?.Trim(),
@@ -187,17 +187,17 @@ namespace BucketProject.UI.BucketProject.Controllers
                 return RedirectToAction("WeekGoals");
             }
 
-            GoalDomain domainModel = _mapper.Map<GoalDomain>(viewModel);
+            Goal domainModel = _mapper.Map<Goal>(viewModel);
             _goalService.CreateGoal(domainModel);
 
             if (TempData.ContainsKey("SubGoals"))
             {
-                var raw = TempData["SubGoals"]?.ToString();
+                string raw = TempData["SubGoals"]?.ToString();
                 if (!string.IsNullOrWhiteSpace(raw))
                 {
-                    var subGoals = JsonConvert.DeserializeObject<List<GoalViewModel>>(raw);
+                    List<GoalViewModel> subGoals = JsonConvert.DeserializeObject<List<GoalViewModel>>(raw);
 
-                    var updated = subGoals
+                    List<GoalViewModel> updated = subGoals
                         .Where(g => !string.Equals(
                             g.Description?.Trim(),
                             viewModel.Description?.Trim(),
@@ -228,7 +228,7 @@ namespace BucketProject.UI.BucketProject.Controllers
         [HttpPost]
         public IActionResult EditWeekGoal(GoalViewModel viewModel)
         {
-            GoalDomain newGoal = _mapper.Map<GoalDomain>(viewModel);
+            Goal newGoal = _mapper.Map<Goal>(viewModel);
 
             _goalService.UpdateGoal(viewModel.Id, newGoal);
 
@@ -239,7 +239,7 @@ namespace BucketProject.UI.BucketProject.Controllers
         [HttpPost]
         public IActionResult EditMonthGoal(GoalViewModel viewModel)
         {
-            GoalDomain newGoal = _mapper.Map<GoalDomain>(viewModel);
+            Goal newGoal = _mapper.Map<Goal>(viewModel);
 
             _goalService.UpdateGoal(viewModel.Id, newGoal);
 
@@ -251,7 +251,7 @@ namespace BucketProject.UI.BucketProject.Controllers
         public IActionResult EditYearGoal(GoalViewModel viewModel)
         {
 
-            GoalDomain newGoal = _mapper.Map<GoalDomain>(viewModel);
+            Goal newGoal = _mapper.Map<Goal>(viewModel);
 
             _goalService.UpdateGoal(viewModel.Id, newGoal);
 
@@ -262,7 +262,7 @@ namespace BucketProject.UI.BucketProject.Controllers
         [HttpPost]
         public IActionResult EdiBucketListGoal(GoalViewModel viewModel)
         {
-            GoalDomain newGoal = _mapper.Map<GoalDomain>(viewModel);
+            Goal newGoal = _mapper.Map<Goal>(viewModel);
 
             _goalService.UpdateGoal(viewModel.Id, newGoal);
 
@@ -304,7 +304,7 @@ namespace BucketProject.UI.BucketProject.Controllers
         [HttpGet]
         public IActionResult WeekGoals()
         {
-            List<GoalDomain> goalDomains = _goalService.LoadGoalsByCategory("Week");
+            List<Goal> goalDomains = _goalService.LoadGoalsByCategory("Week");
 
             List<GoalViewModel> viewModels = _mapper.Map<List<GoalViewModel>>(goalDomains);
 
@@ -319,9 +319,14 @@ namespace BucketProject.UI.BucketProject.Controllers
                     .ToList();
             }
 
+            var pageModel = new GoalsPageViewModel
+            {
+                Goals = parentGoals
+            };
+
             ViewBag.AvailableTypes = GetAvailableTypes();
 
-            return View(parentGoals);
+            return View(pageModel);
         }
 
 
@@ -360,7 +365,7 @@ namespace BucketProject.UI.BucketProject.Controllers
         [HttpGet]
         public IActionResult YearGoals()
         {
-            List<GoalDomain> goalDomains = _goalService.LoadGoalsByCategory("Year");
+            List<Goal> goalDomains = _goalService.LoadGoalsByCategory("Year");
 
             List<GoalViewModel> viewModels = _mapper.Map<List<GoalViewModel>>(goalDomains);
 
@@ -375,16 +380,21 @@ namespace BucketProject.UI.BucketProject.Controllers
                     .ToList();
             }
 
+            GoalsPageViewModel pageModel = new GoalsPageViewModel
+            {
+                Goals = parentGoals
+            };
+
             ViewBag.AvailableTypes = GetAvailableTypes();
 
-            return View(parentGoals);
+            return View(pageModel);
         }
 
         [HttpGet]
         public IActionResult BucketList()
         {
 
-            List<GoalDomain> goalDomains = _goalService.LoadGoalsByCategory("Bucket_list");
+            List<Goal> goalDomains = _goalService.LoadGoalsByCategory("Bucket_list");
 
             List<GoalViewModel> viewModels = _mapper.Map<List<GoalViewModel>>(goalDomains);
 
@@ -399,14 +409,19 @@ namespace BucketProject.UI.BucketProject.Controllers
                     .ToList();
             }
 
+            GoalsPageViewModel pageModel = new GoalsPageViewModel
+            {
+                Goals = parentGoals
+            };
+
             ViewBag.AvailableTypes = GetAvailableTypes();
 
-            return View(parentGoals);
+            return View(pageModel);
         }
         [HttpGet]
         public IActionResult MonthGoals()
         {
-            List<GoalDomain> goalDomains = _goalService.LoadGoalsByCategory("Month");
+            List<Goal> goalDomains = _goalService.LoadGoalsByCategory("Month");
 
             List<GoalViewModel> viewModels = _mapper.Map<List<GoalViewModel>>(goalDomains);
 
@@ -421,15 +436,20 @@ namespace BucketProject.UI.BucketProject.Controllers
                     .ToList();
             }
 
+            GoalsPageViewModel pageModel = new GoalsPageViewModel
+            {
+                Goals = parentGoals
+            };
+
             ViewBag.AvailableTypes = GetAvailableTypes();
 
-            return View(parentGoals);
+            return View(pageModel);
         }
 
         [HttpGet]
         public IActionResult WeekGoalsPreview()
         {
-            List<GoalDomain> goalDomains = _goalService.LoadGoalsByCategory("Week");
+            List<Goal> goalDomains = _goalService.LoadGoalsByCategory("Week");
 
             List<GoalViewModel> viewModels = _mapper.Map<List<GoalViewModel>>(goalDomains);
 
@@ -444,15 +464,20 @@ namespace BucketProject.UI.BucketProject.Controllers
                     .ToList();
             }
 
+            GoalsPageViewModel pageModel = new GoalsPageViewModel
+            {
+                Goals = parentGoals
+            };
+
             ViewBag.AvailableTypes = GetAvailableTypes();
 
-            return View(parentGoals);
+            return View(pageModel);
         }
 
         [HttpGet]
         public IActionResult MonthGoalsPreview()
         {
-            List<GoalDomain> goalDomains = _goalService.LoadGoalsByCategory("Month");
+            List<Goal> goalDomains = _goalService.LoadGoalsByCategory("Month");
 
             List<GoalViewModel> viewModels = _mapper.Map<List<GoalViewModel>>(goalDomains);
 
@@ -467,15 +492,20 @@ namespace BucketProject.UI.BucketProject.Controllers
                     .ToList();
             }
 
+            GoalsPageViewModel pageModel = new GoalsPageViewModel
+            {
+                Goals = parentGoals
+            };
+
             ViewBag.AvailableTypes = GetAvailableTypes();
 
-            return View(parentGoals);
+            return View(pageModel);
         }
 
         [HttpGet]
         public IActionResult YearGoalsPreview()
         {
-            List<GoalDomain> goalDomains = _goalService.LoadGoalsByCategory("Year");
+            List<Goal> goalDomains = _goalService.LoadGoalsByCategory("Year");
 
             List<GoalViewModel> viewModels = _mapper.Map<List<GoalViewModel>>(goalDomains);
 
@@ -490,14 +520,19 @@ namespace BucketProject.UI.BucketProject.Controllers
                     .ToList();
             }
 
+            GoalsPageViewModel pageModel = new GoalsPageViewModel
+            {
+                Goals = parentGoals
+            };
+
             ViewBag.AvailableTypes = GetAvailableTypes();
 
-            return View(parentGoals);
+            return View(pageModel);
         }
 
         public async Task<IActionResult> BreakDownGoalWeek(int id)
         {
-            List<GoalDomain> subGoals = await _goalService.BreakDownGoalAsync(id); 
+            List<Goal> subGoals = await _goalService.BreakDownGoalAsync(id); 
 
             List<GoalViewModel> subGoalViewModels = _mapper.Map<List<GoalViewModel>>(subGoals); 
 
@@ -510,7 +545,7 @@ namespace BucketProject.UI.BucketProject.Controllers
         [HttpPost]
         public async Task<IActionResult> BreakDownGoalMonth(int id)
         {
-            List<GoalDomain> subGoals = await _goalService.BreakDownGoalAsync(id);
+            List<Goal> subGoals = await _goalService.BreakDownGoalAsync(id);
 
             List<GoalViewModel> subGoalViewModels = _mapper.Map<List<GoalViewModel>>(subGoals);
 
@@ -524,7 +559,7 @@ namespace BucketProject.UI.BucketProject.Controllers
         [HttpPost]
         public async Task<IActionResult> BreakDownGoalYear(int id)
         {
-            List<GoalDomain> subGoals = await _goalService.BreakDownGoalAsync(id);
+            List<Goal> subGoals = await _goalService.BreakDownGoalAsync(id);
 
             List<GoalViewModel> subGoalViewModels = _mapper.Map<List<GoalViewModel>>(subGoals);
 
@@ -538,7 +573,7 @@ namespace BucketProject.UI.BucketProject.Controllers
         [HttpPost]
         public async Task<IActionResult> BreakDownGoalBucketList(int id)
         {
-            List<GoalDomain> subGoals = await _goalService.BreakDownGoalAsync(id);
+            List<Goal> subGoals = await _goalService.BreakDownGoalAsync(id);
 
             List<GoalViewModel> subGoalViewModels = _mapper.Map<List<GoalViewModel>>(subGoals);
 

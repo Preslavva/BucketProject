@@ -5,8 +5,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-
-
 namespace BucketProject.UI.ViewModels.ViewModels
 {
     public class GoalViewModel

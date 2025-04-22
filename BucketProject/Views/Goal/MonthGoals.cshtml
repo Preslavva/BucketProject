@@ -1,17 +1,9 @@
-﻿@model List<GoalViewModel>
+﻿@model GoalsPageViewModel
 @using Newtonsoft.Json
 
 <h2>Monthly Goals</h2>
 
 @{
-    int total = Model.Sum(g => 1 + (g.Children?.Count ?? 0));
-    int accomplishedCount = Model.Sum(g =>
-        (g.IsDone ? 1 : 0) +
-        (g.Children?.Count(c => c.IsDone) ?? 0)
-    );
-    int remaining = total - accomplishedCount;
-
-
 
     var brokenDownGoals = TempData["SubGoals"] != null
         ? JsonConvert.DeserializeObject<List<GoalViewModel>>(TempData["SubGoals"].ToString())
@@ -27,9 +19,9 @@
 }
 
 <p>
-    <strong>Completed:</strong> @accomplishedCount /
-    <strong>Total:</strong> @total –
-    <strong>Remaining:</strong> @remaining
+    <strong>Completed:</strong> @Model.AccomplishedCount /
+    <strong>Total:</strong> @Model.Total &ndash;
+    <strong>Remaining:</strong> @Model.Remaining
 </p>
 
 <form method="post" asp-controller="Goal" asp-action="CreateMonthGoal">
@@ -49,7 +41,7 @@
 
 <hr />
 
-@foreach (GoalViewModel goal in Model)
+@foreach (GoalViewModel goal in Model.Goals)
 {
     <div class="goal-item" style="margin-bottom: 1em; padding: 0.5em; border: 1px solid #ccc;">
 

@@ -4,13 +4,13 @@ namespace BucketProject.DAL.Data.InterfacesRepo
 {
     public interface IUserRepo
     {
-        bool Register(User user);
-        User ValidateUser(string username, string password);
+        bool Register(UserEntity user);
+        UserEntity ValidateUser(string username, string password);
 
-        User? GetUserByUsername(string username);
+        UserEntity? GetUserByUsername(string username);
 
-        void UpdateName(User user, string username);
+        void UpdateName(UserEntity user, string username);
 
-        void AddPhoto(User user, byte[] pictute);
+        void AddPhoto(UserEntity user, byte[] pictute);
     }
 }

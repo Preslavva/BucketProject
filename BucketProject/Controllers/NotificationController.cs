@@ -29,7 +29,7 @@ namespace BucketProject.BLL.Business_Logic.Controllers
             ViewBag.Username = HttpContext.Session.GetString("Username");
 
             DateTime today = DateTime.Today;
-            List<GoalDomain> goalDomains = _notificationService.CheckAndNotify(today);
+            List<Goal> goalDomains = _notificationService.CheckAndNotify(today);
 
             List<NotificationViewModel> notifications = new List<NotificationViewModel>();
 

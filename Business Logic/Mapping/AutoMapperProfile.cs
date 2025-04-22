@@ -18,30 +18,30 @@ namespace BucketProject.BLL.Business_Logic.Mapping
         {
 
             CreateMap<RegisterViewModel, UserDomain>();
-            CreateMap<UserDomain, User>();
-            CreateMap<User, UserDomain>();
+            CreateMap<UserDomain, UserEntity>();
+            CreateMap<UserEntity, UserDomain>();
 
             CreateMap<UserDomain, UserViewModel>();
 
             CreateMap<LogInViewModel, UserDomain>();
 
-            CreateMap<Goal, GoalDomain>().ReverseMap();
+            CreateMap<GoalEntity, Goal>().ReverseMap();
 
 
 
-            CreateMap<GoalDomain, GoalViewModel>()
+            CreateMap<Goal, GoalViewModel>()
     .ForMember(dest => dest.Category, opt => opt.MapFrom(src => src.Category.ToString()))
     .ForMember(dest => dest.Type, opt => opt.MapFrom(src => src.Type.ToString()));
 
-            CreateMap<GoalViewModel, GoalDomain>()
+            CreateMap<GoalViewModel, Goal>()
                 .ForMember(dest => dest.Category, opt => opt.MapFrom(src => Enum.Parse<Category>(src.Category)))
                 .ForMember(dest => dest.Type, opt => opt.MapFrom(src => Enum.Parse<GoalType>(src.Type)));
 
-            CreateMap<GoalDomain, HistoryViewModel>()
+            CreateMap<Goal, HistoryViewModel>()
             .ForMember(dest => dest.Type, opt => opt.MapFrom(src => src.Type.ToString()))
             .ForMember(dest => dest.Category, opt => opt.MapFrom(src => src.Category.ToString()));
 
-            CreateMap<GoalDomain, NotificationViewModel>()
+            CreateMap<Goal, NotificationViewModel>()
     .ForMember(dest => dest.Type, opt => opt.MapFrom(src => src.Type.ToString()))
     .ForMember(dest => dest.Category, opt => opt.MapFrom(src => src.Category.ToString()))
     .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id));
