@@ -1,32 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AutoMapper;
+﻿using AutoMapper;
 using BucketProject.BLL.Business_Logic.Domain;
 using BucketProject.BLLBusiness_Logic.Domain;
-using BucketProject.DAL.Models.Entities;
 using BucketProject.DAL.Models.Enums;
 using BucketProject.UI.ViewModels.ViewModels;
 
-namespace BucketProject.BLL.Business_Logic.Mapping
+namespace BucketProject.UI.BucketProject.Mapping
 {
-    public class AutoMapperProfile: Profile
+    public class AutoMapperUI : Profile
     {
-        public AutoMapperProfile()
+        public AutoMapperUI()
         {
 
-            CreateMap<RegisterViewModel, UserDomain>();
-            CreateMap<UserDomain, UserEntity>();
-            CreateMap<UserEntity, UserDomain>();
+            CreateMap<RegisterViewModel, User>();
 
-            CreateMap<UserDomain, UserViewModel>();
+            CreateMap<User, UserViewModel>();
 
-            CreateMap<LogInViewModel, UserDomain>();
-
-            CreateMap<GoalEntity, Goal>().ReverseMap();
-
+            CreateMap<LogInViewModel, User>();
 
 
             CreateMap<Goal, GoalViewModel>()
@@ -49,3 +38,5 @@ namespace BucketProject.BLL.Business_Logic.Mapping
         }
     }
 }
+
+

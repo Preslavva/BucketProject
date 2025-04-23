@@ -1,11 +1,7 @@
 ﻿
-using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
 using BucketProject.BLL.Business_Logic.InterfacesService;
 using AutoMapper;
-using System.Net.Http.Headers;
-using System.Text.RegularExpressions;
-using System.Text;
 using Newtonsoft.Json;
 using BucketProject.BLL.Business_Logic.Domain;
 using BucketProject.UI.ViewModels.ViewModels;

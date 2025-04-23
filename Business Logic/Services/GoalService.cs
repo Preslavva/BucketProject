@@ -1,18 +1,12 @@
-﻿using System.Security.Claims;
-using BucketProject.BLL.Business_Logic.InterfacesService;
+﻿using BucketProject.BLL.Business_Logic.InterfacesService;
 using BucketProject.DAL.Data.InterfacesRepo;
 using BucketProject.DAL.Models.Enums;
 using Microsoft.AspNetCore.Http;
-using System.Globalization;
 using BucketProject.BLL.Business_Logic.Strategies;
 using AutoMapper;
-using BucketProject.UI.ViewModels.ViewModels;
 using BucketProject.DAL.Models.Entities;
 using BucketProject.BLL.Business_Logic.Domain;
-using System.Net.Http.Headers;
-using System.Text.RegularExpressions;
 using System.Text;
-using Microsoft.Extensions.Configuration;
 using BucketProjetc.BLL.Business_Logic.InterfacesService;
 
 

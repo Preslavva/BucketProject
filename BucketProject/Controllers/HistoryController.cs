@@ -1,6 +1,5 @@
-﻿using BucketProject.DAL.Models.Entities;
+﻿
 using BucketProject.BLL.Business_Logic.InterfacesService;
-using BucketProject.DAL.Models.Enums;
 using Microsoft.AspNetCore.Mvc;
 using BucketProject.UI.ViewModels.ViewModels;
 using AutoMapper;

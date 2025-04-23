@@ -1,12 +1,10 @@
 ﻿using System.Data;
 using System.Reflection;
 using BucketProject.DAL.Data.InterfacesRepo;
-using BucketProject.DAL.Data.Repositories;
 using BucketProject.DAL.Models.Entities;
 using BucketProject.DAL.Models.Enums;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace BucketProject.DAL.Data.Repositories;
 

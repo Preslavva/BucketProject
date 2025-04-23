@@ -1,17 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using BucketProject.UI.ViewModels.ViewModels;
+﻿using System.Text;
 using BucketProject.BLL.Business_Logic.Strategies;
 using BucketProject.BLL.Business_Logic.Domain;
 using BucketProject.DAL.Data.InterfacesRepo;
 using BucketProject.DAL.Models.Entities;
-
-
-
-
 using Microsoft.AspNetCore.Http;
 using AutoMapper;
 

@@ -1,12 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using BucketProject.BLL.Business_Logic.InterfacesService;
+﻿using BucketProject.BLL.Business_Logic.InterfacesService;
 using BucketProject.DAL.Models.Enums;
-using BucketProject.BLL.Business_Logic.Strategies;
 
 namespace BucketProject.BLL.Business_Logic.Strategies
 {

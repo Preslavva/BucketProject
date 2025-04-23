@@ -1,13 +1,12 @@
 using BucketProject.DAL.Data.InterfacesRepo;
 using BucketProject.BLL.Business_Logic.Services;
 using BucketProject.BLL.Business_Logic.InterfacesService;
-using BucketProject.Infrastructure.AI;
+using BucketProject.UI.BucketProject.Mapping;
 
 using BucketProject.DAL.Data.Repositories;
 using BucketProject.BLL.Business_Logic.Mapping;
 using BucketProjetc.BLL.Business_Logic.InterfacesService;
-using Microsoft.Extensions.Configuration;
-using System.Runtime;
+
 
 
 
@@ -36,10 +35,10 @@ builder.Services.AddScoped<GoalService>();
 builder.Services.AddScoped<IAIClient,AIClient>();
 builder.Services.AddHttpClient();
 
-
-
-
-builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
+builder.Services.AddAutoMapper(cfg => {
+    cfg.AddProfile<AutoMapperBL>();
+    cfg.AddProfile<AutoMapperUI>();
+});
 
 
 

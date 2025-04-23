@@ -1,12 +1,9 @@
 ﻿using System.Data;
 using System.Reflection;
-using System.Reflection.Metadata.Ecma335;
-using Azure.Identity;
 using BucketProject.DAL.Data.InterfacesRepo;
 using BucketProject.DAL.Models.Entities;
 using Microsoft.Data.SqlClient;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Configuration;;
 
 namespace BucketProject.DAL.Data.Repositories
 

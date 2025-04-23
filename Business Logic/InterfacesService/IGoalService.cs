@@ -1,6 +1,4 @@
-﻿
-using BucketProject.BLL.Business_Logic.Domain;
-using BucketProject.UI.ViewModels.ViewModels;
+﻿using BucketProject.BLL.Business_Logic.Domain;
 
 
 namespace BucketProject.BLL.Business_Logic.InterfacesService

@@ -1,6 +1,5 @@
 ﻿using BucketProject.DAL.Models.Enums;
 using BucketProject.DAL.Models.Entities;
-
 using BucketProject.BLL.Business_Logic.Strategies;
 using BucketProject.BLL.Business_Logic.InterfacesService;
 

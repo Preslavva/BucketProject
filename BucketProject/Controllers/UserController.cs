@@ -1,10 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using BucketProject.DAL.Models.Entities;
 using BucketProject.BLL.Business_Logic.InterfacesService;
 using BucketProject.BLLBusiness_Logic.Domain;
 using BucketProject.UI.ViewModels.ViewModels;
 using BucketProject.DAL.Data.InterfacesRepo;
-using System.Security.Claims;
 using AutoMapper;
 
 
@@ -37,7 +35,7 @@ namespace BucketProject.UI.BucketProject.Controllers
                 return View(user);
             }
 
-            UserDomain newUser = _mapper.Map<UserDomain>(user);
+            User newUser = _mapper.Map<User>(user);
 
             try
             {
@@ -68,7 +66,7 @@ namespace BucketProject.UI.BucketProject.Controllers
         {
             try
             {
-                UserDomain loggedUser = _mapper.Map<UserDomain>(user);
+                User loggedUser = _mapper.Map<User>(user);
                 loggedUser = _userService.LogIn(user.Username, user.Password);
 
                 if (loggedUser != null)
@@ -95,7 +93,7 @@ namespace BucketProject.UI.BucketProject.Controllers
         public IActionResult Account()
         {
 
-            UserDomain userDomain = _userService.GetUserByUsername();
+            User userDomain = _userService.GetUserByUsername();
 
             UserViewModel userViewModel = _mapper.Map<UserViewModel>(userDomain);
 

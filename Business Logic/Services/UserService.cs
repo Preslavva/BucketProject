@@ -1,13 +1,10 @@
 ﻿using BucketProject.BLL.Business_Logic.InterfacesService;
 using BucketProject.BLLBusiness_Logic.Domain;
-
-
 using BucketProject.DAL.Data.InterfacesRepo;
 using BucketProject.DAL.Models.Entities;
-using BucketProject.UI.ViewModels.ViewModels;
 using Microsoft.AspNetCore.Http;
 using AutoMapper;
-using Microsoft.IdentityModel.Tokens;
+
 
 namespace BucketProject.BLL.Business_Logic.Services
 {
@@ -25,7 +22,7 @@ namespace BucketProject.BLL.Business_Logic.Services
             _mapper = mapper;
         }
 
-        public UserDomain? LogIn(string username, string password)
+        public User? LogIn(string username, string password)
         {
             if (string.IsNullOrWhiteSpace(password))
                 throw new ArgumentException("Enter a password");
@@ -35,24 +32,24 @@ namespace BucketProject.BLL.Business_Logic.Services
             if (user == null)
                 return null;
 
-            return _mapper.Map<UserDomain>(user); 
+            return _mapper.Map<User>(user); 
         }
 
 
 
-        public bool Register(UserDomain userDomain)
+        public bool Register(User userDomain)
         {
            
           UserEntity user = _mapper.Map<UserEntity>(userDomain);
           return _userRepo.Register(user);
         }
 
-        public UserDomain GetUserByUsername()
+        public User GetUserByUsername()
         {
             string? username = _contextAccessor.HttpContext.Session.GetString("Username");
 
             UserEntity user = _userRepo.GetUserByUsername(username);
-            UserDomain userDomain = _mapper.Map<UserDomain>(user);
+            User userDomain = _mapper.Map<User>(user);
 
 
             return userDomain;
