@@ -14,14 +14,15 @@ public class UserEntity
     public string Salt { get; private set; }
 
     public string Nationality { get; private set; }
-    public DateOnly DateOfBirth { get; private set; }
+    public DateTime DateOfBirth { get; private set; }
 
     public string Gender { get; private set; }
 
     public DateOnly CreatedAt { get; private set; } = DateOnly.FromDateTime(DateTime.Today);
+    public string Role { get; private set; }
 
 
-    public UserEntity(int id, string username, string email, string password, byte[] picture, string salt, string nationality, DateOnly dateOfBirth, string gender, DateOnly createdAt)
+    public UserEntity(int id, string username, string email, string password, byte[] picture, string salt, string nationality, DateTime dateOfBirth, string gender, DateOnly createdAt, string role )
     {
         this.Id = id;
         this.Username = username;
@@ -33,12 +34,17 @@ public class UserEntity
         this.DateOfBirth = dateOfBirth; 
         this.Gender = gender;
         this.CreatedAt = createdAt;
+        this.Role = role;
     }
 
   
 
+    public UserEntity(int id, string username, byte[] picture) {
+        this.Id = id;
+        this.Username = username;
+        this.Picture = picture;
+    }
     public UserEntity() { }
-
     public void UpdatePicture(byte[] newPicture)
     {
         Picture = newPicture;

@@ -1,44 +1,39 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Reflection;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 
 namespace BucketProject.UI.ViewModels.ViewModels
 {
     public class RegisterViewModel
     {
+        
             [Required]
-            [Display(Name = "Username")]
             public string Username { get; set; }
 
-            [Required]
-            [EmailAddress]
-            [Display(Name = "Email")]
+            [Required, EmailAddress]
             public string Email { get; set; }
 
+            [Required, DataType(DataType.Date)]
+            public DateTime DateOfBirth { get; set; }      // <-- swapped to DateTime
+
             [Required]
-            [DataType(DataType.Date)]
-            [Display(Name = "Date of Birth")]
-            public DateOnly DateOfBirth { get; set; }
-            
-            [Required]
-            [Display(Name = "Nationality")]
             public string Nationality { get; set; }
-            
+
             [Required]
-            [Display(Name = "Gender")]
             public string Gender { get; set; }
 
-            [Required]
-            [StringLength(50, MinimumLength = 6)]
-            [DataType(DataType.Password)]
-            [Display(Name = "Password")]
+            [Required, StringLength(50, MinimumLength = 6), DataType(DataType.Password)]
             public string Password { get; set; }
 
-            [Required]
-            [Display(Name = "Confirm Password")]
-            [Compare("Password", ErrorMessage = "Passwords do not match.")]
+            [Required, Compare(nameof(Password))]
             public string ConfirmPassword { get; set; }
+
+            [ValidateNever]                                // <-- not validated
+            public IEnumerable<SelectListItem> Countries { get; set; }
         }
 
-    }
+    
+}
 

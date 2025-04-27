@@ -2,6 +2,7 @@
 using BucketProject.DAL.Models.Entities;
 using BucketProject.BLL.Business_Logic.Strategies;
 using BucketProject.BLL.Business_Logic.InterfacesService;
+using BucketProject.BLLBusiness_Logic.Domain;
 
 namespace BucketProject.BLL.Business_Logic.Domain;
 
@@ -70,9 +71,13 @@ public class Goal
 
     public int? ParentGoalId { get; private set; }
 
+    public int OwnerId { get; private set; }
+
     public List<Goal> Children { get; private set; } = new();
 
     public List<UserEntity> Users { get; private set; }
+    public List<User> Recipients { get; set; } = new();
+
 
 
     public void MarkAsDone()

@@ -26,6 +26,8 @@ namespace BucketProject.UI.BucketProject.Mapping
                 .ForMember(dest => dest.Category, opt => opt.MapFrom(src => Enum.Parse<Category>(src.Category)))
                 .ForMember(dest => dest.Type, opt => opt.MapFrom(src => Enum.Parse<GoalType>(src.Type)));
 
+
+
             CreateMap<Goal, HistoryViewModel>()
             .ForMember(dest => dest.Type, opt => opt.MapFrom(src => src.Type.ToString()))
             .ForMember(dest => dest.Category, opt => opt.MapFrom(src => src.Category.ToString()));

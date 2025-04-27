@@ -1,5 +1,6 @@
 ﻿@{
     var username = Context.Session.GetString("Username");
+    var role = Context.Session.GetString("Role");
     var hideHeaderFooter = ViewBag.HideHeaderFooter ?? false;
     var pageTitle = ViewData["Title"] ?? "BucketProject";
 }
@@ -17,49 +18,83 @@
     <link rel="stylesheet" href="~/BucketProject.styles.css" asp-append-version="true" />
 </head>
 <body>
+
     @if (!hideHeaderFooter)
     {
         <header>
-            <nav class="navbar navbar-expand-sm navbar-light bg-white border-bottom shadow-sm mb-3">
+            <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom shadow-sm mb-3">
                 <div class="container-fluid">
-                    <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">BucketProject</a>
-                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    @if (string.IsNullOrEmpty(username))
+                    {
+                        <a class="navbar-brand fw-bold" asp-area="" asp-controller="User" asp-action="LogIn">BucketProject</a>
+                    }
+                    else if (role?.Equals("User", StringComparison.OrdinalIgnoreCase) == true)
+                    {
+                        <a class="navbar-brand fw-bold" asp-area="" asp-controller="Home" asp-action="Index">BucketProject</a>
+
+                    }
+                    else if (role?.Equals("Manager", StringComparison.OrdinalIgnoreCase) == true)
+                    {
+                        <a class="navbar-brand fw-bold" asp-area="" asp-controller="Manager" asp-action="Manager">BucketProject</a>
+
+                    }
+
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
                         <span class="navbar-toggler-icon"></span>
                     </button>
 
-                    <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                        <ul class="navbar-nav flex-grow-1">
-                            @if (!string.IsNullOrEmpty(username))
+                    <div class="collapse navbar-collapse" id="mainNav">
+                        <ul class="navbar-nav ms-auto gap-lg-2">
+      
+                            @if (string.IsNullOrEmpty(username))
                             {
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-controller="Home" asp-action="Index">Home</a>
+                                    <a class="nav-link" asp-controller="User" asp-action="Register">Register</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-controller="Goal" asp-action="BucketList">BucketList</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-controller="User" asp-action="Account">Account</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-controller="History" asp-action="History">History</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-controller="Notification" asp-action="Notification">Notifications</a>
+                                    <a class="nav-link" asp-controller="User" asp-action="LogIn">Log in</a>
                                 </li>
                             }
-                            else
+                      
+                            else if (role?.Equals("User", StringComparison.OrdinalIgnoreCase) == true)
                             {
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-controller="User" asp-action="Register">Register</a>
+                                    <a class="nav-link" asp-controller="Home" asp-action="Index">Home</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-controller="User" asp-action="LogIn">LogIn</a>
+                                    <a class="nav-link" asp-controller="Goal" asp-action="BucketList">Bucket List</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="History" asp-action="History">History</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="Social" asp-action="Social">Social</a>
+                                </li>
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" href="#" id="accountMenu" role="button" data-bs-toggle="dropdown" aria-expanded="false">Account</a>
+                                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="accountMenu">
+                                        <li><a class="dropdown-item" asp-controller="User" asp-action="Account">Profile</a></li>
+                                        <li><a class="dropdown-item" asp-controller="Notification" asp-action="Notification">Notifications</a></li>
+                                        <li><hr class="dropdown-divider" /></li>
+                                        <li><a class="dropdown-item text-danger" asp-controller="User" asp-action="LogOut">Log out</a></li>
+                                    </ul>
+                                </li>
+                            }
+                      
+                            else if (role?.Equals("Manager", StringComparison.OrdinalIgnoreCase) == true)
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="Manager" asp-action="Manager">Manager Panel</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-danger" asp-controller="User" asp-action="LogOut">Log out</a>
                                 </li>
                             }
                         </ul>
                     </div>
                 </div>
             </nav>
+
         </header>
     }
 

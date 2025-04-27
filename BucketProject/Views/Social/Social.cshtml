@@ -1,0 +1,121 @@
+﻿@model SocialViewModel
+@{
+    ViewData["Title"] = "Social";
+    var searchTerm = ViewBag.SearchTerm as string ?? "";
+}
+
+<h2>Search Users</h2>
+<form asp-action="Social" method="get" class="mb-4">
+    <div class="input-group">
+        <input type="text"
+               name="searchTerm"
+               class="form-control"
+               placeholder="Type a username…"
+               value="@searchTerm" />
+        <button type="submit" class="btn btn-outline-secondary">
+             Search
+        </button>
+    </div>
+</form>
+
+<h2>Users You May Know</h2>
+@if (!Model.NonFriends.Any())
+{
+    <p>
+        @if (string.IsNullOrWhiteSpace(searchTerm))
+        {
+            <text>Looks like you’re already friends with everyone!</text>
+        }
+        else
+        {
+            <text>No non-friends match “@searchTerm”.</text>
+        }
+    </p>
+}
+else
+{
+    <ul class="list-group mb-4">
+        @foreach (var u in Model.NonFriends)
+        {
+            <li class="list-group-item d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center">
+                    @if (u.Picture != null)
+                    {
+                        var base64 = Convert.ToBase64String(u.Picture);
+                        var imgSrc = $"data:image/jpeg;base64,{base64}";
+                        <img src="@imgSrc"
+                             alt="@u.Username"
+                             class="rounded-circle me-2"
+                             style="width:32px; height:32px;" />
+                    }
+                    else
+                    {
+                        <img src="/images/default-avatar.png"
+                             alt="No avatar"
+                             class="rounded-circle me-2"
+                             style="width:32px; height:32px;" />
+                    }
+                    <span>@u.Username</span>
+                </div>
+                <form asp-action="AddFriend" method="post" class="m-0">
+                    <input type="hidden" name="friendId" value="@u.Id" />
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-sm btn-primary">
+                        Add Friend
+                    </button>
+                </form>
+            </li>
+        }
+    </ul>
+}
+
+<h2>Your Friends</h2>
+@if (!Model.Friends.Any())
+{
+    <p>
+        @if (string.IsNullOrWhiteSpace(searchTerm))
+        {
+            <text>You don’t have any friends yet.</text>
+        }
+        else
+        {
+            <text>No friends match “@searchTerm”.</text>
+        }
+    </p>
+}
+else
+{
+    <ul class="list-group">
+        @foreach (var f in Model.Friends)
+        {
+            <li class="list-group-item d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center">
+                    @if (f.Picture != null)
+                    {
+                        var base64 = Convert.ToBase64String(f.Picture);
+                        var imgSrc = $"data:image/jpeg;base64,{base64}";
+                        <img src="@imgSrc"
+                             alt="@f.Username"
+                             class="rounded-circle me-2"
+                             style="width:32px; height:32px;" />
+                    }
+                    else
+                    {
+                        <img src="/images/default-avatar.png"
+                             alt="No avatar"
+                             class="rounded-circle me-2"
+                             style="width:32px; height:32px;" />
+                    }
+                    <span>@f.Username</span>
+                </div>
+                <form asp-action="RemoveFriend" method="post" class="m-0">
+                    <input type="hidden" name="friendId" value="@f.Id" />
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-sm btn-danger">
+                        Remove Friend
+                    </button>
+                </form>
+            </li>
+        }
+    </ul>
+}

@@ -4,131 +4,254 @@
 <h2>Monthly Goals</h2>
 
 @{
-
     var brokenDownGoals = TempData["SubGoals"] != null
         ? JsonConvert.DeserializeObject<List<GoalViewModel>>(TempData["SubGoals"].ToString())
         : new List<GoalViewModel>();
-
     string subGoalForId = TempData["SubGoalForId"]?.ToString();
-
     if (brokenDownGoals.Any())
         TempData["SubGoals"] = JsonConvert.SerializeObject(brokenDownGoals);
-
     if (!string.IsNullOrEmpty(subGoalForId))
         TempData["SubGoalForId"] = subGoalForId;
 }
 
-<p>
-    <strong>Completed:</strong> @Model.AccomplishedCount /
-    <strong>Total:</strong> @Model.Total &ndash;
-    <strong>Remaining:</strong> @Model.Remaining
-</p>
-
 <form method="post" asp-controller="Goal" asp-action="CreateMonthGoal">
-    <input type="text" name="Description" placeholder="Enter your goal..." required />
+    <div class="input-container">
+        <input type="text" name="Description" required />
+        <label class="label">Enter Goal</label>
+        <div class="underline"></div>
+    </div>
     <input type="hidden" name="Category" value="Month" />
-
-    <select name="Type" required>
+    <select name="Type" required class="form-select mb-3">
         <option value="" disabled selected>Select goal type</option>
-        @foreach (var type in (List<string>)ViewBag.AvailableTypes ?? new List<string>())
+        @foreach (var type in (List<string>)ViewBag.AvailableTypes)
         {
             <option value="@type">@type</option>
         }
     </select>
 
-    <button type="submit">Add Goal</button>
+    <button class="btn btn-outline-secondary mb-2"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#friendsSelect"
+            aria-expanded="false"
+            aria-controls="friendsSelect">
+        Share With Friends
+    </button>
+
+    <div class="collapse mb-3" id="friendsSelect">
+        <label>Share With Friends:</label>
+        <ul class="list-unstyled">
+            @foreach (var f in (List<UserSummaryDTO>)ViewBag.Friends)
+            {
+                var imgSrc = f.Picture != null
+                ? $"data:image/jpeg;base64,{Convert.ToBase64String(f.Picture)}"
+                : Url.Content("~/images/default-avatar.png");
+
+                <li class="mb-1">
+                    <label class="d-flex align-items-center">
+                        <input type="checkbox"
+                               name="friendIds"
+                               value="@f.Id"
+                               class="form-check-input me-2" />
+                        <img src="@imgSrc"
+                             alt="@f.Username"
+                             class="rounded-circle me-2"
+                             style="width:24px; height:24px;" />
+                        <span>@f.Username</span>
+                    </label>
+                </li>
+            }
+        </ul>
+    </div>
+
+
+    <button type="submit" class="btn btn-primary mb-4">Add Goal</button>
 </form>
 
 <hr />
 
-@foreach (GoalViewModel goal in Model.Goals)
-{
-    <div class="goal-item" style="margin-bottom: 1em; padding: 0.5em; border: 1px solid #ccc;">
+<ul class="nav nav-tabs mb-4" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active"
+                id="personal-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#personal"
+                type="button">
+            Personal (@Model.Goals.Count)
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link"
+                id="shared-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#shared"
+                type="button">
+            Shared (@Model.SharedGoals.Count)
+        </button>
+    </li>
+</ul>
+
+<div class="tab-content">
 
 
-        <form method="post" asp-action="EditMonthGoal" class="goal-form" style="display: inline;">
-            <input type="hidden" name="Id" value="@goal.Id" />
-            <input type="text" name="Description" value="@goal.Description" required />
-            <button type="submit">Save changes</button>
-        </form>
+    <div class="tab-pane fade show active" id="personal" role="tabpanel">
+        <p>
+            <strong>Completed:</strong> @Model.AccomplishedCountPersonal /
+            <strong>Total:</strong> @Model.TotalPersonal –
+            <strong>Remaining:</strong> @Model.RemainingPersonal
+        </p>
 
-        <form method="post" asp-action="ChangeGoalStatusMonth" id="goalForm-@goal.Id" style="display: inline;">
-            <input type="hidden" name="Id" value="@goal.Id" />
-            <label style="margin-left: 10px;">
-                <input type="checkbox" name="isDone" value="true" @(goal.IsDone ? "checked" : "") onchange="this.form.submit()" />
-                Done
-            </label>
-        </form>
-
-        <form method="post" asp-action="DeleteGoalMonth" style="display: inline;">
-            <input type="hidden" name="Id" value="@goal.Id" />
-            <button type="submit" class="delete-btn" style="margin-left: 10px;">Delete</button>
-        </form>
-
-        <form method="post" asp-action="BreakDownGoalMonth" asp-controller="Goal" style="display: inline;">
-            <input type="hidden" name="id" value="@goal.Id" />
-            <button type="submit" class="btn btn-secondary" style="margin-left: 10px;">Break Down</button>
-        </form>
-
-        @if (subGoalForId == goal.Id.ToString() && brokenDownGoals.Count > 0)
+        @foreach (var goal in Model.Goals)
         {
-            <div style="margin-top: 1em; padding: 0.5em; background-color: #f9f9f9;">
-                <h5>Breakdown</h5>
-                <div id="subGoalContainer-@goal.Id">
-                    @foreach (var sub in brokenDownGoals)
-                    {
-                        <div class="sub-goal-entry" style="display: flex; align-items: center; gap: 10px; margin-bottom: 0.5em;">
+            <div class="goal-item mb-3 p-2 border">
+              
 
-                            <form method="post" asp-controller="Goal" asp-action="CreateMonthGoal" style="display: flex; align-items: center; gap: 10px;">
-                                <input type="text" name="Description" value="@sub.Description" class="form-control w-100" />
-                                <input type="hidden" name="OriginalDescription" value="@sub.Description" />
-                                <input type="hidden" name="Category" value="Month" />
-                                <input type="hidden" name="Type" value="@goal.Type" />
-                                <input type="hidden" name="ParentGoalId" value="@goal.Id" />
-                                <button type="submit" class="btn btn-sm btn-success">Add Goal</button>
-                            </form>
+                <form method="post" asp-action="EditMonthGoal" style="display:inline;">
+                    <input type="hidden" name="Id" value="@goal.Id" />
+                    <input type="text" name="Description" value="@goal.Description" required />
+                    <button type="submit">Edit</button>
+                </form>
+                <form method="post" asp-action="ChangeGoalStatusMonth" style="display:inline; margin-left:10px;">
+                    <input type="hidden" name="Id" value="@goal.Id" />
+                    <label>
+                        <input type="checkbox"
+                               name="isDone" value="true"
+                        @(goal.IsDone ? "checked" : "")
+                               onchange="this.form.submit()" />
+                        Done
+                    </label>
+                </form>
+                <form method="post" asp-action="DeleteGoalMonth" style="display:inline; margin-left:10px;">
+                    <input type="hidden" name="Id" value="@goal.Id" />
+                    <button type="submit">Delete</button>
+                </form>
+                <form method="post" asp-action="BreakDownGoalMonth" asp-controller="Goal" style="display:inline; margin-left:10px;">
+                    <input type="hidden" name="id" value="@goal.Id" />
+                    <button type="submit">Break Down</button>
+                </form>
 
-                            <form method="post" asp-controller="Goal" asp-action="RemoveSubGoalFromBreakdownMonth" style="display:inline;">
-                                <input type="hidden" name="description" value="@sub.Description" />
-                                <button type="submit" class="btn btn-sm btn-danger">Remove</button>
-                            </form>
-
-                        </div>
-                    }
-
-                </div>
-            </div>
-        }
-
-        @if (goal.Children?.Any() == true)
-        {
-            <div class="sub-goals" style="margin-left: 2em; margin-top: 1em; border-left: 2px dashed #ccc; padding-left: 1em;">
-                @foreach (var sub in goal.Children)
+              
+                @if (subGoalForId == goal.Id.ToString() && brokenDownGoals.Any())
                 {
-                    <div class="sub-goal" style="margin-bottom: 0.5em;">
+                    <div class="mt-2 p-2 bg-light">
+                        @foreach (var sub in brokenDownGoals)
+                        {
+                            <div class="d-flex align-items-center mb-1">
+                                <form method="post" asp-action="CreatMonthGoal" class="d-flex me-2">
+                                    <input type="text" name="Description" value="@sub.Description" required />
+                                    <input type="hidden" name="OriginalDescription" value="@sub.Description" />
+                                    <input type="hidden" name="Category" value="Month" />
+                                    <input type="hidden" name="Type" value="@goal.Type" />
+                                    <input type="hidden" name="ParentGoalId" value="@goal.Id" />
+                                    <button type="submit">Add</button>
+                                </form>
+                                <form method="post" asp-action="RemoveSubGoalFromBreakdownMonth">
+                                    <input type="hidden" name="description" value="@sub.Description" />
+                                    <button type="submit">Remove</button>
+                                </form>
+                            </div>
+                        }
+                    </div>
+                }
 
-                        <form method="post" asp-action="EditMonthGoal" style="display: inline;">
-                            <input type="hidden" name="Id" value="@sub.Id" />
-                            <input type="text" name="Description" value="@sub.Description" required />
-                            <button type="submit">Save changes</button>
-                        </form>
-
-                        <form method="post" asp-action="ChangeGoalStatusMonth" style="display: inline;">
-                            <input type="hidden" name="Id" value="@sub.Id" />
-                            <label style="margin-left: 10px;">
-                                <input type="checkbox" name="isDone" value="true" @(sub.IsDone ? "checked" : "") onchange="this.form.submit()" />
-                                Done
-                            </label>
-                        </form>
-
-                        <form method="post" asp-action="DeleteGoalMonth" style="display: inline;">
-                            <input type="hidden" name="Id" value="@sub.Id" />
-                            <button type="submit" class="delete-btn" style="margin-left: 10px;">Delete</button>
-                        </form>
-
+               
+                @if (goal.Children?.Any() == true)
+                {
+                    <div class="ms-4 mt-2 border-start ps-3">
+                        @foreach (var sub in goal.Children)
+                        {
+                            <div class="mb-1">
+                                <form method="post" asp-action="EditMonthGoal" style="display:inline;">
+                                    <input type="hidden" name="Id" value="@sub.Id" />
+                                    <input type="text" name="Description" value="@sub.Description" required />
+                                    <button type="submit">Save</button>
+                                </form>
+                                <form method="post" asp-action="ChangeGoalStatusMonth" style="display:inline; margin-left:10px;">
+                                    <input type="hidden" name="Id" value="@sub.Id" />
+                                    <label>
+                                        <input type="checkbox"
+                                               name="isDone" value="true"
+                                        @(sub.IsDone ? "checked" : "")
+                                               onchange="this.form.submit()" />
+                                        Done
+                                    </label>
+                                </form>
+                                <form method="post" asp-action="DeleteGoalMonth" style="display:inline; margin-left:10px;">
+                                    <input type="hidden" name="Id" value="@sub.Id" />
+                                    <button type="submit">Delete</button>
+                                </form>
+                            </div>
+                        }
                     </div>
                 }
             </div>
         }
     </div>
-}
+
+    <div class="tab-pane fade" id="shared" role="tabpanel">
+        <p>
+            <strong>Completed:</strong> @Model.AccomplishedCountShared /
+            <strong>Total:</strong> @Model.TotalShared –
+            <strong>Remaining:</strong> @Model.RemainingShared
+        </p>
+
+        @if (!Model.SharedGoals.Any())
+        {
+            <p>No shared goals this week.</p>
+        }
+        else
+        {
+            @foreach (var goal in Model.SharedGoals)
+            {
+                <div class="goal-item mb-3 p-2 border">
+
+                    <form method="post" asp-action="ChangeGoalStatusMonth" style="display:inline;">
+                        <input type="hidden" name="Id" value="@goal.Id" />
+                        <label>
+                            <input type="checkbox"
+                                   name="isDone"
+                                   value="true"
+                            @(goal.IsDone ? "checked" : "")
+                                   onchange="this.form.submit()" />
+                            Done
+                        </label>
+                    </form>
+
+                    <span class="mx-2">@goal.Description</span>
+
+                    <div class="mt-2">
+                        <strong>Also shared with:</strong>
+                        @if (goal.Recipients == null || !goal.Recipients.Any())
+                        {
+                            <span class="text-muted">no one else</span>
+                        }
+                        else
+                        {
+                            <ul class="list-inline mb-0">
+                                @foreach (var u in goal.Recipients)
+                                {
+
+                                    var imgSrc = u.Picture != null
+                                    ? $"data:image/jpeg;base64,{Convert.ToBase64String(u.Picture)}"
+                                    : Url.Content("~/images/default-avatar.png");
+
+                                    <li class="list-inline-item text-center me-2">
+                                        <img src="@imgSrc"
+                                             alt="@u.Username"
+                                             class="rounded-circle mb-1"
+                                             style="width:32px; height:32px;" />
+                                        <br />
+                                        <small>@u.Username</small>
+                                    </li>
+                                }
+                            </ul>
+                        }
+                    </div>
+
+                </div>
+            }
+
+        }
+    </div>
+
+</div>

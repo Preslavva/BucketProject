@@ -1,12 +1,15 @@
 ﻿using BucketProject.BLL.Business_Logic.Domain;
+using BucketProject.DAL.Models.Enums;
 
 
 namespace BucketProject.BLL.Business_Logic.InterfacesService
 {
     public interface IGoalService
     {
-        void CreateGoal(Goal goal);
-        List<Goal> LoadGoalsByCategory(string category);
+        void CreateGoal(Goal goalDomain, IEnumerable<int> sharedWithUserIds);
+        List<Goal> LoadPersonalGoalsByCategory(string category);
+        List<Goal> LoadSharedGoalsByCategory(string category);
+
         void UpdateGoal(int goalId, Goal goalDomain);
         void DeleteGoal(int goalId);
         void PostponeGoal(int goalId);
@@ -15,6 +18,7 @@ namespace BucketProject.BLL.Business_Logic.InterfacesService
 
         Dictionary<string, Dictionary<string, Dictionary<string, List<Goal>>>> LoadGroupedExpiredGoals();
         Task<List<Goal>> BreakDownGoalAsync(int goalId);
+         
 
     }
 }

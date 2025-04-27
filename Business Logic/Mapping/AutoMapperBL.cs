@@ -12,8 +12,10 @@ namespace BucketProject.BLL.Business_Logic.Mapping
         public AutoMapperBL()
         {
             CreateMap<User, UserEntity>().ReverseMap();
-            //CreateMap<UserEntity, User>();
             CreateMap<GoalEntity, Goal>().ReverseMap();
+            CreateMap<UserEntity, UserSummaryDTO>();
+            CreateMap<User, UserSummaryDTO>();
+
 
 
         }

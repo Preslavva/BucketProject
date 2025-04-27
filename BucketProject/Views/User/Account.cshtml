@@ -58,5 +58,8 @@ else
 
 <div class="form-group">
     <label>Date of Birth</label>
-    <input type="email" value="@Model.DateOfBirth" readonly class="form-control" />
+    <input type="text"
+           value="@Model.DateOfBirth.ToString("yyyy-MM-dd")"
+           readonly
+           class="form-control" />
 </div>

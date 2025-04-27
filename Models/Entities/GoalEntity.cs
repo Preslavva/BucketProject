@@ -24,12 +24,14 @@ namespace BucketProject.DAL.Models.Entities
 
         public bool IsPostponed { get; set; }
         public int? ParentGoalId { get; set; }
+        public int OwnerId { get; set; }
 
         public List<GoalEntity> Children { get; private set; } = new();
 
         public List<UserEntity> Users { get; set; } = new List<UserEntity>();
+        public List<UserEntity> Recipients { get; set; } = new();
 
-        public GoalEntity(int id, Category category, GoalType type, string description, DateTime createdAt, DateTime? deadline, DateTime? completedAt, bool isDone, bool isDeleted, bool isPostponed, int? parentGoalId)
+        public GoalEntity(int id, Category category, GoalType type, string description, DateTime createdAt, DateTime? deadline, DateTime? completedAt, bool isDone, bool isDeleted, bool isPostponed, int? parentGoalId, int ownerId)
         {
             this.Id = id;
             this.Category = category;
@@ -42,6 +44,7 @@ namespace BucketProject.DAL.Models.Entities
             this.CompletedAt = completedAt;
             this.IsPostponed = isPostponed;
             this.ParentGoalId = parentGoalId;
+            this.OwnerId = ownerId;
 
         }
 

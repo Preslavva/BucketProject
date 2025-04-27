@@ -5,6 +5,8 @@ using AutoMapper;
 using Newtonsoft.Json;
 using BucketProject.BLL.Business_Logic.Domain;
 using BucketProject.UI.ViewModels.ViewModels;
+using BucketProjetc.BLL.Business_Logic.InterfacesService;
+using BucketProject.BLLBusiness_Logic.Domain;
 
 namespace BucketProject.UI.BucketProject.Controllers
 {
@@ -13,37 +15,53 @@ namespace BucketProject.UI.BucketProject.Controllers
         private readonly IGoalService _goalService;
         private readonly IMapper _mapper;
         private readonly IConfiguration _configuration;
+        private readonly ISocialService _socialService;
+        private readonly IUserService _userService;
 
-        public GoalController(IGoalService goalService, IMapper mapper, IConfiguration configuration)
+
+
+        public GoalController(IGoalService goalService, IMapper mapper, IConfiguration configuration, ISocialService socialService, IUserService userService)
         {
             _goalService = goalService;
             _mapper = mapper;
             _configuration = configuration;
+            _socialService = socialService;
+            _userService = userService;
+
+        }
+        private int CurrentUserId
+        {
+            get
+            {
+
+                User currentUser = _userService.GetUserByUsername();
+                return currentUser.Id;
+            }
         }
 
-        
         [HttpPost]
-        public IActionResult CreateMonthGoal(GoalViewModel viewModel)
+        public IActionResult CreateMonthGoal(GoalViewModel viewModel, int[] friendIds)
         {
             viewModel.Category = "Month";
 
             if (!ModelState.IsValid)
             {
                 ViewBag.AvailableTypes = GetAvailableTypes();
+                ViewBag.Friends = _socialService.GetFriends(CurrentUserId);
                 TempData.Keep("SubGoals");
                 TempData.Keep("SubGoalForId");
                 return RedirectToAction("MonthGoals");
             }
 
             Goal domainModel = _mapper.Map<Goal>(viewModel);
-            _goalService.CreateGoal(domainModel);
+            _goalService.CreateGoal(domainModel, friendIds);
 
             if (TempData.ContainsKey("SubGoals"))
             {
-                string? raw = TempData["SubGoals"]?.ToString();
+                string raw = TempData["SubGoals"]?.ToString();
                 if (!string.IsNullOrWhiteSpace(raw))
                 {
-                    List<GoalViewModel>? subGoals = JsonConvert.DeserializeObject<List<GoalViewModel>>(raw);
+                    List<GoalViewModel> subGoals = JsonConvert.DeserializeObject<List<GoalViewModel>>(raw);
 
                     List<GoalViewModel> updated = subGoals
                         .Where(g => !string.Equals(
@@ -73,27 +91,29 @@ namespace BucketProject.UI.BucketProject.Controllers
 
 
         [HttpPost]
-        public IActionResult CreateYearGoal(GoalViewModel viewModel)
+        public IActionResult CreateYearGoal(GoalViewModel viewModel, int[] friendIds)
         {
             viewModel.Category = "Year";
+
 
             if (!ModelState.IsValid)
             {
                 ViewBag.AvailableTypes = GetAvailableTypes();
+                ViewBag.Friends = _socialService.GetFriends(CurrentUserId);
                 TempData.Keep("SubGoals");
                 TempData.Keep("SubGoalForId");
                 return RedirectToAction("YearGoals");
             }
 
             Goal domainModel = _mapper.Map<Goal>(viewModel);
-            _goalService.CreateGoal(domainModel);
+            _goalService.CreateGoal(domainModel, friendIds);
 
             if (TempData.ContainsKey("SubGoals"))
             {
-                string? raw = TempData["SubGoals"]?.ToString();
+                string raw = TempData["SubGoals"]?.ToString();
                 if (!string.IsNullOrWhiteSpace(raw))
                 {
-                    List<GoalViewModel>? subGoals = JsonConvert.DeserializeObject<List<GoalViewModel>>(raw);
+                    List<GoalViewModel> subGoals = JsonConvert.DeserializeObject<List<GoalViewModel>>(raw);
 
                     List<GoalViewModel> updated = subGoals
                         .Where(g => !string.Equals(
@@ -122,27 +142,28 @@ namespace BucketProject.UI.BucketProject.Controllers
         }
 
         [HttpPost]
-        public IActionResult CreateBucketListGoal(GoalViewModel viewModel)
+        public IActionResult CreateBucketListGoal(GoalViewModel viewModel, int[] friendIds)
         {
-            viewModel.Category = "Week";
+            viewModel.Category = "Bucket_list";
 
             if (!ModelState.IsValid)
             {
                 ViewBag.AvailableTypes = GetAvailableTypes();
+                ViewBag.Friends = _socialService.GetFriends(CurrentUserId);
                 TempData.Keep("SubGoals");
                 TempData.Keep("SubGoalForId");
                 return RedirectToAction("BucketListGoals");
             }
 
             Goal domainModel = _mapper.Map<Goal>(viewModel);
-            _goalService.CreateGoal(domainModel);
+            _goalService.CreateGoal(domainModel, friendIds);
 
             if (TempData.ContainsKey("SubGoals"))
             {
-                string? raw = TempData["SubGoals"]?.ToString();
+                string raw = TempData["SubGoals"]?.ToString();
                 if (!string.IsNullOrWhiteSpace(raw))
                 {
-                    List<GoalViewModel>? subGoals = JsonConvert.DeserializeObject<List<GoalViewModel>>(raw);
+                    List<GoalViewModel> subGoals = JsonConvert.DeserializeObject<List<GoalViewModel>>(raw);
 
                     List<GoalViewModel> updated = subGoals
                         .Where(g => !string.Equals(
@@ -166,25 +187,25 @@ namespace BucketProject.UI.BucketProject.Controllers
                     }
                 }
             }
-
             return RedirectToAction("BucketList");
         }
 
         [HttpPost]
-        public IActionResult CreateWeekGoal(GoalViewModel viewModel)
+        public IActionResult CreateWeekGoal(GoalViewModel viewModel, int[]friendIds)
         {
             viewModel.Category = "Week";
 
             if (!ModelState.IsValid)
             {
                 ViewBag.AvailableTypes = GetAvailableTypes();
+                ViewBag.Friends = _socialService.GetFriends(CurrentUserId);
                 TempData.Keep("SubGoals");
                 TempData.Keep("SubGoalForId");
                 return RedirectToAction("WeekGoals");
             }
 
             Goal domainModel = _mapper.Map<Goal>(viewModel);
-            _goalService.CreateGoal(domainModel);
+            _goalService.CreateGoal(domainModel,friendIds);
 
             if (TempData.ContainsKey("SubGoals"))
             {
@@ -295,35 +316,54 @@ namespace BucketProject.UI.BucketProject.Controllers
         }
 
 
-       
 
+
+    
         [HttpGet]
         public IActionResult WeekGoals()
         {
-            List<Goal> goalDomains = _goalService.LoadGoalsByCategory("Week");
+            List<Goal> personalDomains = _goalService.LoadPersonalGoalsByCategory("Week");
+            List<Goal> sharedDomains = _goalService.LoadSharedGoalsByCategory("Week");
 
-            List<GoalViewModel> viewModels = _mapper.Map<List<GoalViewModel>>(goalDomains);
+           
+            List<GoalViewModel> personalVMs = _mapper.Map<List<GoalViewModel>>(personalDomains);
+            List<GoalViewModel> sharedVMs = _mapper.Map<List<GoalViewModel>>(sharedDomains);
 
-            List<GoalViewModel> parentGoals = viewModels
+        
+            List<GoalViewModel> personalParents = personalVMs
                 .Where(g => g.ParentGoalId == null)
                 .ToList();
-
-            foreach (GoalViewModel goal in parentGoals)
+            foreach (var p in personalParents)
             {
-                goal.Children = viewModels
-                    .Where(g => g.ParentGoalId == goal.Id)
+                p.Children = personalVMs
+                    .Where(c => c.ParentGoalId == p.Id)
                     .ToList();
             }
 
-            var pageModel = new GoalsPageViewModel
+           
+            List<GoalViewModel> sharedParents = sharedVMs
+                .Where(g => g.ParentGoalId == null)
+                .ToList();
+            foreach (var p in sharedParents)
             {
-                Goals = parentGoals
+                p.Children = sharedVMs
+                    .Where(c => c.ParentGoalId == p.Id)
+                    .ToList();
+            }
+
+        
+            GoalsPageViewModel pageModel = new GoalsPageViewModel
+            {
+                Goals = personalParents,
+                SharedGoals = sharedParents
             };
 
             ViewBag.AvailableTypes = GetAvailableTypes();
+            ViewBag.Friends = _socialService.GetFriends(CurrentUserId);
 
             return View(pageModel);
         }
+
 
 
         [HttpPost]
@@ -361,27 +401,44 @@ namespace BucketProject.UI.BucketProject.Controllers
         [HttpGet]
         public IActionResult YearGoals()
         {
-            List<Goal> goalDomains = _goalService.LoadGoalsByCategory("Year");
+            List<Goal> personalDomains = _goalService.LoadPersonalGoalsByCategory("Year");
+            List<Goal> sharedDomains = _goalService.LoadSharedGoalsByCategory("Year");
 
-            List<GoalViewModel> viewModels = _mapper.Map<List<GoalViewModel>>(goalDomains);
 
-            List<GoalViewModel> parentGoals = viewModels
+            List<GoalViewModel> personalVMs = _mapper.Map<List<GoalViewModel>>(personalDomains);
+            List<GoalViewModel> sharedVMs = _mapper.Map<List<GoalViewModel>>(sharedDomains);
+
+
+            List<GoalViewModel> personalParents = personalVMs
                 .Where(g => g.ParentGoalId == null)
                 .ToList();
-
-            foreach (GoalViewModel goal in parentGoals)
+            foreach (var p in personalParents)
             {
-                goal.Children = viewModels
-                    .Where(g => g.ParentGoalId == goal.Id)
+                p.Children = personalVMs
+                    .Where(c => c.ParentGoalId == p.Id)
                     .ToList();
             }
 
+
+            List<GoalViewModel> sharedParents = sharedVMs
+                .Where(g => g.ParentGoalId == null)
+                .ToList();
+            foreach (var p in sharedParents)
+            {
+                p.Children = sharedVMs
+                    .Where(c => c.ParentGoalId == p.Id)
+                    .ToList();
+            }
+
+
             GoalsPageViewModel pageModel = new GoalsPageViewModel
             {
-                Goals = parentGoals
+                Goals = personalParents,
+                SharedGoals = sharedParents
             };
 
             ViewBag.AvailableTypes = GetAvailableTypes();
+            ViewBag.Friends = _socialService.GetFriends(CurrentUserId);
 
             return View(pageModel);
         }
@@ -390,54 +447,88 @@ namespace BucketProject.UI.BucketProject.Controllers
         public IActionResult BucketList()
         {
 
-            List<Goal> goalDomains = _goalService.LoadGoalsByCategory("Bucket_list");
+            List<Goal> personalDomains = _goalService.LoadPersonalGoalsByCategory("Bucket_list");
+            List<Goal> sharedDomains = _goalService.LoadSharedGoalsByCategory("Bucket_list");
 
-            List<GoalViewModel> viewModels = _mapper.Map<List<GoalViewModel>>(goalDomains);
 
-            List<GoalViewModel> parentGoals = viewModels
+            List<GoalViewModel> personalVMs = _mapper.Map<List<GoalViewModel>>(personalDomains);
+            List<GoalViewModel> sharedVMs = _mapper.Map<List<GoalViewModel>>(sharedDomains);
+
+
+            List<GoalViewModel> personalParents = personalVMs
                 .Where(g => g.ParentGoalId == null)
                 .ToList();
-
-            foreach (GoalViewModel goal in parentGoals)
+            foreach (var p in personalParents)
             {
-                goal.Children = viewModels
-                    .Where(g => g.ParentGoalId == goal.Id)
+                p.Children = personalVMs
+                    .Where(c => c.ParentGoalId == p.Id)
                     .ToList();
             }
 
+
+            List<GoalViewModel> sharedParents = sharedVMs
+                .Where(g => g.ParentGoalId == null)
+                .ToList();
+            foreach (var p in sharedParents)
+            {
+                p.Children = sharedVMs
+                    .Where(c => c.ParentGoalId == p.Id)
+                    .ToList();
+            }
+
+
             GoalsPageViewModel pageModel = new GoalsPageViewModel
             {
-                Goals = parentGoals
+                Goals = personalParents,
+                SharedGoals = sharedParents
             };
 
             ViewBag.AvailableTypes = GetAvailableTypes();
+            ViewBag.Friends = _socialService.GetFriends(CurrentUserId);
 
             return View(pageModel);
         }
         [HttpGet]
         public IActionResult MonthGoals()
         {
-            List<Goal> goalDomains = _goalService.LoadGoalsByCategory("Month");
+            List<Goal> personalDomains = _goalService.LoadPersonalGoalsByCategory("Month");
+            List<Goal> sharedDomains = _goalService.LoadSharedGoalsByCategory("Month");
 
-            List<GoalViewModel> viewModels = _mapper.Map<List<GoalViewModel>>(goalDomains);
 
-            List<GoalViewModel> parentGoals = viewModels
+            List<GoalViewModel> personalVMs = _mapper.Map<List<GoalViewModel>>(personalDomains);
+            List<GoalViewModel> sharedVMs = _mapper.Map<List<GoalViewModel>>(sharedDomains);
+
+
+            List<GoalViewModel> personalParents = personalVMs
                 .Where(g => g.ParentGoalId == null)
                 .ToList();
-
-            foreach (GoalViewModel goal in parentGoals)
+            foreach (var p in personalParents)
             {
-                goal.Children = viewModels
-                    .Where(g => g.ParentGoalId == goal.Id)
+                p.Children = personalVMs
+                    .Where(c => c.ParentGoalId == p.Id)
                     .ToList();
             }
 
+
+            List<GoalViewModel> sharedParents = sharedVMs
+                .Where(g => g.ParentGoalId == null)
+                .ToList();
+            foreach (var p in sharedParents)
+            {
+                p.Children = sharedVMs
+                    .Where(c => c.ParentGoalId == p.Id)
+                    .ToList();
+            }
+
+
             GoalsPageViewModel pageModel = new GoalsPageViewModel
             {
-                Goals = parentGoals
+                Goals = personalParents,
+                SharedGoals = sharedParents
             };
 
             ViewBag.AvailableTypes = GetAvailableTypes();
+            ViewBag.Friends = _socialService.GetFriends(CurrentUserId);
 
             return View(pageModel);
         }
@@ -445,27 +536,43 @@ namespace BucketProject.UI.BucketProject.Controllers
         [HttpGet]
         public IActionResult WeekGoalsPreview()
         {
-            List<Goal> goalDomains = _goalService.LoadGoalsByCategory("Week");
+            List<Goal> personalDomains = _goalService.LoadPersonalGoalsByCategory("Week");
+            List<Goal> sharedDomains = _goalService.LoadSharedGoalsByCategory("Week");
 
-            List<GoalViewModel> viewModels = _mapper.Map<List<GoalViewModel>>(goalDomains);
 
-            List<GoalViewModel> parentGoals = viewModels
+            List<GoalViewModel> personalVMs = _mapper.Map<List<GoalViewModel>>(personalDomains);
+            List<GoalViewModel> sharedVMs = _mapper.Map<List<GoalViewModel>>(sharedDomains);
+
+
+            List<GoalViewModel> personalParents = personalVMs
                 .Where(g => g.ParentGoalId == null)
                 .ToList();
-
-            foreach (GoalViewModel goal in parentGoals)
+            foreach (var p in personalParents)
             {
-                goal.Children = viewModels
-                    .Where(g => g.ParentGoalId == goal.Id)
+                p.Children = personalVMs
+                    .Where(c => c.ParentGoalId == p.Id)
                     .ToList();
             }
 
+
+            List<GoalViewModel> sharedParents = sharedVMs
+                .Where(g => g.ParentGoalId == null)
+                .ToList();
+            foreach (var p in sharedParents)
+            {
+                p.Children = sharedVMs
+                    .Where(c => c.ParentGoalId == p.Id)
+                    .ToList();
+            }
+
+
             GoalsPageViewModel pageModel = new GoalsPageViewModel
             {
-                Goals = parentGoals
+                Goals = personalParents,
+                SharedGoals = sharedParents
             };
 
-            ViewBag.AvailableTypes = GetAvailableTypes();
+           
 
             return View(pageModel);
         }
@@ -473,27 +580,41 @@ namespace BucketProject.UI.BucketProject.Controllers
         [HttpGet]
         public IActionResult MonthGoalsPreview()
         {
-            List<Goal> goalDomains = _goalService.LoadGoalsByCategory("Month");
+            List<Goal> personalDomains = _goalService.LoadPersonalGoalsByCategory("Month");
+            List<Goal> sharedDomains = _goalService.LoadSharedGoalsByCategory("Month");
 
-            List<GoalViewModel> viewModels = _mapper.Map<List<GoalViewModel>>(goalDomains);
 
-            List<GoalViewModel> parentGoals = viewModels
+            List<GoalViewModel> personalVMs = _mapper.Map<List<GoalViewModel>>(personalDomains);
+            List<GoalViewModel> sharedVMs = _mapper.Map<List<GoalViewModel>>(sharedDomains);
+
+
+            List<GoalViewModel> personalParents = personalVMs
                 .Where(g => g.ParentGoalId == null)
                 .ToList();
-
-            foreach (GoalViewModel goal in parentGoals)
+            foreach (var p in personalParents)
             {
-                goal.Children = viewModels
-                    .Where(g => g.ParentGoalId == goal.Id)
+                p.Children = personalVMs
+                    .Where(c => c.ParentGoalId == p.Id)
                     .ToList();
             }
 
+
+            List<GoalViewModel> sharedParents = sharedVMs
+                .Where(g => g.ParentGoalId == null)
+                .ToList();
+            foreach (var p in sharedParents)
+            {
+                p.Children = sharedVMs
+                    .Where(c => c.ParentGoalId == p.Id)
+                    .ToList();
+            }
+
+
             GoalsPageViewModel pageModel = new GoalsPageViewModel
             {
-                Goals = parentGoals
+                Goals = personalParents,
+                SharedGoals = sharedParents
             };
-
-            ViewBag.AvailableTypes = GetAvailableTypes();
 
             return View(pageModel);
         }
@@ -501,36 +622,50 @@ namespace BucketProject.UI.BucketProject.Controllers
         [HttpGet]
         public IActionResult YearGoalsPreview()
         {
-            List<Goal> goalDomains = _goalService.LoadGoalsByCategory("Year");
+            List<Goal> personalDomains = _goalService.LoadPersonalGoalsByCategory("Year");
+            List<Goal> sharedDomains = _goalService.LoadSharedGoalsByCategory("Year");
 
-            List<GoalViewModel> viewModels = _mapper.Map<List<GoalViewModel>>(goalDomains);
 
-            List<GoalViewModel> parentGoals = viewModels
+            List<GoalViewModel> personalVMs = _mapper.Map<List<GoalViewModel>>(personalDomains);
+            List<GoalViewModel> sharedVMs = _mapper.Map<List<GoalViewModel>>(sharedDomains);
+
+
+            List<GoalViewModel> personalParents = personalVMs
                 .Where(g => g.ParentGoalId == null)
                 .ToList();
-
-            foreach (GoalViewModel goal in parentGoals)
+            foreach (var p in personalParents)
             {
-                goal.Children = viewModels
-                    .Where(g => g.ParentGoalId == goal.Id)
+                p.Children = personalVMs
+                    .Where(c => c.ParentGoalId == p.Id)
                     .ToList();
             }
 
+
+            List<GoalViewModel> sharedParents = sharedVMs
+                .Where(g => g.ParentGoalId == null)
+                .ToList();
+            foreach (var p in sharedParents)
+            {
+                p.Children = sharedVMs
+                    .Where(c => c.ParentGoalId == p.Id)
+                    .ToList();
+            }
+
+
             GoalsPageViewModel pageModel = new GoalsPageViewModel
             {
-                Goals = parentGoals
+                Goals = personalParents,
+                SharedGoals = sharedParents
             };
-
-            ViewBag.AvailableTypes = GetAvailableTypes();
 
             return View(pageModel);
         }
 
         public async Task<IActionResult> BreakDownGoalWeek(int id)
         {
-            List<Goal> subGoals = await _goalService.BreakDownGoalAsync(id); 
+            List<Goal> subGoals = await _goalService.BreakDownGoalAsync(id);
 
-            List<GoalViewModel> subGoalViewModels = _mapper.Map<List<GoalViewModel>>(subGoals); 
+            List<GoalViewModel> subGoalViewModels = _mapper.Map<List<GoalViewModel>>(subGoals);
 
             TempData["SubGoals"] = JsonConvert.SerializeObject(subGoalViewModels);
             TempData["SubGoalForId"] = id;
@@ -625,8 +760,8 @@ namespace BucketProject.UI.BucketProject.Controllers
             return RedirectToAction("WeekGoals");
         }
 
-   
-     [HttpPost]
+
+        [HttpPost]
         public IActionResult RemoveSubGoalFromBreakdownMonth(string description)
         {
             if (TempData["SubGoals"] is string json)
@@ -707,9 +842,10 @@ namespace BucketProject.UI.BucketProject.Controllers
 
             return RedirectToAction("BucketList");
         }
-
     }
 }
+
+
 
 
 

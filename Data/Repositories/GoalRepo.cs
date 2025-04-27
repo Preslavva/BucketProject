@@ -16,61 +16,77 @@ public class GoalRepo: Repository, IGoalRepo
     { 
     }
 
-    public void InsertGoalAndAssignToUser(int userId, GoalEntity goal)
+    public void InsertGoalAndAssignToUsers(
+     int ownerUserId,
+     GoalEntity goal,
+     IEnumerable<int> sharedWithUserIds)
     {
-        using (SqlConnection conn = GetSqlConnection())
+        using var conn = GetSqlConnection();
+        conn.Open();
+        using var tx = conn.BeginTransaction();
+        try
         {
-            conn.Open();
-            using (SqlTransaction transaction = conn.BeginTransaction())
+            const string insertGoalSql = @"
+INSERT INTO Goal
+  (Category, Description, Type, Deadline, IsDone, IsDeleted,
+   CreatedAt, CompletedAt, IsPostponed, ParentGoalId, OwnerId)
+OUTPUT INSERTED.Id
+VALUES
+  (@Category, @Description, @Type, @Deadline, @IsDone, @IsDeleted,
+   @CreatedAt, @CompletedAt, @IsPostponed, @ParentGoalId, @OwnerId);
+";
+            int newGoalId;
+            using (var cmd = new SqlCommand(insertGoalSql, conn, tx))
             {
-                try
-                {
-                    string insertGoalQuery = @"
-                    INSERT INTO Goal (Category, Description, Type, Deadline, IsDone, IsDeleted, CreatedAt, CompletedAt, IsPostponed, ParentGoalId)
-                    OUTPUT INSERTED.Id
-                    VALUES (@Category, @Description, @Type, @Deadline, @IsDone, @IsDeleted, @CreatedAt, @CompletedAt, @IsPostponed, @ParentGoalId);";
+                cmd.Parameters.AddWithValue("@Category", goal.Category.ToString());
+                cmd.Parameters.AddWithValue("@Description", goal.Description);
+                cmd.Parameters.AddWithValue("@Type", goal.Type.ToString());
+                cmd.Parameters.AddWithValue("@Deadline", goal.Deadline ?? (object)DBNull.Value);
+                cmd.Parameters.AddWithValue("@IsDone", goal.IsDone);
+                cmd.Parameters.AddWithValue("@IsDeleted", goal.IsDeleted);
+                cmd.Parameters.AddWithValue("@CreatedAt", goal.CreatedAt);
+                cmd.Parameters.AddWithValue("@CompletedAt", goal.CompletedAt ?? (object)DBNull.Value);
+                cmd.Parameters.AddWithValue("@IsPostponed", goal.IsPostponed);
+                cmd.Parameters.Add("@ParentGoalId", SqlDbType.Int)
+                   .Value = goal.ParentGoalId ?? (object)DBNull.Value;
+                cmd.Parameters.AddWithValue("@OwnerId", ownerUserId);
 
-                    int goalId;
-
-                    using (SqlCommand insertGoalCmd = new SqlCommand(insertGoalQuery, conn, transaction))
-                    {
-                        insertGoalCmd.Parameters.AddWithValue("@Category", goal.Category.ToString());
-                        insertGoalCmd.Parameters.AddWithValue("@Description", goal.Description);
-                        insertGoalCmd.Parameters.AddWithValue("@Type", goal.Type.ToString());
-                        insertGoalCmd.Parameters.AddWithValue("@Deadline", goal.Deadline ?? (object)DBNull.Value);
-                        insertGoalCmd.Parameters.AddWithValue("@IsDone", goal.IsDone);
-                        insertGoalCmd.Parameters.AddWithValue("@IsDeleted", goal.IsDeleted);
-                        insertGoalCmd.Parameters.AddWithValue("@CreatedAt", goal.CreatedAt);
-                        insertGoalCmd.Parameters.AddWithValue("@CompletedAt", goal.CompletedAt ?? (object)DBNull.Value);
-                        insertGoalCmd.Parameters.AddWithValue("@IsPostponed", goal.IsPostponed);
-                        insertGoalCmd.Parameters.Add("@ParentGoalId", SqlDbType.Int).Value =
-    goal.ParentGoalId ?? (object)DBNull.Value;
-
-
-
-
-                        goalId = (int)insertGoalCmd.ExecuteScalar();
-                    }
-
-                    string insertUserGoalQuery = "INSERT INTO User_Goal (UserId, GoalId) VALUES (@UserId, @GoalId);";
-                    using (SqlCommand insertUserGoalCmd = new SqlCommand(insertUserGoalQuery, conn, transaction))
-                    {
-                        insertUserGoalCmd.Parameters.AddWithValue("@UserId", userId);
-                        insertUserGoalCmd.Parameters.AddWithValue("@GoalId", goalId);
-                        insertUserGoalCmd.ExecuteNonQuery();
-                    }
-
-                    transaction.Commit();
-                }
-                catch (Exception ex)
-                {
-                    transaction.Rollback();
-
-                }
-
+                newGoalId = (int)cmd.ExecuteScalar();
             }
+
+         
+            const string insertUserGoalSql = @"
+INSERT INTO User_Goal (UserId, GoalId)
+VALUES (@UserId, @GoalId);
+";
+            using (var cmd = new SqlCommand(insertUserGoalSql, conn, tx))
+            {
+                cmd.Parameters.Add(new SqlParameter("@UserId", SqlDbType.Int));
+                cmd.Parameters.Add(new SqlParameter("@GoalId", SqlDbType.Int) { Value = newGoalId });
+
+  
+                cmd.Parameters["@UserId"].Value = ownerUserId;
+                cmd.ExecuteNonQuery();
+
+               
+                foreach (var friendId in sharedWithUserIds ?? Enumerable.Empty<int>())
+                {
+                    if (friendId == ownerUserId) continue;
+                    cmd.Parameters["@UserId"].Value = friendId;
+                    cmd.ExecuteNonQuery();
+                }
+            }
+
+            tx.Commit();
+        }
+        catch
+        {
+            tx.Rollback();
+            throw;
         }
     }
+
+
     public GoalEntity GetGoalById(int id)
     {
 
@@ -104,6 +120,7 @@ public class GoalRepo: Repository, IGoalRepo
                             DateTime? completedAt = reader.IsDBNull(8) ? (DateTime?)null : reader.GetDateTime(8);
                             bool isPostponed = reader.GetBoolean(9);
                             int? parentGoalId = reader.IsDBNull(10) ? (int?)null : reader.GetInt32(10);
+                            int ownerId = reader.GetInt32(11);
 
 
                             return new GoalEntity(
@@ -117,7 +134,8 @@ public class GoalRepo: Repository, IGoalRepo
                                 isDone,
                                 isDeleted,
                                 isPostponed,
-                                parentGoalId
+                                parentGoalId,
+                                ownerId
                             );
 
                     
@@ -138,7 +156,7 @@ public class GoalRepo: Repository, IGoalRepo
 
     }
 
-    public List<GoalEntity> LoadGoalsOfUserbyCategory(int userId, Category category)
+    public List<GoalEntity> LoadPersonalGoalsOfUserbyCategory(int userId, Category category)
     {
         List<GoalEntity> goals = new List<GoalEntity>();
 
@@ -148,10 +166,32 @@ public class GoalRepo: Repository, IGoalRepo
             {
                 conn.Open();
 
-                string queryGetGoals = @"SELECT g.Id, g.Category, g.[Description], g.IsDone, g.IsDeleted, g.CreatedAt, g.Deadline, g.Type, g.CompletedAt, g.IsPostponed, g.ParentGoalId
-                                     FROM Goal AS g
-                                     INNER JOIN User_Goal AS ug ON g.Id = ug.GoalId
-                                     WHERE g.Category = @Category AND ug.UserId = @UserId AND g.IsDeleted = @IsDeleted";
+                string queryGetGoals = @"SELECT 
+    g.Id,
+    g.Category,
+    g.[Description],
+    g.IsDone,
+    g.IsDeleted,
+    g.CreatedAt,
+    g.Deadline,
+    g.Type,
+    g.CompletedAt,
+    g.IsPostponed,
+    g.ParentGoalId,
+    g.OwnerId
+FROM dbo.Goal AS g
+WHERE 
+    g.OwnerId = @UserId               
+    AND NOT EXISTS (                  
+      SELECT 1
+      FROM dbo.User_Goal AS ug
+      WHERE ug.GoalId = g.Id
+        AND ug.UserId <> @UserId
+    )
+    AND g.IsDeleted = 0
+    -- optional category filter:
+    AND g.Category = @Category
+;";
 
                 using (SqlCommand loadGoals = new SqlCommand(queryGetGoals, conn))
                 {
@@ -174,6 +214,7 @@ public class GoalRepo: Repository, IGoalRepo
                             DateTime? completedAt = reader.IsDBNull(8) ? (DateTime?)null : reader.GetDateTime(8);
                             bool isPostponed = reader.GetBoolean(9);
                             int? parentGoalId = reader.IsDBNull(10) ? (int?)null : reader.GetInt32(10);
+                            int ownerId = reader.GetInt32(11);
 
 
 
@@ -188,7 +229,8 @@ public class GoalRepo: Repository, IGoalRepo
                                 isDone,
                                 isDeleted,
                                 isPostponed,
-                                parentGoalId
+                                parentGoalId,
+                                ownerId
                             );
 
                             goals.Add(goal);
@@ -208,6 +250,80 @@ public class GoalRepo: Repository, IGoalRepo
 
         return goals;
     }
+    public List<GoalEntity> LoadSharedGoalsOfUserByCategory(int userId, Category category)
+    {
+        var goals = new List<GoalEntity>();
+
+        const string queryGetGoals = @"
+SELECT 
+    g.Id,
+    g.Category,
+    g.[Description],
+    g.IsDone,
+    g.IsDeleted,
+    g.CreatedAt,
+    g.Deadline,
+    g.Type,
+    g.CompletedAt,
+    g.IsPostponed,
+    g.ParentGoalId,
+    g.OwnerId
+FROM dbo.Goal AS g
+INNER JOIN dbo.User_Goal AS ug
+  ON g.Id      = ug.GoalId
+ AND ug.UserId = @UserId        -- you are assigned
+WHERE 
+    g.Category   = @Category
+  AND g.IsDeleted = 0
+  AND (
+      SELECT COUNT(*) 
+      FROM dbo.User_Goal AS x
+      WHERE x.GoalId = g.Id
+  ) > 1                       
+;
+                    
+";
+
+        try
+        {
+            using var conn = GetSqlConnection();
+            conn.Open();
+            using var cmd = new SqlCommand(queryGetGoals, conn);
+            cmd.Parameters.AddWithValue("@Category", category.ToString());
+            cmd.Parameters.AddWithValue("@UserId", userId);
+
+            using var reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                var goal = new GoalEntity(
+                    id: reader.GetInt32(0),
+                    category: Enum.Parse<Category>(reader.GetString(1)),
+                    type: Enum.Parse<GoalType>(reader.GetString(7)),
+                    description: reader.GetString(2),
+                    createdAt: reader.GetDateTime(5),
+                    deadline: reader.IsDBNull(6) ? null : reader.GetDateTime(6),
+                    completedAt: reader.IsDBNull(8) ? null : reader.GetDateTime(8),
+                    isDone: reader.GetBoolean(3),
+                    isDeleted: reader.GetBoolean(4),
+                    isPostponed: reader.GetBoolean(9),
+                    parentGoalId: reader.IsDBNull(10) ? null : reader.GetInt32(10),
+                    ownerId: reader.GetInt32(11)
+                );
+                goals.Add(goal);
+            }
+        }
+        catch (SqlException sqlEx)
+        {
+            throw new Exception($"Database error occurred while loading shared goals: {sqlEx.Message}", sqlEx);
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"An unexpected error occurred in {MethodBase.GetCurrentMethod().Name}: {ex.Message}", ex);
+        }
+
+        return goals;
+    }
+
     public List<GoalEntity> LoadGoalsOfUser(int userId)
     {
         List<GoalEntity> goals = new List<GoalEntity>();
@@ -218,7 +334,7 @@ public class GoalRepo: Repository, IGoalRepo
             {
                 conn.Open();
 
-                string queryGetGoals = @"SELECT g.Id, g.Category, g.[Description], g.IsDone, g.IsDeleted, g.CreatedAt, g.Deadline, g.Type, g.CompletedAt, g.IsPostponed, g.ParentGoalId
+                string queryGetGoals = @"SELECT g.Id, g.Category, g.[Description], g.IsDone, g.IsDeleted, g.CreatedAt, g.Deadline, g.Type, g.CompletedAt, g.IsPostponed, g.ParentGoalId, g.OwnerId
                                      FROM Goal AS g
                                      INNER JOIN User_Goal AS ug ON g.Id = ug.GoalId
                                      WHERE ug.UserId = @UserId AND g.IsDeleted = @IsDeleted";
@@ -243,6 +359,7 @@ public class GoalRepo: Repository, IGoalRepo
                             DateTime? completedAt = reader.IsDBNull(8) ? (DateTime?)null : reader.GetDateTime(8);
                             bool isPostponed = reader.GetBoolean(9);
                             int? parentGoalId = reader.IsDBNull(10) ? (int?)null : reader.GetInt32(10);
+                            int ownerId = reader.GetInt32(11);
 
 
 
@@ -257,7 +374,8 @@ public class GoalRepo: Repository, IGoalRepo
                                 isDone,
                                 isDeleted,
                                 isPostponed,
-                                parentGoalId
+                                parentGoalId,
+                                ownerId
                             );
 
                             goals.Add(goal);
@@ -312,6 +430,7 @@ public class GoalRepo: Repository, IGoalRepo
                             DateTime? completedAt = reader.IsDBNull(8) ? (DateTime?)null : reader.GetDateTime(8);
                             bool isPostponed = reader.GetBoolean(9);
                             int? parentGoalId = reader.IsDBNull(10) ? (int?)null : reader.GetInt32(10);
+                            int ownerId = reader.GetInt32(11);
 
 
                             GoalEntity goal = new GoalEntity(
@@ -325,7 +444,8 @@ public class GoalRepo: Repository, IGoalRepo
                                isDone,
                                isDeleted,
                                isPostponed,
-                               parentGoalId
+                               parentGoalId,
+                               ownerId
                            );
 
                             goals.Add(goal);
@@ -511,7 +631,7 @@ public class GoalRepo: Repository, IGoalRepo
             {
                 conn.Open();
 
-                string queryGetGoals = @"SELECT g.Id, g.Category, g.[Description], g.IsDone, g.IsDeleted, g.CreatedAt, g.Deadline, g.Type, g.CompletedAt, g.IsPostponed, g.ParentGoalId
+                string queryGetGoals = @"SELECT g.Id, g.Category, g.[Description], g.IsDone, g.IsDeleted, g.CreatedAt, g.Deadline, g.Type, g.CompletedAt, g.IsPostponed, g.ParentGoalId, g.OwnerId
                                      FROM Goal AS g
                                      INNER JOIN User_Goal AS ug ON g.Id = ug.GoalId
                                      WHERE ug.UserId = @UserId AND g.IsDeleted = @IsDeleted AND g.Deadline < CAST(GETDATE() AS DATE)
@@ -539,6 +659,7 @@ public class GoalRepo: Repository, IGoalRepo
                             DateTime? completedAt = reader.IsDBNull(8) ? (DateTime?)null : reader.GetDateTime(8);
                             bool isPostponed = reader.GetBoolean(9);
                             int? parentGoalId = reader.IsDBNull(10) ? (int?)null : reader.GetInt32(10);
+                            int ownerId = reader.GetInt32(11);
 
 
 
@@ -553,7 +674,8 @@ public class GoalRepo: Repository, IGoalRepo
                                 isDone,
                                 isDeleted,
                                 isPostponed,
-                                parentGoalId
+                                parentGoalId,
+                                ownerId
                             );
 
                             goals.Add(goal);
@@ -574,7 +696,35 @@ public class GoalRepo: Repository, IGoalRepo
         return goals;
     }
 
-
+    public List<UserEntity> LoadSharedUsersForGoal(int goalId, int ownerId)
+    {
+        var list = new List<UserEntity>();
+        const string sql = @"
+SELECT u.UserId, u.Username, u.Picture
+FROM dbo.User_Goal ug
+JOIN dbo.[User] u
+  ON ug.UserId = u.UserId
+WHERE ug.GoalId   = @GoalId
+  AND ug.UserId  <> @OwnerId;
+";
+        using var conn = GetSqlConnection();
+        conn.Open();
+        using var cmd = new SqlCommand(sql, conn);
+        cmd.Parameters.AddWithValue("@GoalId", goalId);
+        cmd.Parameters.AddWithValue("@OwnerId", ownerId);
+        using var rdr = cmd.ExecuteReader();
+        while (rdr.Read())
+        {
+            list.Add(new UserEntity(
+              rdr.GetInt32(rdr.GetOrdinal("UserId")),
+              rdr.GetString(rdr.GetOrdinal("Username")),
+              rdr.IsDBNull(rdr.GetOrdinal("Picture"))
+                ? null
+                : (byte[])rdr["Picture"]
+            ));
+        }
+        return list;
+    }
 }
 
 

@@ -1,22 +1,35 @@
 ﻿@model GoalsPageViewModel
+
 @{
     Layout = "_Layout";
     ViewBag.HideHeaderFooter = true;
 }
-<h2>Year Goals</h2>
 
+<h2>Yearly Goals</h2>
 
-
-<p>
-    <strong>Completed:</strong> @Model.AccomplishedCount /
-    <strong>Total:</strong> @Model.Total &ndash;
-    <strong>Remaining:</strong> @Model.Remaining
-</p>
 
 <hr />
 
 <ul style="list-style-type:none;">
     @foreach (var goal in Model.Goals)
+    {
+        <li style="list-style-type:none;">
+            @(goal.IsDone ? "☑" : "☐") @goal.Description
+
+            @if (goal.Children?.Any() == true)
+            {
+                <ul style="list-style-type:none;">
+                    @foreach (var sub in goal.Children)
+                    {
+                        <li style="list-style-type:none;">
+                            @(sub.IsDone ? "☑" : "☐") @sub.Description
+                        </li>
+                    }
+                </ul>
+            }
+        </li>
+    }
+    @foreach (var goal in Model.SharedGoals)
     {
         <li style="list-style-type:none;">
             @(goal.IsDone ? "☑" : "☐") @goal.Description

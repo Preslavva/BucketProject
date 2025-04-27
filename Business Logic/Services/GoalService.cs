@@ -8,12 +8,13 @@ using BucketProject.DAL.Models.Entities;
 using BucketProject.BLL.Business_Logic.Domain;
 using System.Text;
 using BucketProjetc.BLL.Business_Logic.InterfacesService;
+using BucketProject.BLLBusiness_Logic.Domain;
 
 
 
 namespace BucketProject.BLL.Business_Logic.Services
 {
-    public class GoalService : IGoalService
+    public class GoalService: IGoalService
     {
         private readonly IHttpContextAccessor _contextAccessor;
         private readonly IGoalRepo _goalRepo;
@@ -26,22 +27,31 @@ namespace BucketProject.BLL.Business_Logic.Services
             _contextAccessor = contextAccessor;
             _mapper = mapper;
             _aIClient = aIClient;
+          
         }
 
 
-        public void CreateGoal(Goal goalDomain)
+        // SocialService or GoalService
+        public void CreateGoal(Goal goalDomain, IEnumerable<int> sharedWithUserIds)
         {
-            string? username = _contextAccessor.HttpContext.Session.GetString("Username");
-            int userId = _goalRepo.GetIdOfUser(username);
+            // get your user ID
+            string? username = _contextAccessor
+                                 .HttpContext
+                                 .Session
+                                 .GetString("Username");
+            int ownerId = _goalRepo.GetIdOfUser(username);
 
-            GoalEntity goal = _mapper.Map<GoalEntity>(goalDomain);
+            // map domain → entity
+            GoalEntity entity = _mapper.Map<GoalEntity>(goalDomain);
 
-            _goalRepo.InsertGoalAndAssignToUser(userId, goal);
+            // use the new repo method
+            _goalRepo.InsertGoalAndAssignToUsers(ownerId, entity, sharedWithUserIds);
         }
 
 
 
-        public List<Goal> LoadGoalsByCategory(string category)
+
+        public List<Goal> LoadPersonalGoalsByCategory(string category)
         {
             string? username = _contextAccessor.HttpContext.Session.GetString("Username");
             if (string.IsNullOrEmpty(username))
@@ -52,7 +62,7 @@ namespace BucketProject.BLL.Business_Logic.Services
 
             int userId = _goalRepo.GetIdOfUser(username);
 
-            List<GoalEntity> allEntities = _goalRepo.LoadGoalsOfUserbyCategory(userId, parsedCategory);
+            List<GoalEntity> allEntities = _goalRepo.LoadPersonalGoalsOfUserbyCategory(userId, parsedCategory);
 
             List<Goal> allGoals = _mapper.Map<List<Goal>>(allEntities);
 
@@ -62,8 +72,39 @@ namespace BucketProject.BLL.Business_Logic.Services
                 .ToList();
         }
 
+        public List<Goal> LoadSharedGoalsByCategory(string category)
+        {
+            // 1) Get current user
+            string? username = _contextAccessor.HttpContext?.Session.GetString("Username");
+            if (string.IsNullOrEmpty(username))
+                throw new Exception("User not logged in.");
 
-      
+            int userId = _goalRepo.GetIdOfUser(username);
+
+            // 2) Parse category
+            if (!Enum.TryParse<Category>(category, true, out var parsedCategory))
+                throw new ArgumentException($"Invalid category: {category}");
+
+            // 3) Load the raw shared goals (any goal assigned to you and shared)
+            var entities = _goalRepo.LoadSharedGoalsOfUserByCategory(userId, parsedCategory);
+
+            // 4) Map to domain
+            var goals = _mapper.Map<List<Goal>>(entities);
+
+            // 5) For each goal, load the list of other users it’s shared with
+            foreach (var g in goals)
+            {
+                var recipients = _goalRepo.LoadSharedUsersForGoal(g.Id, userId);
+                g.Recipients = _mapper.Map<List<User>>(recipients);
+            }
+
+            // 6) Filter out expired deadlines
+            var today = DateTime.Today;
+            return goals
+                .Where(g => !g.Deadline.HasValue || g.Deadline.Value.Date >= today)
+                .ToList();
+        }
+
 
 
         public void UpdateGoal(int goalId, Goal goalDomain)
@@ -220,6 +261,19 @@ namespace BucketProject.BLL.Business_Logic.Services
 
             return subGoals;
         }
+
+        //public async Task InviteUserToGoal(string email, int goalId)
+        //{
+        //    GoalEntity entity = _goalRepo.GetGoalById(goalId);
+        //    if (entity == null || string.IsNullOrWhiteSpace(entity.Description))
+        //        throw new ArgumentException("Invalid goal.");
+
+        //    Goal goal = _mapper.Map<Goal>(entity);
+
+        //    string body = $"<p>You’ve been invited to join the goal: <strong>{goal.Description}</strong></p>";
+        //    await _emailService.SendEmailAsync(email, "Goal Invitation", body);
+        //}
     }
+
 }
 

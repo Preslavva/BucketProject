@@ -3,7 +3,7 @@ using System.Reflection;
 using BucketProject.DAL.Data.InterfacesRepo;
 using BucketProject.DAL.Models.Entities;
 using Microsoft.Data.SqlClient;
-using Microsoft.Extensions.Configuration;;
+using Microsoft.Extensions.Configuration;
 
 namespace BucketProject.DAL.Data.Repositories
 
@@ -37,8 +37,8 @@ namespace BucketProject.DAL.Data.Repositories
 
                 var (hashedPassword, salt) = _passwordHasher.HashPassword(user.Password);
 
-                string insertSql = @"INSERT INTO [User] ([Username], Email, [Password], Salt, Nationality, DateOfBirth, Gender, CreatedAt) 
-                             VALUES (@Username, @Email, @Password, @Salt, @Nationality, @DateOfBirth, @Gender, @CreatedAt)";
+                string insertSql = @"INSERT INTO [User] ([Username], Email, [Password], Salt, Nationality, DateOfBirth, Gender, CreatedAt, Role) 
+                             VALUES (@Username, @Email, @Password, @Salt, @Nationality, @DateOfBirth, @Gender, @CreatedAt, @Role)";
                 using SqlCommand insertCommand = new SqlCommand(insertSql, connection);
                 insertCommand.Parameters.AddWithValue("@Username", user.Username);
                 insertCommand.Parameters.AddWithValue("@Email", user.Email);
@@ -48,6 +48,8 @@ namespace BucketProject.DAL.Data.Repositories
                 insertCommand.Parameters.AddWithValue("@DateOfBirth", user.DateOfBirth);
                 insertCommand.Parameters.AddWithValue("@Gender", user.Gender);
                 insertCommand.Parameters.AddWithValue("@CreatedAt", user.CreatedAt);
+                insertCommand.Parameters.AddWithValue("@Role", "User");
+
 
 
                 insertCommand.ExecuteNonQuery();
@@ -62,7 +64,7 @@ namespace BucketProject.DAL.Data.Repositories
                 using (SqlConnection sqlConn = GetSqlConnection())
                 {
                     sqlConn.Open();
-                    string query = @"SELECT UserId, [Username], Email, [Password], Picture, Salt, Nationality, DateofBirth, Gender, CreatedAt
+                    string query = @"SELECT UserId, [Username], Email, [Password], Picture, Salt, Nationality, DateofBirth, Gender, CreatedAt, Role
                              FROM [User]
                              WHERE Username = @Username";
 
@@ -89,11 +91,12 @@ namespace BucketProject.DAL.Data.Repositories
                                       reader.IsDBNull(reader.GetOrdinal("Picture")) ? null : (byte[])reader["Picture"],
                                       storedSalt,
                                       reader["Nationality"].ToString(),
-                                      DateOnly.FromDateTime((DateTime)reader["DateOfBirth"]),
+                                      (DateTime)reader["DateOfBirth"],
                                       reader["Gender"].ToString(),
-                                      DateOnly.FromDateTime((DateTime)reader["CreatedAt"])
-);
+                                      DateOnly.FromDateTime((DateTime)reader["CreatedAt"]),
+                                      reader["Role"].ToString()
 
+);
                                 }
                             }
                         }
@@ -267,7 +270,7 @@ namespace BucketProject.DAL.Data.Repositories
                     sqlConn.Open();
 
                     string queryValidateUser = @"
-                SELECT UserId, [Username], Email, [Password], Picture, Salt, Nationality, DateOfBirth, Gender, CreatedAt
+                SELECT UserId, [Username], Email, [Password], Picture, Salt, Nationality, DateOfBirth, Gender, CreatedAt, Role
                 FROM [User]
                 WHERE Username = @Username";
 
@@ -287,9 +290,10 @@ namespace BucketProject.DAL.Data.Repositories
                                  picture: reader.IsDBNull(reader.GetOrdinal("Picture")) ? null : (byte[])reader["Picture"],
                                  salt: reader["Salt"].ToString(),
                                  nationality: reader["Nationality"].ToString(),
-                                 dateOfBirth: DateOnly.FromDateTime((DateTime)reader["DateOfBirth"]),
+                                 dateOfBirth: (DateTime)reader["DateOfBirth"],
                                  gender: reader["Gender"].ToString(),
-                                 createdAt: DateOnly.FromDateTime((DateTime)reader["CreatedAt"])
+                                 createdAt: DateOnly.FromDateTime((DateTime)reader["CreatedAt"]),
+                                 role: reader["Role"].ToString()
 );
 
                             }

@@ -33,7 +33,11 @@
 
             <div class="form-group">
                 <label asp-for="Nationality" class="control-label">Nationality:</label>
-                <input asp-for="Nationality" class="form-control" />
+                <select asp-for="Nationality"
+                        asp-items="Model.Countries"
+                        class="form-control">
+                    <option value="">-- Select Nationality --</option>
+                </select>
                 <span asp-validation-for="Nationality" class="text-danger"></span>
             </div>
 
