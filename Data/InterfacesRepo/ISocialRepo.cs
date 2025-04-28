@@ -11,8 +11,11 @@ namespace BucketProject.DAL.Data.InterfacesRepo;
     {
     List<UserEntity> LoadFriends(int userId);
     List<UserEntity> LoadNonFriends(int userId);
-    bool TryAddFriend(int userId, int friendId);
+    bool SendFriendRequest(int userId, int friendId);
     bool TryRemoveFriend(int userId, int friendId);
+    List<UserEntity> LoadIncomingRequests(int userId);
+    bool RespondToFriendRequest(int userId, int requesterId, bool accept);
+    List<UserEntity> LoadOutgoingRequests(int userId);
 
     }
 

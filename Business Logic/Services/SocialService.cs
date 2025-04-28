@@ -33,26 +33,47 @@ namespace BucketProject.BLL.Business_Logic.Services
 
         public List<UserSummaryDTO> GetFriends(int userId)
         {
-            List<UserEntity> entities = _socialRepo.LoadFriends(userId);
-            return _mapper.Map<List<UserSummaryDTO>>(entities);
+            var ents = _socialRepo.LoadFriends(userId);
+            return _mapper.Map<List<UserSummaryDTO>>(ents);
         }
 
         public List<UserSummaryDTO> GetNonFriends(int userId)
         {
-            List<UserEntity> entities = _socialRepo.LoadNonFriends(userId);
-            return _mapper.Map<List<UserSummaryDTO>>(entities);
+            var ents = _socialRepo.LoadNonFriends(userId);
+            return _mapper.Map<List<UserSummaryDTO>>(ents);
         }
 
-        public bool AddFriend(int userId, int friendId)
+        public List<UserSummaryDTO> GetIncomingFriendRequests(int userId)
         {
-           return _socialRepo.TryAddFriend(userId, friendId);
+            var ents = _socialRepo.LoadIncomingRequests(userId);
+            return _mapper.Map<List<UserSummaryDTO>>(ents);
         }
-           
+
+        public bool SendFriendRequest(int userId, int friendId)
+        {
+            return _socialRepo.SendFriendRequest(userId, friendId);
+        }
+
+        public bool AcceptFriendRequest(int userId, int requesterId)
+        {
+            return _socialRepo.RespondToFriendRequest(userId, requesterId, accept: true);
+        }
+
+        public bool DeclineFriendRequest(int userId, int requesterId)
+        {
+            return _socialRepo.RespondToFriendRequest(userId, requesterId, accept: false);
+        }
 
         public bool RemoveFriend(int userId, int friendId)
         {
             return _socialRepo.TryRemoveFriend(userId, friendId);
         }
+        public List<UserSummaryDTO> GetOutgoingFriendRequests(int userId)
+        {
+            var ents = _socialRepo.LoadOutgoingRequests(userId);
+            return _mapper.Map<List<UserSummaryDTO>>(ents);
+        }
+
 
 
 

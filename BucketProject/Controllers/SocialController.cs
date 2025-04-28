@@ -37,46 +37,67 @@ namespace BucketProject.Controllers
 
 
         [HttpGet]
-        // Controllers/SocialController.cs
-        [HttpGet]
         public IActionResult Social(string searchTerm)
         {
-            var uid = CurrentUserId;
+            int uid = CurrentUserId;
 
-            // Get the full lists first
+            var incoming = _socialService.GetIncomingFriendRequests(uid);
             var friends = _socialService.GetFriends(uid);
             var nonFriends = _socialService.GetNonFriends(uid);
+            var outgoingUsers = _socialService.GetOutgoingFriendRequests(uid);
 
             if (!string.IsNullOrWhiteSpace(searchTerm))
             {
-                // Filter both lists by username (case-insensitive)
-                friends = friends
-                    .Where(u => u.Username.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
-                    .ToList();
-                nonFriends = nonFriends
-                    .Where(u => u.Username.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
-                    .ToList();
+                incoming = incoming.Where(u => u.Username.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)).ToList();
+                friends = friends.Where(u => u.Username.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)).ToList();
+                nonFriends = nonFriends.Where(u => u.Username.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)).ToList();
+                outgoingUsers = outgoingUsers
+                                .Where(u => u.Username.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
+                                .ToList();
             }
+
+            var potential = nonFriends
+                .Concat(outgoingUsers)
+                .GroupBy(u => u.Id)
+                .Select(g => g.First())
+                .ToList();
 
             var vm = new SocialViewModel
             {
+                IncomingRequests = incoming,
                 Friends = friends,
-                NonFriends = nonFriends
+                PotentialFriends = potential,
+                OutgoingRequestIds = outgoingUsers.Select(u => u.Id).ToList()
             };
+            ViewBag.SearchTerm = searchTerm ?? "";
 
-            ViewBag.SearchTerm = searchTerm ?? string.Empty;
             return View(vm);
         }
 
 
-        public IActionResult AddFriend(int friendId)
+
+        [HttpPost]
+        public IActionResult SendFriendRequest(int friendId)
         {
-            _socialService.AddFriend(CurrentUserId, friendId);
+            _socialService.SendFriendRequest(CurrentUserId, friendId);
             return RedirectToAction("Social");
         }
 
         [HttpPost]
-      
+        public IActionResult AcceptFriendRequest(int requesterId)
+        {
+            _socialService.AcceptFriendRequest(CurrentUserId, requesterId);
+            return RedirectToAction("Social");
+        }
+
+        [HttpPost]
+        public IActionResult DeclineFriendRequest(int requesterId)
+        {
+            _socialService.DeclineFriendRequest(CurrentUserId, requesterId);
+            return RedirectToAction("Social");
+        }
+
+        [HttpPost]
         public IActionResult RemoveFriend(int friendId)
         {
             _socialService.RemoveFriend(CurrentUserId, friendId);
@@ -84,3 +105,4 @@ namespace BucketProject.Controllers
         }
     }
 }
+

@@ -1,5 +1,4 @@
-﻿
-using System.Data;
+﻿using System.Data;
 using System.Reflection;
 using BucketProject.DAL.Data.InterfacesRepo;
 using BucketProject.DAL.Data.Repositories;
@@ -11,185 +10,241 @@ namespace Data.Repositories
 {
     public class SocialRepo : Repository, ISocialRepo
     {
-        public SocialRepo(IConfiguration configuration) : base(configuration)
-        {
+        public SocialRepo(IConfiguration configuration) : base(configuration) { }
 
-        }
-
+    
         public List<UserEntity> LoadFriends(int userId)
         {
             var friends = new List<UserEntity>();
-
+            const string sql = @"
+SELECT u.UserId, u.Username, u.Picture
+FROM [User] AS u
+INNER JOIN Friends AS f
+  ON (f.UserId   = @Id AND u.UserId = f.FriendId)
+  OR (f.FriendId = @Id AND u.UserId = f.UserId)
+WHERE f.Status = 'Accepted';
+";
             try
             {
-                using (SqlConnection conn = GetSqlConnection())
+                using var conn = GetSqlConnection();
+                conn.Open();
+                using var cmd = new SqlCommand(sql, conn);
+                cmd.Parameters.AddWithValue("@Id", userId);
+                using var rdr = cmd.ExecuteReader();
+                while (rdr.Read())
                 {
-                    conn.Open();
-
-                    const string Sql = @"
-                SELECT  u.UserId,         
-                        u.Username,
-                        u.Picture
-                FROM    dbo.[User] AS u
-                WHERE   u.UserId IN (
-                       SELECT FriendId FROM dbo.Friends WHERE UserId   = @Id
-                       UNION
-                       SELECT UserId   FROM dbo.Friends WHERE FriendId = @Id
-                );";
-
-                    using (SqlCommand cmd = new SqlCommand(Sql, conn))
-                    {
-                        cmd.Parameters.AddWithValue("@Id", userId);
-
-                        using (SqlDataReader reader = cmd.ExecuteReader())
-                        {
-                            while (reader.Read())
-                            {
-                                
-                                var friend = new UserEntity(
-                                    reader.GetInt32(reader.GetOrdinal("UserId")),
-                                    reader.GetString(reader.GetOrdinal("Username")),
-                                    reader.IsDBNull(reader.GetOrdinal("Picture"))
-                                        ? null
-                                        : (byte[])reader["Picture"]
-                                );
-                                
-
-                                friends.Add(friend);
-                            }
-                        }
-                    }
+                    friends.Add(new UserEntity(
+                        rdr.GetInt32(rdr.GetOrdinal("UserId")),
+                        rdr.GetString(rdr.GetOrdinal("Username")),
+                        rdr.IsDBNull(rdr.GetOrdinal("Picture"))
+                          ? null
+                          : (byte[])rdr["Picture"]));
                 }
             }
-            catch (SqlException sqlEx)
-            {
-                throw new Exception($"Database error occurred while loading: {sqlEx.Message}", sqlEx);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"An unexpected error occurred in {MethodBase.GetCurrentMethod().Name}: {ex.Message}", ex);
-            }
-
+            catch (SqlException ex) { throw new Exception($"DB error in {MethodBase.GetCurrentMethod().Name}: {ex.Message}", ex); }
+            catch (Exception ex) { throw new Exception($"Unexpected error in {MethodBase.GetCurrentMethod().Name}: {ex.Message}", ex); }
             return friends;
         }
+
         public List<UserEntity> LoadNonFriends(int userId)
         {
             var users = new List<UserEntity>();
-
+            const string sql = @"
+SELECT u.UserId, u.Username, u.Picture
+FROM [User] AS u
+WHERE u.UserId <> @Id
+  AND u.Role = 'User'
+  AND u.UserId NOT IN (
+      SELECT CASE WHEN f.UserId   = @Id THEN f.FriendId ELSE f.UserId END
+      FROM Friends f
+      WHERE (f.UserId = @Id OR f.FriendId = @Id)
+        AND f.Status IN ('Pending','Accepted')
+  );
+";
             try
             {
-                using (var conn = GetSqlConnection())
+                using var conn = GetSqlConnection();
+                conn.Open();
+                using var cmd = new SqlCommand(sql, conn);
+                cmd.Parameters.AddWithValue("@Id", userId);
+                using var rdr = cmd.ExecuteReader();
+                while (rdr.Read())
                 {
-                    conn.Open();
-
-                    const string Sql = @"
-SELECT  
-    u.UserId,
-    u.Username,
-    u.Picture
-FROM dbo.[User] AS u
-WHERE 
-    u.UserId <> @Id
-    AND u.Role = 'User'                 
-    AND u.UserId NOT IN (
-        SELECT FriendId FROM dbo.Friends WHERE UserId   = @Id 
-        UNION
-        SELECT UserId   FROM dbo.Friends WHERE FriendId = @Id
-    );
-";
-
-                    using (var cmd = new SqlCommand(Sql, conn))
-                    {
-                        cmd.Parameters.AddWithValue("@Id", userId);
-
-                        using (var rdr = cmd.ExecuteReader())
-                        {
-                            while (rdr.Read())
-                            {
-                                users.Add(new UserEntity(
-                                    rdr.GetInt32(rdr.GetOrdinal("UserId")),
-                                    rdr.GetString(rdr.GetOrdinal("Username")),
-                                    rdr.IsDBNull(rdr.GetOrdinal("Picture"))
-                                        ? null
-                                        : (byte[])rdr["Picture"]
-                                ));
-                            }
-                        }
-                    }
+                    users.Add(new UserEntity(
+                        rdr.GetInt32(rdr.GetOrdinal("UserId")),
+                        rdr.GetString(rdr.GetOrdinal("Username")),
+                        rdr.IsDBNull(rdr.GetOrdinal("Picture"))
+                          ? null
+                          : (byte[])rdr["Picture"]));
                 }
             }
-            catch (SqlException sqlEx)
-            {
-                throw new Exception($"Database error occurred while loading: {sqlEx.Message}", sqlEx);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"An unexpected error occurred in {MethodBase.GetCurrentMethod().Name}: {ex.Message}", ex);
-            }
-
+            catch (SqlException ex) { throw new Exception($"DB error in {MethodBase.GetCurrentMethod().Name}: {ex.Message}", ex); }
+            catch (Exception ex) { throw new Exception($"Unexpected error in {MethodBase.GetCurrentMethod().Name}: {ex.Message}", ex); }
             return users;
         }
 
 
-        public bool TryAddFriend(int userId, int friendId)
+        public bool SendFriendRequest(int userId, int friendId)
         {
             if (userId == friendId)
                 throw new ArgumentException("A user cannot befriend themself.");
 
-            const string Sql = @"
-        INSERT INTO dbo.Friends (UserId, FriendId)
-        SELECT
-          CASE WHEN @UserId < @FriendId THEN @UserId ELSE @FriendId END,
-          CASE WHEN @UserId < @FriendId THEN @FriendId ELSE @UserId END;
-    ";
+            // ensure the smaller ID is always in @UserIdNorm so the PK is consistent
+            int userIdNorm = Math.Min(userId, friendId);
+            int friendIdNorm = Math.Max(userId, friendId);
 
-            using var conn = GetSqlConnection();
-            conn.Open();
+            const string sql = @"
+BEGIN TRANSACTION;
 
-            using var cmd = new SqlCommand(Sql, conn);
-            cmd.Parameters.AddWithValue("@UserId", userId);
-            cmd.Parameters.AddWithValue("@FriendId", friendId);
+UPDATE Friends
+SET
+    Status      = 'Pending',
+    RequestedBy = @RequestedBy
+WHERE
+    UserId       = @UserIdNorm
+    AND FriendId = @FriendIdNorm
+    AND Status   = 'Declined';
 
+IF @@ROWCOUNT = 0
+BEGIN
+    INSERT INTO dbo.Friends (UserId, FriendId, Status, RequestedBy)
+    VALUES (@UserIdNorm, @FriendIdNorm, 'Pending', @RequestedBy);
+END
+
+COMMIT TRANSACTION;
+";
             try
             {
-                cmd.ExecuteNonQuery();      
-                return true;                
+                using var conn = GetSqlConnection();
+                conn.Open();
+                using var cmd = new SqlCommand(sql, conn);
+                cmd.Parameters.AddWithValue("@UserIdNorm", userIdNorm);
+                cmd.Parameters.AddWithValue("@FriendIdNorm", friendIdNorm);
+                cmd.Parameters.AddWithValue("@RequestedBy", userId);
+
+                cmd.ExecuteNonQuery();
+                return true;
             }
-            catch (SqlException sqlEx)
+            catch (SqlException ex)
             {
-                throw new Exception($"Database error occurred while befriending: {sqlEx.Message}", sqlEx);
+                // you’ll no longer get a PK violation here
+                throw new Exception($"DB error in {MethodBase.GetCurrentMethod().Name}: {ex.Message}", ex);
             }
             catch (Exception ex)
             {
-                throw new Exception($"An unexpected error occurred in {MethodBase.GetCurrentMethod().Name}: {ex.Message}", ex);
+                throw new Exception($"Unexpected error in {MethodBase.GetCurrentMethod().Name}: {ex.Message}", ex);
             }
         }
 
+
+        public bool RespondToFriendRequest(int userId, int requesterId, bool accept)
+        {
+            int u = Math.Min(userId, requesterId),
+                f = Math.Max(userId, requesterId);
+            const string sql = @"
+UPDATE dbo.Friends
+   SET Status    = @Status
+ WHERE UserId   = @U
+   AND FriendId = @F
+   AND Status   = 'Pending';
+";
+            using var conn = GetSqlConnection();
+            conn.Open();
+            using var cmd = new SqlCommand(sql, conn);
+            cmd.Parameters.AddWithValue("@Status", accept ? "Accepted" : "Declined");
+            cmd.Parameters.AddWithValue("@U", u);
+            cmd.Parameters.AddWithValue("@F", f);
+            return cmd.ExecuteNonQuery() == 1;
+        }
+
+     
+        public List<UserEntity> LoadIncomingRequests(int userId)
+        {
+            var list = new List<UserEntity>();
+            const string sql = @"
+SELECT 
+    u.UserId,
+    u.Username,
+    u.Picture
+FROM dbo.[User] AS u
+JOIN dbo.Friends AS f
+  ON ( (f.UserId   = @Id AND u.UserId = f.FriendId)
+    OR (f.FriendId = @Id AND u.UserId = f.UserId) )
+WHERE f.Status      = 'Pending'
+  AND f.RequestedBy <> @Id;
+";
+            try
+            {
+                using var conn = GetSqlConnection();
+                conn.Open();
+                using var cmd = new SqlCommand(sql, conn);
+                cmd.Parameters.AddWithValue("@Id", userId);
+                using var rdr = cmd.ExecuteReader();
+                while (rdr.Read())
+                {
+                    list.Add(new UserEntity(
+                        rdr.GetInt32(rdr.GetOrdinal("UserId")),
+                        rdr.GetString(rdr.GetOrdinal("Username")),
+                        rdr.IsDBNull(rdr.GetOrdinal("Picture"))
+                          ? null
+                          : (byte[])rdr["Picture"]));
+                }
+            }
+            catch (SqlException ex) { throw new Exception($"DB error in {MethodBase.GetCurrentMethod().Name}: {ex.Message}", ex); }
+            catch (Exception ex) { throw new Exception($"Unexpected error in {MethodBase.GetCurrentMethod().Name}: {ex.Message}", ex); }
+            return list;
+        }
+
+        /// <summary>
+        /// Remove an existing friendship (or cancel a pending/declined request).
+        /// </summary>
         public bool TryRemoveFriend(int userId, int friendId)
         {
             if (userId == friendId)
                 throw new ArgumentException("A user cannot unfriend themself.");
 
-            const string Sql = @"
-        DELETE FROM dbo.Friends
-        WHERE 
-          UserId   = CASE WHEN @UserId   < @FriendId THEN @UserId   ELSE @FriendId END
-          AND
-          FriendId = CASE WHEN @UserId   < @FriendId THEN @FriendId ELSE @UserId   END;
-    ";
-
+            const string sql = @"
+DELETE FROM dbo.Friends
+WHERE 
+  UserId   = CASE WHEN @UserId < @FriendId THEN @UserId   ELSE @FriendId END
+  AND FriendId = CASE WHEN @UserId < @FriendId THEN @FriendId ELSE @UserId   END;
+";
             using var conn = GetSqlConnection();
             conn.Open();
-
-            using var cmd = new SqlCommand(Sql, conn);
+            using var cmd = new SqlCommand(sql, conn);
             cmd.Parameters.AddWithValue("@UserId", userId);
             cmd.Parameters.AddWithValue("@FriendId", friendId);
-
-            int rowsAffected = cmd.ExecuteNonQuery();
-            return rowsAffected > 0;   
+            int rows = cmd.ExecuteNonQuery();
+            return rows > 0;
+        }
+        public List<UserEntity> LoadOutgoingRequests(int userId)
+        {
+            var list = new List<UserEntity>();
+            const string sql = @"
+SELECT u.UserId, u.Username, u.Picture
+FROM dbo.[User] AS u
+JOIN dbo.Friends AS f
+  ON ( (f.UserId   = @Id AND u.UserId = f.FriendId)
+    OR (f.FriendId = @Id AND u.UserId = f.UserId) )
+WHERE f.Status      = 'Pending'
+  AND f.RequestedBy = @Id;
+";
+            using var conn = GetSqlConnection();
+            conn.Open();
+            using var cmd = new SqlCommand(sql, conn);
+            cmd.Parameters.AddWithValue("@Id", userId);
+            using var rdr = cmd.ExecuteReader();
+            while (rdr.Read())
+            {
+                list.Add(new UserEntity(
+                    rdr.GetInt32(rdr.GetOrdinal("UserId")),
+                    rdr.GetString(rdr.GetOrdinal("Username")),
+                    rdr.IsDBNull(rdr.GetOrdinal("Picture")) ? null : (byte[])rdr["Picture"]
+                ));
+            }
+            return list;
         }
 
     }
 
 }
-

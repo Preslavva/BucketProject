@@ -11,8 +11,13 @@ namespace BucketProjetc.BLL.Business_Logic.InterfacesService
     {
         List<UserSummaryDTO> GetFriends(int userId);
         List<UserSummaryDTO> GetNonFriends(int userId);
-        bool AddFriend(int userId, int friendId);
+        List<UserSummaryDTO> GetIncomingFriendRequests(int userId);
+
+        bool SendFriendRequest(int userId, int friendId);
+        bool AcceptFriendRequest(int userId, int requesterId);
+        bool DeclineFriendRequest(int userId, int requesterId);
         bool RemoveFriend(int userId, int friendId);
+        List<UserSummaryDTO> GetOutgoingFriendRequests(int userId);
 
 
     }

@@ -68,40 +68,35 @@ namespace BucketProject.BLL.Business_Logic.Services
 
             var today = DateTime.Today;
             return allGoals
-                .Where(g => !g.Deadline.HasValue || g.Deadline.Value.Date >= today)
+                .Where(g => !g.Deadline.HasValue || g.Deadline.Value.Date >today)
                 .ToList();
         }
 
         public List<Goal> LoadSharedGoalsByCategory(string category)
         {
-            // 1) Get current user
             string? username = _contextAccessor.HttpContext?.Session.GetString("Username");
             if (string.IsNullOrEmpty(username))
                 throw new Exception("User not logged in.");
 
             int userId = _goalRepo.GetIdOfUser(username);
 
-            // 2) Parse category
             if (!Enum.TryParse<Category>(category, true, out var parsedCategory))
                 throw new ArgumentException($"Invalid category: {category}");
 
-            // 3) Load the raw shared goals (any goal assigned to you and shared)
             var entities = _goalRepo.LoadSharedGoalsOfUserByCategory(userId, parsedCategory);
 
-            // 4) Map to domain
             var goals = _mapper.Map<List<Goal>>(entities);
 
-            // 5) For each goal, load the list of other users it’s shared with
+            
             foreach (var g in goals)
             {
                 var recipients = _goalRepo.LoadSharedUsersForGoal(g.Id, userId);
                 g.Recipients = _mapper.Map<List<User>>(recipients);
             }
 
-            // 6) Filter out expired deadlines
             var today = DateTime.Today;
             return goals
-                .Where(g => !g.Deadline.HasValue || g.Deadline.Value.Date >= today)
+                .Where(g => !g.Deadline.HasValue || g.Deadline.Value.Date > today)
                 .ToList();
         }
 
