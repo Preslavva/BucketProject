@@ -18,6 +18,7 @@ namespace BucketProjetc.BLL.Business_Logic.InterfacesService
         bool DeclineFriendRequest(int userId, int requesterId);
         bool RemoveFriend(int userId, int friendId);
         List<UserSummaryDTO> GetOutgoingFriendRequests(int userId);
+        string GetUsername(int userId);
 
 
     }

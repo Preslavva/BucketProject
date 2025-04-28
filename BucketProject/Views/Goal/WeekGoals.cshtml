@@ -4,7 +4,6 @@
 <h2>Weekly Goals</h2>
 
 @{
-    // Handle any in‐progress sub‐goals in TempData
     var brokenDownGoals = TempData["SubGoals"] != null
         ? JsonConvert.DeserializeObject<List<GoalViewModel>>(TempData["SubGoals"].ToString())
         : new List<GoalViewModel>();
@@ -13,18 +12,14 @@
         TempData["SubGoals"] = JsonConvert.SerializeObject(brokenDownGoals);
     if (!string.IsNullOrEmpty(subGoalForId))
         TempData["SubGoalForId"] = subGoalForId;
-
-    // Pull the friends list out of ViewBag once
-    var friends = (List<UserSummaryDTO>)(ViewBag.Friends ?? new List<UserSummaryDTO>());
 }
 
 <form method="post" asp-controller="Goal" asp-action="CreateWeekGoal">
-    <div class="input-container mb-3">
+    <div class="input-container">
         <input type="text" name="Description" required />
         <label class="label">Enter Goal</label>
         <div class="underline"></div>
     </div>
-
     <input type="hidden" name="Category" value="Week" />
     <select name="Type" required class="form-select mb-3">
         <option value="" disabled selected>Select goal type</option>
@@ -35,77 +30,68 @@
     </select>
 
     <button class="btn btn-outline-secondary mb-2"
-            type="button"
-            data-bs-toggle="collapse"
-            data-bs-target="#friendsSelect"
-            aria-expanded="false"
-            aria-controls="friendsSelect">
+    type="button"
+    data-bs-toggle="collapse"
+    data-bs-target="#friendsSelect"
+    aria-expanded="false"
+    aria-controls="friendsSelect">
         Share With Friends
     </button>
 
     <div class="collapse mb-3" id="friendsSelect">
-        <label class="form-label">Share With Friends:</label>
+        <label>Share With Friends:</label>
+        <ul class="list-unstyled">
+            @foreach (var f in (List<UserSummaryDTO>)ViewBag.Friends)
+            {
+                var imgSrc = f.Picture != null
+                ? $"data:image/jpeg;base64,{Convert.ToBase64String(f.Picture)}"
+                : Url.Content("~/images/default-avatar.png");
 
-        @if (!friends.Any())
-        {
-            <p class="text-muted">You have no friends to share with.</p>
-        }
-        else
-        {
-            <ul class="list-unstyled">
-                @foreach (var f in friends)
-                {
-                    var imgSrc = f.Picture != null
-                    ? $"data:image/jpeg;base64,{Convert.ToBase64String(f.Picture)}"
-                    : Url.Content("~/images/default-avatar.png");
-
-                    <li class="mb-1">
-                        <label class="d-flex align-items-center">
-                            <input type="checkbox"
-                                   name="friendIds"
-                                   value="@f.Id"
-                                   class="form-check-input me-2" />
-                            <img src="@imgSrc"
-                                 alt="@f.Username"
-                                 class="rounded-circle me-2"
-                                 style="width:24px; height:24px;" />
-                            <span>@f.Username</span>
-                        </label>
-                    </li>
-                }
-            </ul>
-        }
+                <li class="mb-1">
+                    <label class="d-flex align-items-center">
+                        <input type="checkbox"
+                        name="friendIds"
+                        value="@f.Id"
+                        class="form-check-input me-2" />
+                        <img src="@imgSrc"
+                        alt="@f.Username"
+                        class="rounded-circle me-2"
+                        style="width:24px; height:24px;" />
+                        <span>@f.Username</span>
+                    </label>
+                </li>
+            }
+        </ul>
     </div>
+
 
     <button type="submit" class="btn btn-primary mb-4">Add Goal</button>
 </form>
 
 <hr />
-
 <ul class="nav nav-tabs mb-4" role="tablist">
     <li class="nav-item" role="presentation">
-        <button class="nav-link active"
-                id="personal-tab"
-                data-bs-toggle="tab"
-                data-bs-target="#personal"
-                type="button">
-            Personal (@Model.Goals.Count)
+        <button class="nav-link active" id="personal-tab" data-bs-toggle="tab" data-bs-target="#personal" type="button">
+            Personal (@Model.TotalPersonal)
         </button>
     </li>
     <li class="nav-item" role="presentation">
-        <button class="nav-link"
-                id="shared-tab"
-                data-bs-toggle="tab"
-                data-bs-target="#shared"
-                type="button">
-            Shared (@Model.SharedGoals.Count)
+        <button class="nav-link" id="shared-tab" data-bs-toggle="tab" data-bs-target="#shared" type="button">
+            Shared (@Model.TotalShared)
+        </button>
+    </li>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="invites-tab" data-bs-toggle="tab" data-bs-target="#invites" type="button">
+            Invitations (@Model.PendingInvitations.Count)
         </button>
     </li>
 </ul>
 
+
 <div class="tab-content">
 
-    <!-- PERSONAL GOALS -->
+
     <div class="tab-pane fade show active" id="personal" role="tabpanel">
         <p>
             <strong>Completed:</strong> @Model.AccomplishedCountPersonal /
@@ -117,36 +103,32 @@
         {
             <div class="goal-item mb-3 p-2 border">
 
-                <form method="post" asp-action="EditWeekGoal" class="d-inline">
+
+                <form method="post" asp-action="EditWeekGoal" style="display:inline;">
                     <input type="hidden" name="Id" value="@goal.Id" />
                     <input type="text" name="Description" value="@goal.Description" required />
-                    <button type="submit" class="btn btn-sm btn-outline-secondary">Edit</button>
+                    <button type="submit">Edit</button>
                 </form>
-
-                <form method="post" asp-action="ChangeGoalStatusWeek" class="d-inline ms-2">
+                <form method="post" asp-action="ChangeGoalStatusWeek" style="display:inline; margin-left:10px;">
                     <input type="hidden" name="Id" value="@goal.Id" />
-                    <label class="form-check-label ms-1">
+                    <label>
                         <input type="checkbox"
-                               name="isDone"
-                               value="true"
-                               class="form-check-input"
+                        name="isDone" value="true"
                         @(goal.IsDone ? "checked" : "")
-                               onchange="this.form.submit()" />
+                        onchange="this.form.submit()" />
                         Done
                     </label>
                 </form>
-
-                <form method="post" asp-action="DeleteGoalWeek" class="d-inline ms-2">
+                <form method="post" asp-action="DeleteGoalWeek" style="display:inline; margin-left:10px;">
                     <input type="hidden" name="Id" value="@goal.Id" />
-                    <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                    <button type="submit">Delete</button>
                 </form>
-
-                <form method="post" asp-action="BreakDownGoalWeek" class="d-inline ms-2">
+                <form method="post" asp-action="BreakDownGoalWeek" asp-controller="Goal" style="display:inline; margin-left:10px;">
                     <input type="hidden" name="id" value="@goal.Id" />
-                    <button type="submit" class="btn btn-sm btn-outline-warning">Break Down</button>
+                    <button type="submit">Break Down</button>
                 </form>
 
-                @* Sub-goal entry area *@
+
                 @if (subGoalForId == goal.Id.ToString() && brokenDownGoals.Any())
                 {
                     <div class="mt-2 p-2 bg-light">
@@ -154,49 +136,47 @@
                         {
                             <div class="d-flex align-items-center mb-1">
                                 <form method="post" asp-action="CreateWeekGoal" class="d-flex me-2">
-                                    <input type="text" name="Description" value="@sub.Description" required class="form-control form-control-sm" />
+                                    <input type="text" name="Description" value="@sub.Description" required />
                                     <input type="hidden" name="OriginalDescription" value="@sub.Description" />
                                     <input type="hidden" name="Category" value="Week" />
                                     <input type="hidden" name="Type" value="@goal.Type" />
                                     <input type="hidden" name="ParentGoalId" value="@goal.Id" />
-                                    <button type="submit" class="btn btn-sm btn-primary">Add</button>
+                                    <button type="submit">Add</button>
                                 </form>
                                 <form method="post" asp-action="RemoveSubGoalFromBreakdownWeek">
                                     <input type="hidden" name="description" value="@sub.Description" />
-                                    <button type="submit" class="btn btn-sm btn-outline-danger">Remove</button>
+                                    <button type="submit">Remove</button>
                                 </form>
                             </div>
                         }
                     </div>
                 }
 
-                @* Show existing children *@
+
                 @if (goal.Children?.Any() == true)
                 {
                     <div class="ms-4 mt-2 border-start ps-3">
                         @foreach (var sub in goal.Children)
                         {
                             <div class="mb-1">
-                                <form method="post" asp-action="EditWeekGoal" class="d-inline">
+                                <form method="post" asp-action="EditWeekGoal" style="display:inline;">
                                     <input type="hidden" name="Id" value="@sub.Id" />
-                                    <input type="text" name="Description" value="@sub.Description" required class="form-control form-control-sm d-inline-block w-auto" />
-                                    <button type="submit" class="btn btn-sm btn-outline-secondary">Save</button>
+                                    <input type="text" name="Description" value="@sub.Description" required />
+                                    <button type="submit">Save</button>
                                 </form>
-                                <form method="post" asp-action="ChangeGoalStatusWeek" class="d-inline ms-2">
+                                <form method="post" asp-action="ChangeGoalStatusWeek" style="display:inline; margin-left:10px;">
                                     <input type="hidden" name="Id" value="@sub.Id" />
-                                    <label class="form-check-label ms-1">
+                                    <label>
                                         <input type="checkbox"
-                                               name="isDone"
-                                               value="true"
-                                               class="form-check-input"
+                                        name="isDone" value="true"
                                         @(sub.IsDone ? "checked" : "")
-                                               onchange="this.form.submit()" />
+                                        onchange="this.form.submit()" />
                                         Done
                                     </label>
                                 </form>
-                                <form method="post" asp-action="DeleteGoalWeek" class="d-inline ms-2">
+                                <form method="post" asp-action="DeleteGoalWeek" style="display:inline; margin-left:10px;">
                                     <input type="hidden" name="Id" value="@sub.Id" />
-                                    <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                                    <button type="submit">Delete</button>
                                 </form>
                             </div>
                         }
@@ -206,7 +186,6 @@
         }
     </div>
 
-    <!-- SHARED GOALS -->
     <div class="tab-pane fade" id="shared" role="tabpanel">
         <p>
             <strong>Completed:</strong> @Model.AccomplishedCountShared /
@@ -223,20 +202,41 @@
             @foreach (var goal in Model.SharedGoals)
             {
                 <div class="goal-item mb-3 p-2 border">
-                    <form method="post" asp-action="ChangeGoalStatusWeek" class="d-inline">
-                        <input type="hidden" name="Id" value="@goal.Id" />
-                        <label class="form-check-label">
-                            <input type="checkbox"
-                                   name="isDone"
-                                   value="true"
-                                   class="form-check-input"
-                            @(goal.IsDone ? "checked" : "")
-                                   onchange="this.form.submit()" />
-                            Done
-                        </label>
-                    </form>
-                    <span class="mx-2">@goal.Description</span>
 
+                <form method="post" asp-action="ChangeGoalStatusWeek" class="d-inline">
+                    <input type="hidden" name="Id" value="@goal.Id" />
+                    <input type="checkbox" name="isDone" value="true" class="form-check-input" @(goal.IsDone ? "checked" : "") onchange="this.form.submit()" />
+                    Done
+                </form>
+
+                
+
+                    @if (goal.OwnerId == ViewBag.CurrentUserId)
+                    {
+                    
+
+                        <form method="post" asp-action="EditWeekGoal" class="d-inline ms-2">
+                            <input type="hidden" name="Id" value="@goal.Id" />
+                            <input type="text" name="Description" value="@goal.Description" required />
+                            <button type="submit" class="btn btn-sm btn-outline-secondary">Edit</button>
+                        </form>
+
+                        <form method="post" asp-action="DeleteGoalWeek" class="d-inline ms-2">
+                            <input type="hidden" name="Id" value="@goal.Id" />
+                            <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                        </form>
+
+                        <form method="post" asp-action="BreakDownGoalWeek" class="d-inline ms-2">
+                            <input type="hidden" name="id" value="@goal.Id" />
+                            <button type="submit" class="btn btn-sm btn-outline-warning">Break Down</button>
+                        </form>
+                    }
+                    else
+                    {
+                        <span class="mx-2">@goal.Description</span>
+                    }
+
+                    <!-- Shared with info -->
                     <div class="mt-2">
                         <strong>Also shared with:</strong>
                         @if (goal.Recipients == null || !goal.Recipients.Any())
@@ -251,11 +251,9 @@
                                     var imgSrc = u.Picture != null
                                     ? $"data:image/jpeg;base64,{Convert.ToBase64String(u.Picture)}"
                                     : Url.Content("~/images/default-avatar.png");
+
                                     <li class="list-inline-item text-center me-2">
-                                        <img src="@imgSrc"
-                                             alt="@u.Username"
-                                             class="rounded-circle mb-1"
-                                             style="width:32px; height:32px;" />
+                                        <img src="@imgSrc" alt="@u.Username" class="rounded-circle mb-1" style="width:32px; height:32px;" />
                                         <br />
                                         <small>@u.Username</small>
                                     </li>
@@ -263,9 +261,114 @@
                             </ul>
                         }
                     </div>
-                </div>
+
+                    <!-- Broken down goals -->
+                    @if (subGoalForId == goal.Id.ToString() && brokenDownGoals.Any())
+                    {
+                        <div class="mt-2 p-2 bg-light">
+                            @foreach (var sub in brokenDownGoals)
+                            {
+                                <div class="d-flex align-items-center mb-1">
+                                    <form method="post" asp-action="CreateWeekGoal" class="d-flex me-2">
+                                        <input type="text" name="Description" value="@sub.Description" required />
+                                        <input type="hidden" name="OriginalDescription" value="@sub.Description" />
+                                        <input type="hidden" name="Category" value="Week" />
+                                        <input type="hidden" name="Type" value="@goal.Type" />
+                                        <input type="hidden" name="ParentGoalId" value="@goal.Id" />
+                                        @if (goal.Recipients != null)
+                                        {
+                                            @foreach (var friend in goal.Recipients)
+                                            {
+                                                <input type="hidden" name="friendIds[]" value="@friend.Id" />
+                                            }
+                                        }
+                                        <button type="submit">Add</button>
+                                    </form>
+                                    <form method="post" asp-action="RemoveSubGoalFromBreakdownWeek">
+                                        <input type="hidden" name="description" value="@sub.Description" />
+                                        <button type="submit">Remove</button>
+                                    </form>
+                                </div>
+                            }
+                        </div>
+                    }
+
+                    <!-- Children goals -->
+                    @if (goal.Children?.Any() == true)
+                    {
+                        <div class="ms-4 mt-2 border-start ps-3">
+                            @foreach (var sub in goal.Children)
+                            {
+                                <div class="mb-1">
+                                    <form method="post" asp-action="ChangeGoalStatusWeek" class="d-inline">
+                                        <input type="hidden" name="Id" value="@sub.Id" />
+                                        <input type="checkbox" name="isDone" value="true" class="form-check-input" @(sub.IsDone ? "checked" : "") onchange="this.form.submit()" />
+                                    </form>
+
+                                    @if (sub.OwnerId == ViewBag.CurrentUserId)
+                                    {
+                                        <form method="post" asp-action="EditWeekGoal" class="d-inline ms-2">
+                                            <input type="hidden" name="Id" value="@sub.Id" />
+                                            <input type="text" name="Description" value="@sub.Description" required class="form-control form-control-sm d-inline-block w-auto" />
+                                            <button class="btn btn-sm btn-outline-secondary">Save</button>
+                                        </form>
+
+                                        <form method="post" asp-action="DeleteGoalWeek" class="d-inline ms-2">
+                                            <input type="hidden" name="Id" value="@sub.Id" />
+                                            <button class="btn btn-sm btn-danger">Delete</button>
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        <span class="ms-2">@sub.Description</span>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    }
+
+                </div> <!-- 🔥 CLOSE goal-item div here -->
             }
+
+
+        }
+    </div>
+    <div class="tab-pane fade" id="invites" role="tabpanel">
+        <p>
+            <strong>Pending Invitations:</strong> @Model.PendingInvitations.Count
+        </p>
+
+        @if (!Model.PendingInvitations.Any())
+        {
+            <p class="text-muted">No pending invitations.</p>
+        }
+        else
+        {
+            <ul class="list-group">
+                @foreach (var inv in Model.PendingInvitations)
+                {
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>@inv.InviterUsername</strong> invited you to:<br />
+                            <em>@inv.GoalDescription</em>
+                        </div>
+                        <div class="d-flex">
+                            <form method="post" asp-action="RespondInvitationWeek" class="me-1">
+                                <input type="hidden" name="invitationId" value="@inv.InvitationId" />
+                                <input type="hidden" name="accept" value="true" />
+                                <button type="submit" class="btn btn-sm btn-success">Accept</button>
+                            </form>
+                            <form method="post" asp-action="RespondInvitationWeek">
+                                <input type="hidden" name="invitationId" value="@inv.InvitationId" />
+                                <input type="hidden" name="accept" value="false" />
+                                <button type="submit" class="btn btn-sm btn-danger">Decline</button>
+                            </form>
+                        </div>
+                    </li>
+                }
+            </ul>
         }
     </div>
 
 </div>
+

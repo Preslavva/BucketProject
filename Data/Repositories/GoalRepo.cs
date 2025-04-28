@@ -16,10 +16,7 @@ public class GoalRepo: Repository, IGoalRepo
     { 
     }
 
-    public void InsertGoalAndAssignToUsers(
-     int ownerUserId,
-     GoalEntity goal,
-     IEnumerable<int> sharedWithUserIds)
+    public void InsertGoalAndAssignToUsers(int ownerUserId, GoalEntity goal, IEnumerable<int> sharedWithUserIds)
     {
         using var conn = GetSqlConnection();
         conn.Open();
@@ -35,6 +32,7 @@ VALUES
   (@Category, @Description, @Type, @Deadline, @IsDone, @IsDeleted,
    @CreatedAt, @CompletedAt, @IsPostponed, @ParentGoalId, @OwnerId);
 ";
+
             int newGoalId;
             using (var cmd = new SqlCommand(insertGoalSql, conn, tx))
             {
@@ -47,28 +45,31 @@ VALUES
                 cmd.Parameters.AddWithValue("@CreatedAt", goal.CreatedAt);
                 cmd.Parameters.AddWithValue("@CompletedAt", goal.CompletedAt ?? (object)DBNull.Value);
                 cmd.Parameters.AddWithValue("@IsPostponed", goal.IsPostponed);
-                cmd.Parameters.Add("@ParentGoalId", SqlDbType.Int)
-                   .Value = goal.ParentGoalId ?? (object)DBNull.Value;
+                cmd.Parameters.AddWithValue("@ParentGoalId", goal.ParentGoalId ?? (object)DBNull.Value);
                 cmd.Parameters.AddWithValue("@OwnerId", ownerUserId);
 
+                // 🚨 This will get back the generated Goal ID
                 newGoalId = (int)cmd.ExecuteScalar();
             }
 
-         
+            // 🚨 Set the entity's Id here!
+            goal.Id = newGoalId;
+
             const string insertUserGoalSql = @"
 INSERT INTO User_Goal (UserId, GoalId)
 VALUES (@UserId, @GoalId);
 ";
+
             using (var cmd = new SqlCommand(insertUserGoalSql, conn, tx))
             {
                 cmd.Parameters.Add(new SqlParameter("@UserId", SqlDbType.Int));
                 cmd.Parameters.Add(new SqlParameter("@GoalId", SqlDbType.Int) { Value = newGoalId });
 
-  
+                // Owner assignment
                 cmd.Parameters["@UserId"].Value = ownerUserId;
                 cmd.ExecuteNonQuery();
 
-               
+                // Shared users (if any, but in your case it will usually be empty for now)
                 foreach (var friendId in sharedWithUserIds ?? Enumerable.Empty<int>())
                 {
                     if (friendId == ownerUserId) continue;
@@ -85,6 +86,7 @@ VALUES (@UserId, @GoalId);
             throw;
         }
     }
+
 
 
     public GoalEntity GetGoalById(int id)
@@ -725,6 +727,20 @@ WHERE ug.GoalId   = @GoalId
         }
         return list;
     }
+    public void AssignUserToGoal(int goalId, int userId)
+    {
+        const string sql = @"
+INSERT INTO dbo.User_Goal (UserId, GoalId)
+VALUES (@UserId, @GoalId);";
+
+        using var conn = GetSqlConnection();
+        conn.Open();
+        using var cmd = new SqlCommand(sql, conn);
+        cmd.Parameters.AddWithValue("@UserId", userId);
+        cmd.Parameters.AddWithValue("@GoalId", goalId);
+        cmd.ExecuteNonQuery();
+    }
+
 }
 
 

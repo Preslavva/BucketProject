@@ -72,6 +72,12 @@ namespace BucketProject.BLL.Business_Logic.Services
         {
             var ents = _socialRepo.LoadOutgoingRequests(userId);
             return _mapper.Map<List<UserSummaryDTO>>(ents);
+           
+    }
+        public string GetUsername(int userId)
+        {
+            UserEntity user = _socialRepo.GetUserById(userId);
+            return user?.Username ?? "(Unknown User)";
         }
 
 

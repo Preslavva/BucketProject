@@ -28,4 +28,5 @@ namespace BucketProject.DAL.Data.InterfacesRepo;
     GoalEntity GetGoalById(int id);
     List<GoalEntity> LoadChildGoalsOfGoals(int goalId);
     List<UserEntity> LoadSharedUsersForGoal(int goalId, int ownerId);
+    void AssignUserToGoal(int goalId, int userId);
 } 

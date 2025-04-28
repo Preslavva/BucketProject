@@ -29,5 +29,6 @@ namespace BucketProject.UI.ViewModels.ViewModels
             );
 
         public int RemainingShared => TotalShared - AccomplishedCountShared;
+        public List<GoalInviteViewModel> PendingInvitations { get; set; } = new();
     }
 }

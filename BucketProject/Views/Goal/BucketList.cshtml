@@ -72,21 +72,19 @@
 
 <ul class="nav nav-tabs mb-4" role="tablist">
     <li class="nav-item" role="presentation">
-        <button class="nav-link active"
-                id="personal-tab"
-                data-bs-toggle="tab"
-                data-bs-target="#personal"
-                type="button">
+        <button class="nav-link active" id="personal-tab" data-bs-toggle="tab" data-bs-target="#personal" type="button">
             Personal (@Model.Goals.Count)
         </button>
     </li>
     <li class="nav-item" role="presentation">
-        <button class="nav-link"
-                id="shared-tab"
-                data-bs-toggle="tab"
-                data-bs-target="#shared"
-                type="button">
+        <button class="nav-link" id="shared-tab" data-bs-toggle="tab" data-bs-target="#shared" type="button">
             Shared (@Model.SharedGoals.Count)
+        </button>
+    </li>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="invites-tab" data-bs-toggle="tab" data-bs-target="#invites" type="button">
+            Invitations (@Model.PendingInvitations.Count)
         </button>
     </li>
 </ul>
@@ -248,6 +246,42 @@
                 </div>
             }
 
+        }
+    </div>
+    <div class="tab-pane fade" id="invites" role="tabpanel">
+        <p>
+            <strong>Pending Invitations:</strong> @Model.PendingInvitations.Count
+        </p>
+
+        @if (!Model.PendingInvitations.Any())
+        {
+            <p class="text-muted">No pending invitations.</p>
+        }
+        else
+        {
+            <ul class="list-group">
+                @foreach (var inv in Model.PendingInvitations)
+                {
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>@inv.InviterUsername</strong> invited you to:<br />
+                            <em>@inv.GoalDescription</em>
+                        </div>
+                        <div class="d-flex">
+                            <form method="post" asp-action="RespondInvitationBucketList" class="me-1">
+                                <input type="hidden" name="invitationId" value="@inv.InvitationId" />
+                                <input type="hidden" name="accept" value="true" />
+                                <button type="submit" class="btn btn-sm btn-success">Accept</button>
+                            </form>
+                            <form method="post" asp-action="RespondInvitationBucketList">
+                                <input type="hidden" name="invitationId" value="@inv.InvitationId" />
+                                <input type="hidden" name="accept" value="false" />
+                                <button type="submit" class="btn btn-sm btn-danger">Decline</button>
+                            </form>
+                        </div>
+                    </li>
+                }
+            </ul>
         }
     </div>
 

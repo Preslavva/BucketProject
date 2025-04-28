@@ -20,32 +20,64 @@ namespace BucketProject.BLL.Business_Logic.Services
         private readonly IGoalRepo _goalRepo;
         private readonly IMapper _mapper;
         private readonly IAIClient _aIClient;
+        private readonly IGoalInviteRepo _inviteRepo;
 
-        public GoalService(IGoalRepo goalRepo, IHttpContextAccessor contextAccessor, IMapper mapper, IAIClient aIClient)
+        public GoalService(IGoalRepo goalRepo, IHttpContextAccessor contextAccessor, IMapper mapper, IAIClient aIClient, IGoalInviteRepo inviteRepo)
         {
             _goalRepo = goalRepo;
             _contextAccessor = contextAccessor;
             _mapper = mapper;
             _aIClient = aIClient;
+            _inviteRepo = inviteRepo;
           
+        }
+        public int GetCurrentUserId()
+        {
+            string? username = _contextAccessor.HttpContext.Session.GetString("Username");
+            if (string.IsNullOrEmpty(username))
+                throw new Exception("User not logged in.");
+
+
+            int userId = _goalRepo.GetIdOfUser(username);
+            return userId;
+        }
+        private void EnsureUserIsOwner(int goalId, int currentUserId)
+        {
+            var goalEntity = _goalRepo.GetGoalById(goalId);
+
+            if (goalEntity == null)
+                throw new Exception("Goal not found.");
+
+            if (goalEntity.OwnerId != currentUserId)
+                throw new UnauthorizedAccessException("You are not the owner of this goal.");
         }
 
 
-        // SocialService or GoalService
         public void CreateGoal(Goal goalDomain, IEnumerable<int> sharedWithUserIds)
         {
-            // get your user ID
-            string? username = _contextAccessor
-                                 .HttpContext
-                                 .Session
-                                 .GetString("Username");
-            int ownerId = _goalRepo.GetIdOfUser(username);
+           
 
-            // map domain → entity
+            // Retrieve user ID from repository
+            int ownerId = GetCurrentUserId();
+
+            // Map domain goal to entity goal
             GoalEntity entity = _mapper.Map<GoalEntity>(goalDomain);
 
-            // use the new repo method
-            _goalRepo.InsertGoalAndAssignToUsers(ownerId, entity, sharedWithUserIds);
+            // Insert goal, assigning only the owner immediately
+            _goalRepo.InsertGoalAndAssignToUsers(ownerId, entity, Enumerable.Empty<int>());
+
+           
+            int newGoalId = entity.Id;
+
+            // Insert invitations for friends instead of immediate assignment
+            if (sharedWithUserIds != null)
+            {
+                foreach (var friendId in sharedWithUserIds)
+                {
+                    if (friendId == ownerId) continue; 
+                    _inviteRepo.InsertInvitation(newGoalId, ownerId, friendId);
+                }
+            }
         }
 
 
@@ -53,14 +85,12 @@ namespace BucketProject.BLL.Business_Logic.Services
 
         public List<Goal> LoadPersonalGoalsByCategory(string category)
         {
-            string? username = _contextAccessor.HttpContext.Session.GetString("Username");
-            if (string.IsNullOrEmpty(username))
-                throw new Exception("User not logged in.");
+           
 
             if (!Enum.TryParse<Category>(category, true, out var parsedCategory))
                 throw new ArgumentException($"Invalid category: {category}");
 
-            int userId = _goalRepo.GetIdOfUser(username);
+            int userId = GetCurrentUserId();
 
             List<GoalEntity> allEntities = _goalRepo.LoadPersonalGoalsOfUserbyCategory(userId, parsedCategory);
 
@@ -74,11 +104,9 @@ namespace BucketProject.BLL.Business_Logic.Services
 
         public List<Goal> LoadSharedGoalsByCategory(string category)
         {
-            string? username = _contextAccessor.HttpContext?.Session.GetString("Username");
-            if (string.IsNullOrEmpty(username))
-                throw new Exception("User not logged in.");
 
-            int userId = _goalRepo.GetIdOfUser(username);
+
+            int userId = GetCurrentUserId();
 
             if (!Enum.TryParse<Category>(category, true, out var parsedCategory))
                 throw new ArgumentException($"Invalid category: {category}");
@@ -104,6 +132,11 @@ namespace BucketProject.BLL.Business_Logic.Services
 
         public void UpdateGoal(int goalId, Goal goalDomain)
         {
+
+
+            int userId = GetCurrentUserId();
+            EnsureUserIsOwner(goalId, userId);
+
             var entityGoal = _goalRepo.GetGoalById(goalId);
             if (entityGoal == null)
                 throw new Exception("Goal not found");
@@ -115,8 +148,12 @@ namespace BucketProject.BLL.Business_Logic.Services
 
 
 
+
         public void DeleteGoal(int goalId)
         {
+            int userId = GetCurrentUserId();
+            EnsureUserIsOwner(goalId, userId);
+
             GoalEntity goal = _goalRepo.GetGoalById(goalId);
             if (goal == null)
                 throw new Exception("Goal not found");
@@ -146,6 +183,11 @@ namespace BucketProject.BLL.Business_Logic.Services
 
         public void PostponeGoal(int goalId)
         {
+
+
+            int userId = GetCurrentUserId();
+            EnsureUserIsOwner(goalId, userId);
+
             GoalEntity entityGoal = _goalRepo.GetGoalById(goalId);
             if (entityGoal == null)
                 throw new Exception("Goal not found");
@@ -256,18 +298,30 @@ namespace BucketProject.BLL.Business_Logic.Services
 
             return subGoals;
         }
+        public List<GoalInvitation> GetPendingInvitations(int userId, string category)
+        {
+              return _inviteRepo.GetPendingFor(userId, category);
+        }
+      
 
-        //public async Task InviteUserToGoal(string email, int goalId)
-        //{
-        //    GoalEntity entity = _goalRepo.GetGoalById(goalId);
-        //    if (entity == null || string.IsNullOrWhiteSpace(entity.Description))
-        //        throw new ArgumentException("Invalid goal.");
+        public void RespondToInvitation(int invitationId, bool accept, int currentUserId)
+        {
+            var inv = _inviteRepo.GetById(invitationId);
+            if (inv == null || inv.InvitedId != currentUserId)
+                throw new InvalidOperationException("Unauthorized or not found.");
 
-        //    Goal goal = _mapper.Map<Goal>(entity);
+            _inviteRepo.UpdateStatus(invitationId, accept ? "Accepted" : "Declined");
+            if (accept)
+                _goalRepo.AssignUserToGoal(inv.GoalId, currentUserId);
+        }
 
-        //    string body = $"<p>You’ve been invited to join the goal: <strong>{goal.Description}</strong></p>";
-        //    await _emailService.SendEmailAsync(email, "Goal Invitation", body);
-        //}
+        public string GetGoalDescription(int goalId)
+        {
+            GoalEntity goal = _goalRepo.GetGoalById(goalId);
+            return goal?.Description ?? "(Deleted Goal)";
+        }
+        
+
     }
 
 }

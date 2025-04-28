@@ -6,7 +6,7 @@ using BucketProject.UI.BucketProject.Mapping;
 using BucketProject.DAL.Data.Repositories;
 using BucketProject.BLL.Business_Logic.Mapping;
 using BucketProjetc.BLL.Business_Logic.InterfacesService;
-using Data.Repositories;
+
 
 
 
@@ -45,7 +45,7 @@ builder.Services.AddAutoMapper(cfg => {
     cfg.AddProfile<AutoMapperBL>();
     cfg.AddProfile<AutoMapperUI>();
 });
-
+builder.Services.AddScoped<IGoalInviteRepo, GoalInviteRepo>();
 
 
 

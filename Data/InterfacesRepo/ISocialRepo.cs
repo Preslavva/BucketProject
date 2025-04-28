@@ -16,6 +16,7 @@ namespace BucketProject.DAL.Data.InterfacesRepo;
     List<UserEntity> LoadIncomingRequests(int userId);
     bool RespondToFriendRequest(int userId, int requesterId, bool accept);
     List<UserEntity> LoadOutgoingRequests(int userId);
+    UserEntity GetUserById(int userId);
 
     }
 

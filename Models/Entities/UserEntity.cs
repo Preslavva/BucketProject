@@ -44,6 +44,12 @@ public class UserEntity
         this.Username = username;
         this.Picture = picture;
     }
+    public UserEntity(int id, string username)
+    {
+        this.Id = id;
+        this.Username = username;
+      
+    }
     public UserEntity() { }
     public void UpdatePicture(byte[] newPicture)
     {

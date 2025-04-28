@@ -7,6 +7,7 @@ using BucketProject.BLL.Business_Logic.Domain;
 using BucketProject.UI.ViewModels.ViewModels;
 using BucketProjetc.BLL.Business_Logic.InterfacesService;
 using BucketProject.BLLBusiness_Logic.Domain;
+using BucketProject.DAL.Models.Entities;
 
 namespace BucketProject.UI.BucketProject.Controllers
 {
@@ -322,14 +323,14 @@ namespace BucketProject.UI.BucketProject.Controllers
         [HttpGet]
         public IActionResult WeekGoals()
         {
+            // 1. Load personal and shared goals
             List<Goal> personalDomains = _goalService.LoadPersonalGoalsByCategory("Week");
             List<Goal> sharedDomains = _goalService.LoadSharedGoalsByCategory("Week");
 
-           
             List<GoalViewModel> personalVMs = _mapper.Map<List<GoalViewModel>>(personalDomains);
             List<GoalViewModel> sharedVMs = _mapper.Map<List<GoalViewModel>>(sharedDomains);
 
-        
+            // 2. Structure parent-child for personal goals
             List<GoalViewModel> personalParents = personalVMs
                 .Where(g => g.ParentGoalId == null)
                 .ToList();
@@ -340,7 +341,7 @@ namespace BucketProject.UI.BucketProject.Controllers
                     .ToList();
             }
 
-           
+            // 3. Structure parent-child for shared goals
             List<GoalViewModel> sharedParents = sharedVMs
                 .Where(g => g.ParentGoalId == null)
                 .ToList();
@@ -351,19 +352,34 @@ namespace BucketProject.UI.BucketProject.Controllers
                     .ToList();
             }
 
-        
+            // 4. Load pending invitations
+            List<GoalInvitation> pendingInvitations = _goalService.GetPendingInvitations(CurrentUserId, "Week");
+
+            // 5. Map invitations into ViewModels
+            List<GoalInviteViewModel> pendingInvitationVMs = pendingInvitations
+                .Select(inv => new GoalInviteViewModel
+                {
+                    InvitationId = inv.Id,
+                    GoalDescription = _goalService.GetGoalDescription(inv.GoalId),
+                    InviterUsername = _socialService.GetUsername(inv.InviterId)
+                })
+                .ToList();
+
+            // 6. Build the Page ViewModel
             GoalsPageViewModel pageModel = new GoalsPageViewModel
             {
                 Goals = personalParents,
-                SharedGoals = sharedParents
+                SharedGoals = sharedParents,
+                PendingInvitations = pendingInvitationVMs
             };
 
+            // 7. Additional ViewBag settings
             ViewBag.AvailableTypes = GetAvailableTypes();
             ViewBag.Friends = _socialService.GetFriends(CurrentUserId);
+            ViewBag.CurrentUserId = _goalService.GetCurrentUserId();
 
             return View(pageModel);
         }
-
 
 
         [HttpPost]
@@ -401,14 +417,14 @@ namespace BucketProject.UI.BucketProject.Controllers
         [HttpGet]
         public IActionResult YearGoals()
         {
+            // 1. Load personal and shared goals
             List<Goal> personalDomains = _goalService.LoadPersonalGoalsByCategory("Year");
             List<Goal> sharedDomains = _goalService.LoadSharedGoalsByCategory("Year");
-
 
             List<GoalViewModel> personalVMs = _mapper.Map<List<GoalViewModel>>(personalDomains);
             List<GoalViewModel> sharedVMs = _mapper.Map<List<GoalViewModel>>(sharedDomains);
 
-
+            // 2. Structure parent-child for personal goals
             List<GoalViewModel> personalParents = personalVMs
                 .Where(g => g.ParentGoalId == null)
                 .ToList();
@@ -419,7 +435,7 @@ namespace BucketProject.UI.BucketProject.Controllers
                     .ToList();
             }
 
-
+            // 3. Structure parent-child for shared goals
             List<GoalViewModel> sharedParents = sharedVMs
                 .Where(g => g.ParentGoalId == null)
                 .ToList();
@@ -430,13 +446,28 @@ namespace BucketProject.UI.BucketProject.Controllers
                     .ToList();
             }
 
+            // 4. Load pending invitations
+            List<GoalInvitation> pendingInvitations = _goalService.GetPendingInvitations(CurrentUserId, "Year");
 
+            // 5. Map invitations into ViewModels
+            List<GoalInviteViewModel> pendingInvitationVMs = pendingInvitations
+                .Select(inv => new GoalInviteViewModel
+                {
+                    InvitationId = inv.Id,
+                    GoalDescription = _goalService.GetGoalDescription(inv.GoalId),
+                    InviterUsername = _socialService.GetUsername(inv.InviterId)
+                })
+                .ToList();
+
+            // 6. Build the Page ViewModel
             GoalsPageViewModel pageModel = new GoalsPageViewModel
             {
                 Goals = personalParents,
-                SharedGoals = sharedParents
+                SharedGoals = sharedParents,
+                PendingInvitations = pendingInvitationVMs
             };
 
+            // 7. Additional ViewBag settings
             ViewBag.AvailableTypes = GetAvailableTypes();
             ViewBag.Friends = _socialService.GetFriends(CurrentUserId);
 
@@ -447,14 +478,14 @@ namespace BucketProject.UI.BucketProject.Controllers
         public IActionResult BucketList()
         {
 
+            // 1. Load personal and shared goals
             List<Goal> personalDomains = _goalService.LoadPersonalGoalsByCategory("Bucket_list");
             List<Goal> sharedDomains = _goalService.LoadSharedGoalsByCategory("Bucket_list");
-
 
             List<GoalViewModel> personalVMs = _mapper.Map<List<GoalViewModel>>(personalDomains);
             List<GoalViewModel> sharedVMs = _mapper.Map<List<GoalViewModel>>(sharedDomains);
 
-
+            // 2. Structure parent-child for personal goals
             List<GoalViewModel> personalParents = personalVMs
                 .Where(g => g.ParentGoalId == null)
                 .ToList();
@@ -465,7 +496,7 @@ namespace BucketProject.UI.BucketProject.Controllers
                     .ToList();
             }
 
-
+            // 3. Structure parent-child for shared goals
             List<GoalViewModel> sharedParents = sharedVMs
                 .Where(g => g.ParentGoalId == null)
                 .ToList();
@@ -476,13 +507,28 @@ namespace BucketProject.UI.BucketProject.Controllers
                     .ToList();
             }
 
+            // 4. Load pending invitations
+            List<GoalInvitation> pendingInvitations = _goalService.GetPendingInvitations(CurrentUserId, "Bucket_list");
 
+            // 5. Map invitations into ViewModels
+            List<GoalInviteViewModel> pendingInvitationVMs = pendingInvitations
+                .Select(inv => new GoalInviteViewModel
+                {
+                    InvitationId = inv.Id,
+                    GoalDescription = _goalService.GetGoalDescription(inv.GoalId),
+                    InviterUsername = _socialService.GetUsername(inv.InviterId)
+                })
+                .ToList();
+
+            // 6. Build the Page ViewModel
             GoalsPageViewModel pageModel = new GoalsPageViewModel
             {
                 Goals = personalParents,
-                SharedGoals = sharedParents
+                SharedGoals = sharedParents,
+                PendingInvitations = pendingInvitationVMs
             };
 
+            // 7. Additional ViewBag settings
             ViewBag.AvailableTypes = GetAvailableTypes();
             ViewBag.Friends = _socialService.GetFriends(CurrentUserId);
 
@@ -491,14 +537,14 @@ namespace BucketProject.UI.BucketProject.Controllers
         [HttpGet]
         public IActionResult MonthGoals()
         {
+            // 1. Load personal and shared goals
             List<Goal> personalDomains = _goalService.LoadPersonalGoalsByCategory("Month");
             List<Goal> sharedDomains = _goalService.LoadSharedGoalsByCategory("Month");
-
 
             List<GoalViewModel> personalVMs = _mapper.Map<List<GoalViewModel>>(personalDomains);
             List<GoalViewModel> sharedVMs = _mapper.Map<List<GoalViewModel>>(sharedDomains);
 
-
+            // 2. Structure parent-child for personal goals
             List<GoalViewModel> personalParents = personalVMs
                 .Where(g => g.ParentGoalId == null)
                 .ToList();
@@ -509,7 +555,7 @@ namespace BucketProject.UI.BucketProject.Controllers
                     .ToList();
             }
 
-
+            // 3. Structure parent-child for shared goals
             List<GoalViewModel> sharedParents = sharedVMs
                 .Where(g => g.ParentGoalId == null)
                 .ToList();
@@ -520,15 +566,31 @@ namespace BucketProject.UI.BucketProject.Controllers
                     .ToList();
             }
 
+            // 4. Load pending invitations
+            List<GoalInvitation> pendingInvitations = _goalService.GetPendingInvitations(CurrentUserId, "Month");
 
+            // 5. Map invitations into ViewModels
+            List<GoalInviteViewModel> pendingInvitationVMs = pendingInvitations
+                .Select(inv => new GoalInviteViewModel
+                {
+                    InvitationId = inv.Id,
+                    GoalDescription = _goalService.GetGoalDescription(inv.GoalId),
+                    InviterUsername = _socialService.GetUsername(inv.InviterId)
+                })
+                .ToList();
+
+            // 6. Build the Page ViewModel
             GoalsPageViewModel pageModel = new GoalsPageViewModel
             {
                 Goals = personalParents,
-                SharedGoals = sharedParents
+                SharedGoals = sharedParents,
+                PendingInvitations = pendingInvitationVMs
             };
 
+            // 7. Additional ViewBag settings
             ViewBag.AvailableTypes = GetAvailableTypes();
             ViewBag.Friends = _socialService.GetFriends(CurrentUserId);
+            ViewBag.CurrentUserId = _goalService.GetCurrentUserId();
 
             return View(pageModel);
         }
@@ -839,6 +901,42 @@ namespace BucketProject.UI.BucketProject.Controllers
                     TempData.Remove("SubGoalForId");
                 }
             }
+
+            return RedirectToAction("BucketList");
+        }
+        [HttpPost]
+        public IActionResult RespondInvitationWeek(int invitationId, bool accept)
+        {
+            int currentUserId = CurrentUserId;
+
+            _goalService.RespondToInvitation(invitationId, accept, currentUserId);
+
+            return RedirectToAction("WeekGoals");
+        }
+        [HttpPost]
+        public IActionResult RespondInvitationMonth(int invitationId, bool accept)
+        {
+            int currentUserId = CurrentUserId;
+
+            _goalService.RespondToInvitation(invitationId, accept, currentUserId);
+
+            return RedirectToAction("MonthGoals");
+        }
+        [HttpPost]
+        public IActionResult RespondInvitationYear(int invitationId, bool accept)
+        {
+            int currentUserId = CurrentUserId;
+
+            _goalService.RespondToInvitation(invitationId, accept, currentUserId);
+
+            return RedirectToAction("YearGoals");
+        }
+        [HttpPost]
+        public IActionResult RespondInvitationBucketList(int invitationId, bool accept)
+        {
+            int currentUserId = CurrentUserId;
+
+            _goalService.RespondToInvitation(invitationId, accept, currentUserId);
 
             return RedirectToAction("BucketList");
         }

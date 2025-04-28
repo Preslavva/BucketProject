@@ -20,6 +20,8 @@ namespace BucketProject.UI.ViewModels.ViewModels
         public List<GoalViewModel> Children { get; set; } = new();
         public int? ParentGoalId { get; set; }
 
+        public int OwnerId { get; set; }
+
         public List<UserSummaryDTO> Recipients { get; set; } = new();
 
 

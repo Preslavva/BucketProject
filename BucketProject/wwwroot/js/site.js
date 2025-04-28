@@ -1,4 +1,22 @@
-﻿// Please see documentation at https://learn.microsoft.com/aspnet/core/client-side/bundling-and-minification
-// for details on configuring this project to bundle and minify static web assets.
+﻿(function () {
+    document.addEventListener("DOMContentLoaded", function () {
+        var stored = localStorage.getItem("lastTab");
+        var hash = window.location.hash;
+        var active = stored || hash;
 
-// Write your JavaScript code.
+        if (active) {
+            var trigger = document.querySelector(`.nav-tabs button[data-bs-target="${active}"]`);
+            if (trigger) {
+                new bootstrap.Tab(trigger).show();
+            }
+        }
+
+        document.querySelectorAll('.nav-tabs button[data-bs-toggle="tab"]').forEach(function (tab) {
+            tab.addEventListener('shown.bs.tab', function (e) {
+                var target = e.target.getAttribute('data-bs-target');
+                localStorage.setItem('lastTab', target);
+                window.location.hash = target;
+            });
+        });
+    });
+})();

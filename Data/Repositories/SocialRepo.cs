@@ -6,7 +6,7 @@ using BucketProject.DAL.Models.Entities;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 
-namespace Data.Repositories
+namespace BucketProject.DAL.Data.Repositories
 {
     public class SocialRepo : Repository, ISocialRepo
     {
@@ -243,6 +243,21 @@ WHERE f.Status      = 'Pending'
                 ));
             }
             return list;
+        }
+        public UserEntity GetUserById(int userId)
+        {
+            const string sql = "SELECT UserId, Username FROM [User] WHERE UserId = @UserId;";
+            using var conn = GetSqlConnection();
+            conn.Open();
+            using var cmd = new SqlCommand(sql, conn);
+            cmd.Parameters.AddWithValue("@UserId", userId);
+            using var rdr = cmd.ExecuteReader();
+            if (!rdr.Read()) return null;
+            return new UserEntity(
+    rdr.GetInt32(0),   
+    rdr.GetString(1)   
+);
+
         }
 
     }
