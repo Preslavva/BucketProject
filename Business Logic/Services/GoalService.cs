@@ -43,7 +43,7 @@ namespace BucketProject.BLL.Business_Logic.Services
         }
         private void EnsureUserIsOwner(int goalId, int currentUserId)
         {
-            var goalEntity = _goalRepo.GetGoalById(goalId);
+            var goalEntity = _goalRepo.GetGoalById(goalId,GetCurrentUserId());
 
             if (goalEntity == null)
                 throw new Exception("Goal not found.");
@@ -133,7 +133,7 @@ namespace BucketProject.BLL.Business_Logic.Services
             int userId = GetCurrentUserId();
             EnsureUserIsOwner(goalId, userId);
 
-            var entityGoal = _goalRepo.GetGoalById(goalId);
+            var entityGoal = _goalRepo.GetGoalById(goalId,GetCurrentUserId());
             if (entityGoal == null)
                 throw new Exception("Goal not found");
 
@@ -150,7 +150,7 @@ namespace BucketProject.BLL.Business_Logic.Services
             int userId = GetCurrentUserId();
             EnsureUserIsOwner(goalId, userId);
 
-            GoalEntity goal = _goalRepo.GetGoalById(goalId);
+            GoalEntity goal = _goalRepo.GetGoalById(goalId, GetCurrentUserId());
             if (goal == null)
                 throw new Exception("Goal not found");
 
@@ -160,7 +160,7 @@ namespace BucketProject.BLL.Business_Logic.Services
 
         public void ChangeGoalStatus(int goalId, bool isDone)
         {
-            GoalEntity entityGoal = _goalRepo.GetGoalById(goalId);
+            GoalEntity entityGoal = _goalRepo.GetGoalById(goalId,GetCurrentUserId());
             if (entityGoal == null)
                 throw new Exception("Goal not found");
 
@@ -173,7 +173,7 @@ namespace BucketProject.BLL.Business_Logic.Services
 
             entityGoal = _mapper.Map<GoalEntity>(goal);
 
-            _goalRepo.ChangeGoalStatus(entityGoal);
+            _goalRepo.ChangeGoalStatus(entityGoal, GetCurrentUserId());
         }
 
 
@@ -184,7 +184,7 @@ namespace BucketProject.BLL.Business_Logic.Services
             int userId = GetCurrentUserId();
             EnsureUserIsOwner(goalId, userId);
 
-            GoalEntity entityGoal = _goalRepo.GetGoalById(goalId);
+            GoalEntity entityGoal = _goalRepo.GetGoalById(goalId,GetCurrentUserId());
             if (entityGoal == null)
                 throw new Exception("Goal not found");
 
@@ -276,7 +276,7 @@ namespace BucketProject.BLL.Business_Logic.Services
 
         public async Task<List<Goal>> BreakDownGoalAsync(int goalId)
         {
-            GoalEntity entity = _goalRepo.GetGoalById(goalId);
+            GoalEntity entity = _goalRepo.GetGoalById(goalId, GetCurrentUserId());
             if (entity == null || string.IsNullOrWhiteSpace(entity.Description))
                 throw new ArgumentException("Invalid goal.");
 
@@ -322,13 +322,13 @@ namespace BucketProject.BLL.Business_Logic.Services
 
         public string GetGoalDescription(int goalId)
         {
-            GoalEntity goal = _goalRepo.GetGoalById(goalId);
+            GoalEntity goal = _goalRepo.GetGoalById(goalId, GetCurrentUserId());
             return goal.Description;
         }
 
         public DateTime GetCreatedAt(int goalId)
         {
-            GoalEntity goal = _goalRepo.GetGoalById(goalId);
+            GoalEntity goal = _goalRepo.GetGoalById(goalId, GetCurrentUserId());
             return goal.CreatedAt;
         }
         public string GetInvitationStatus(int goalId, int invitedId)

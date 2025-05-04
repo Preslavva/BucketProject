@@ -331,46 +331,49 @@
                 </div>
             }
 
-            @if (!Model.SentInvitations.Any())
-            {
-                <p class="text-muted">No sent invitations.</p>
-            }
-            else
-            {
-                <ul class="list-group">
-                    @foreach (var inv in Model.SentInvitations)
-                    {
-                        <li class="list-group-item mb-2 position-relative" id="invite-@inv.InvitationId">
-                            <!-- Close button -->
-                            <button type="button"
-                                    class="btn-close position-absolute top-0 end-0 m-2"
-                                    aria-label="Close"
-                                    onclick="document.getElementById('invite-@inv.InvitationId').remove();">
-                            </button>
 
-                            <!-- Invitation info -->
-                            <div class="me-4">
-                                <em>@inv.GoalDescription</em><br />
-                                <small>sent @inv.CreatedAt.ToShortDateString()</small>
-                                <small class="ms-3">@inv.Status</small>
-                                <small class="ms-3">@inv.InvitedUsername</small>
-                                @if (!string.IsNullOrEmpty(inv.ParentGoalDescription))
-                                {
-                                    <div>
-                                        <small class="text-muted">
-                                            Parent goal: @inv.ParentGoalDescription
-                                        </small>
-                                    </div>
-                                }
+        }
+        <hr />
+        <br/>
+        <h5>Invitations You’ve Sent</h5>
+        @if (!Model.SentInvitations.Any())
+        {
+            <p class="text-muted">No sent invitations.</p>
+        }
+        else
+        {
+            <ul class="list-group">
+                @foreach (var inv in Model.SentInvitations)
+                {
+                    <li class="list-group-item mb-2 position-relative" id="invite-@inv.InvitationId">
+                        <!-- Close button -->
+                        <button type="button"
+                                class="btn-close position-absolute top-0 end-0 m-2"
+                                aria-label="Close"
+                                onclick="document.getElementById('invite-@inv.InvitationId').remove();">
+                        </button>
 
-                            </div>
-                        </li>
-                    }
+                        <!-- Invitation info -->
+                        <div class="me-4">
+                            <em>@inv.GoalDescription</em><br />
+                            <small>sent @inv.CreatedAt.ToShortDateString()</small>
+                            <small class="ms-3">@inv.Status</small>
+                            <small class="ms-3">@inv.InvitedUsername</small>
+                            @if (!string.IsNullOrEmpty(inv.ParentGoalDescription))
+                            {
+                                <div>
+                                    <small class="text-muted">
+                                        Parent goal: @inv.ParentGoalDescription
+                                    </small>
+                                </div>
+                            }
+
+                        </div>
+                    </li>
+                }
 
 
-                </ul>
-            }
-
+            </ul>
         }
     </div>
     <div class="tab-pane fade" id="invites" role="tabpanel">

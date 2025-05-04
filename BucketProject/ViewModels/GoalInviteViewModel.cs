@@ -1,4 +1,6 @@
-﻿namespace BucketProject.UI.ViewModels.ViewModels
+﻿using BucketProject.BLLBusiness_Logic.Domain;
+
+namespace BucketProject.UI.ViewModels.ViewModels
 {
     public class GoalInviteViewModel
     {
@@ -9,6 +11,7 @@
         public DateTime CreatedAt { get; set; }
         public string Status { get; set; }
         public string? ParentGoalDescription { get; set; }
+        
 
 
     }

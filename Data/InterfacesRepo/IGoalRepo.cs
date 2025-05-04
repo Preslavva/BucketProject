@@ -14,14 +14,14 @@ namespace BucketProject.DAL.Data.InterfacesRepo;
 
     void UpdateGoalDescription(GoalEntity goal);
     void DeleteGoal(GoalEntity goal);
-    void ChangeGoalStatus(GoalEntity goal);
+    void ChangeGoalStatus(GoalEntity goal, int userId);
 
     void PostponeGoal(GoalEntity goal);
     List<GoalEntity> LoadExpiredGoalsOfUser(int userId);
     List<GoalEntity> LoadGoalsOfUser(int userId);
 
-    GoalEntity GetGoalById(int id);
-    List<GoalEntity> LoadChildGoalsOfGoals(int goalId);
+    GoalEntity GetGoalById(int goalId, int userId);
+   // List<GoalEntity> LoadChildGoalsOfGoals(int goalId);
     List<UserEntity> LoadSharedUsersForGoal(int goalId, int ownerId);
    
     int InsertGoal(int ownerUserId, GoalEntity goal);
