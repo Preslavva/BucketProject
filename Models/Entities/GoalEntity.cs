@@ -47,6 +47,5 @@ namespace BucketProject.DAL.Models.Entities
             this.OwnerId = ownerId;
 
         }
-
     }
 }

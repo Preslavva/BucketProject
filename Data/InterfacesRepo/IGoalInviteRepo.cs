@@ -13,5 +13,7 @@ namespace BucketProject.DAL.Data.InterfacesRepo
         List<GoalInvitation> GetPendingFor(int invitedId, string category);
         GoalInvitation GetById(int invitationId);
         void UpdateStatus(int invitationId, string newStatus);
+        List<GoalInvitation> GetInvitationsOf(int userId, string category);
+        string GetInvitationStatus(int goalId, int invitedId);
     }
 }

@@ -11,71 +11,59 @@ namespace BucketProject.DAL.Data.Repositories;
 public class GoalRepo: Repository, IGoalRepo
 {
 
-
     public GoalRepo(IConfiguration configuration):base(configuration)
     { 
     }
 
-    public void InsertGoalAndAssignToUsers(int ownerUserId, GoalEntity goal, IEnumerable<int> sharedWithUserIds)
+    public int InsertGoal(int ownerUserId, GoalEntity goal)
     {
+        const string sql = @"
+INSERT INTO dbo.Goal
+       (Category, Description, Type, Deadline, IsDone, IsDeleted,
+        CreatedAt, CompletedAt, IsPostponed, ParentGoalId, OwnerId)
+OUTPUT INSERTED.Id
+VALUES (@Category, @Description, @Type, @Deadline, @IsDone, @IsDeleted,
+        @CreatedAt, @CompletedAt, @IsPostponed, @ParentGoalId, @OwnerId);";
+
+        using var conn = GetSqlConnection();
+        conn.Open();
+
+        using var cmd = new SqlCommand(sql, conn);
+        cmd.Parameters.AddWithValue("@Category", goal.Category.ToString());
+        cmd.Parameters.AddWithValue("@Description", goal.Description);
+        cmd.Parameters.AddWithValue("@Type", goal.Type.ToString());
+        cmd.Parameters.AddWithValue("@Deadline", goal.Deadline ?? (object)DBNull.Value);
+        cmd.Parameters.AddWithValue("@IsDone", goal.IsDone);
+        cmd.Parameters.AddWithValue("@IsDeleted", goal.IsDeleted);
+        cmd.Parameters.AddWithValue("@CreatedAt", goal.CreatedAt);
+        cmd.Parameters.AddWithValue("@CompletedAt", goal.CompletedAt ?? (object)DBNull.Value);
+        cmd.Parameters.AddWithValue("@IsPostponed", goal.IsPostponed);
+        cmd.Parameters.AddWithValue("@ParentGoalId", goal.ParentGoalId ?? (object)DBNull.Value);
+        cmd.Parameters.AddWithValue("@OwnerId", ownerUserId);
+
+        int newId = (int)cmd.ExecuteScalar();
+        goal.Id = newId;                 
+        return newId;
+    }
+
+    public void AssignUsersToGoal(int goalId, IEnumerable<int> userIds)
+    {
+        const string sql = @"INSERT INTO dbo.User_Goal (UserId, GoalId)
+                         VALUES (@UserId, @GoalId);";
+
         using var conn = GetSqlConnection();
         conn.Open();
         using var tx = conn.BeginTransaction();
         try
         {
-            const string insertGoalSql = @"
-INSERT INTO Goal
-  (Category, Description, Type, Deadline, IsDone, IsDeleted,
-   CreatedAt, CompletedAt, IsPostponed, ParentGoalId, OwnerId)
-OUTPUT INSERTED.Id
-VALUES
-  (@Category, @Description, @Type, @Deadline, @IsDone, @IsDeleted,
-   @CreatedAt, @CompletedAt, @IsPostponed, @ParentGoalId, @OwnerId);
-";
+            using var cmd = new SqlCommand(sql, conn, tx);
+            cmd.Parameters.Add(new SqlParameter("@UserId", SqlDbType.Int));
+            cmd.Parameters.Add(new SqlParameter("@GoalId", SqlDbType.Int) { Value = goalId });
 
-            int newGoalId;
-            using (var cmd = new SqlCommand(insertGoalSql, conn, tx))
+            foreach (var userId in userIds.Distinct())
             {
-                cmd.Parameters.AddWithValue("@Category", goal.Category.ToString());
-                cmd.Parameters.AddWithValue("@Description", goal.Description);
-                cmd.Parameters.AddWithValue("@Type", goal.Type.ToString());
-                cmd.Parameters.AddWithValue("@Deadline", goal.Deadline ?? (object)DBNull.Value);
-                cmd.Parameters.AddWithValue("@IsDone", goal.IsDone);
-                cmd.Parameters.AddWithValue("@IsDeleted", goal.IsDeleted);
-                cmd.Parameters.AddWithValue("@CreatedAt", goal.CreatedAt);
-                cmd.Parameters.AddWithValue("@CompletedAt", goal.CompletedAt ?? (object)DBNull.Value);
-                cmd.Parameters.AddWithValue("@IsPostponed", goal.IsPostponed);
-                cmd.Parameters.AddWithValue("@ParentGoalId", goal.ParentGoalId ?? (object)DBNull.Value);
-                cmd.Parameters.AddWithValue("@OwnerId", ownerUserId);
-
-                // 🚨 This will get back the generated Goal ID
-                newGoalId = (int)cmd.ExecuteScalar();
-            }
-
-            // 🚨 Set the entity's Id here!
-            goal.Id = newGoalId;
-
-            const string insertUserGoalSql = @"
-INSERT INTO User_Goal (UserId, GoalId)
-VALUES (@UserId, @GoalId);
-";
-
-            using (var cmd = new SqlCommand(insertUserGoalSql, conn, tx))
-            {
-                cmd.Parameters.Add(new SqlParameter("@UserId", SqlDbType.Int));
-                cmd.Parameters.Add(new SqlParameter("@GoalId", SqlDbType.Int) { Value = newGoalId });
-
-                // Owner assignment
-                cmd.Parameters["@UserId"].Value = ownerUserId;
+                cmd.Parameters["@UserId"].Value = userId;
                 cmd.ExecuteNonQuery();
-
-                // Shared users (if any, but in your case it will usually be empty for now)
-                foreach (var friendId in sharedWithUserIds ?? Enumerable.Empty<int>())
-                {
-                    if (friendId == ownerUserId) continue;
-                    cmd.Parameters["@UserId"].Value = friendId;
-                    cmd.ExecuteNonQuery();
-                }
             }
 
             tx.Commit();
@@ -168,7 +156,7 @@ VALUES (@UserId, @GoalId);
             {
                 conn.Open();
 
-                string queryGetGoals = @"SELECT 
+                string queryGetGoals = @"SELECT
     g.Id,
     g.Category,
     g.[Description],
@@ -181,18 +169,17 @@ VALUES (@UserId, @GoalId);
     g.IsPostponed,
     g.ParentGoalId,
     g.OwnerId
-FROM dbo.Goal AS g
-WHERE 
-    g.OwnerId = @UserId               
-    AND NOT EXISTS (                  
-      SELECT 1
-      FROM dbo.User_Goal AS ug
-      WHERE ug.GoalId = g.Id
-        AND ug.UserId <> @UserId
-    )
-    AND g.IsDeleted = 0
-    -- optional category filter:
-    AND g.Category = @Category
+FROM dbo.Goal        AS g
+JOIN dbo.User_Goal   AS ug   ON ug.GoalId = g.Id         
+WHERE ug.UserId  = @UserId                               
+  AND g.IsDeleted = 0
+  AND g.Category  = @Category
+  AND NOT EXISTS (
+        SELECT 1
+        FROM dbo.User_Goal AS x
+        WHERE x.GoalId = g.Id
+          AND x.UserId <> @UserId
+      );
 ;";
 
                 using (SqlCommand loadGoals = new SqlCommand(queryGetGoals, conn))
@@ -273,7 +260,7 @@ SELECT
 FROM dbo.Goal AS g
 INNER JOIN dbo.User_Goal AS ug
   ON g.Id      = ug.GoalId
- AND ug.UserId = @UserId        -- you are assigned
+ AND ug.UserId = @UserId 
 WHERE 
     g.Category   = @Category
   AND g.IsDeleted = 0

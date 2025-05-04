@@ -6,7 +6,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace BucketProject.DAL.Data.Repositories
 {
-    public class GoalInviteRepo: Repository, IGoalInviteRepo
+    public class GoalInviteRepo : Repository, IGoalInviteRepo
     {
         public GoalInviteRepo(IConfiguration configuration) : base(configuration)
         {
@@ -47,7 +47,7 @@ ORDER BY gi.CreatedAt DESC;";
             conn.Open();
             using var cmd = new SqlCommand(sql, conn);
             cmd.Parameters.AddWithValue("@InvitedId", invitedId);
-            cmd.Parameters.AddWithValue("@Category", category); 
+            cmd.Parameters.AddWithValue("@Category", category);
             using var rdr = cmd.ExecuteReader();
             while (rdr.Read())
             {
@@ -103,6 +103,66 @@ WHERE InvitationId = @Id;";
             cmd.Parameters.AddWithValue("@Status", newStatus);
             cmd.ExecuteNonQuery();
         }
+
+        public List<GoalInvitation> GetInvitationsOf(int userId, string category)
+        {
+            const string sql = @"
+SELECT
+    gi.InvitationId,
+    gi.InviterId,
+    gi.InvitedId,
+    gi.GoalId,
+    gi.Status,
+    gi.CreatedAt
+FROM dbo.GoalInvitation AS gi
+JOIN dbo.Goal           AS g  ON g.Id = gi.GoalId
+WHERE gi.InviterId = @InviterId
+  AND g.Category  = @Category
+  AND gi.Status IN ('Pending', 'Declined')   
+ORDER BY gi.CreatedAt DESC;";
+
+            var list = new List<GoalInvitation>();
+            using var conn = GetSqlConnection();
+            conn.Open();
+            using var cmd = new SqlCommand(sql, conn);
+            cmd.Parameters.AddWithValue("@InviterId", userId);
+            cmd.Parameters.AddWithValue("@Category", category);
+            using var rdr = cmd.ExecuteReader();
+            while (rdr.Read())
+            {
+                list.Add(new GoalInvitation(
+                    rdr.GetInt32(0),
+                    rdr.GetInt32(1),
+                    rdr.GetInt32(2),
+                    rdr.GetInt32(3),
+                    rdr.GetString(4),
+                    rdr.GetDateTime(5)
+                ));
+            }
+
+            return list;
+        }
+
+        public string GetInvitationStatus(int goalId, int invitedId)
+        {
+            const string sql = @"
+SELECT Status                
+FROM   dbo.GoalInvitation
+WHERE  GoalId    = @GoalId
+  AND  InvitedId = @InvitedId
+  AND  Status IN ('Pending', 'Declined');";
+
+            using var conn = GetSqlConnection();
+            conn.Open();
+            using var cmd = new SqlCommand(sql, conn);
+            cmd.Parameters.AddWithValue("@GoalId", goalId);
+            cmd.Parameters.AddWithValue("@InvitedId", invitedId);  // ← fixed
+
+            object? result = cmd.ExecuteScalar();
+            return result is string s ? s : null;
+        }
     }
 }
+
+
 

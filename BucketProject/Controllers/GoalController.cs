@@ -21,6 +21,7 @@ namespace BucketProject.UI.BucketProject.Controllers
 
 
 
+
         public GoalController(IGoalService goalService, IMapper mapper, IConfiguration configuration, ISocialService socialService, IUserService userService)
         {
             _goalService = goalService;
@@ -323,14 +324,13 @@ namespace BucketProject.UI.BucketProject.Controllers
         [HttpGet]
         public IActionResult WeekGoals()
         {
-            // 1. Load personal and shared goals
+            
             List<Goal> personalDomains = _goalService.LoadPersonalGoalsByCategory("Week");
             List<Goal> sharedDomains = _goalService.LoadSharedGoalsByCategory("Week");
 
             List<GoalViewModel> personalVMs = _mapper.Map<List<GoalViewModel>>(personalDomains);
             List<GoalViewModel> sharedVMs = _mapper.Map<List<GoalViewModel>>(sharedDomains);
 
-            // 2. Structure parent-child for personal goals
             List<GoalViewModel> personalParents = personalVMs
                 .Where(g => g.ParentGoalId == null)
                 .ToList();
@@ -341,7 +341,6 @@ namespace BucketProject.UI.BucketProject.Controllers
                     .ToList();
             }
 
-            // 3. Structure parent-child for shared goals
             List<GoalViewModel> sharedParents = sharedVMs
                 .Where(g => g.ParentGoalId == null)
                 .ToList();
@@ -352,10 +351,9 @@ namespace BucketProject.UI.BucketProject.Controllers
                     .ToList();
             }
 
-            // 4. Load pending invitations
+
             List<GoalInvitation> pendingInvitations = _goalService.GetPendingInvitations(CurrentUserId, "Week");
 
-            // 5. Map invitations into ViewModels
             List<GoalInviteViewModel> pendingInvitationVMs = pendingInvitations
                 .Select(inv => new GoalInviteViewModel
                 {
@@ -365,15 +363,31 @@ namespace BucketProject.UI.BucketProject.Controllers
                 })
                 .ToList();
 
-            // 6. Build the Page ViewModel
+
+
+
+            List<GoalInvitation> sentInvitationsOfUser = _goalService.GetInvitationsOf(CurrentUserId, "Week");
+            List<GoalInviteViewModel> sentInvitationsOFVMs = sentInvitationsOfUser
+             .Select(inv => new GoalInviteViewModel
+             {
+                 InvitationId = inv.Id,
+                 GoalDescription = _goalService.GetGoalDescription(inv.GoalId),
+                 CreatedAt = _goalService.GetCreatedAt(inv.GoalId),
+                 InvitedUsername = _socialService.GetUsername(inv.InvitedId),
+                 Status = _goalService.GetInvitationStatus(inv.GoalId, inv.InvitedId)
+             })    
+             .ToList();
+
+
             GoalsPageViewModel pageModel = new GoalsPageViewModel
             {
                 Goals = personalParents,
                 SharedGoals = sharedParents,
-                PendingInvitations = pendingInvitationVMs
+                PendingInvitations = pendingInvitationVMs,
+                SentInvitations = sentInvitationsOFVMs
+
             };
 
-            // 7. Additional ViewBag settings
             ViewBag.AvailableTypes = GetAvailableTypes();
             ViewBag.Friends = _socialService.GetFriends(CurrentUserId);
             ViewBag.CurrentUserId = _goalService.GetCurrentUserId();
@@ -435,7 +449,6 @@ namespace BucketProject.UI.BucketProject.Controllers
                     .ToList();
             }
 
-            // 3. Structure parent-child for shared goals
             List<GoalViewModel> sharedParents = sharedVMs
                 .Where(g => g.ParentGoalId == null)
                 .ToList();
@@ -446,10 +459,8 @@ namespace BucketProject.UI.BucketProject.Controllers
                     .ToList();
             }
 
-            // 4. Load pending invitations
             List<GoalInvitation> pendingInvitations = _goalService.GetPendingInvitations(CurrentUserId, "Year");
 
-            // 5. Map invitations into ViewModels
             List<GoalInviteViewModel> pendingInvitationVMs = pendingInvitations
                 .Select(inv => new GoalInviteViewModel
                 {

@@ -53,34 +53,30 @@ namespace BucketProject.BLL.Business_Logic.Services
         }
 
 
-        public void CreateGoal(Goal goalDomain, IEnumerable<int> sharedWithUserIds)
+        public void CreateGoal(Goal goalDomain, IEnumerable<int>? sharedWithUserIds)
         {
-           
-
-            // Retrieve user ID from repository
             int ownerId = GetCurrentUserId();
+            var entity = _mapper.Map<GoalEntity>(goalDomain);
 
-            // Map domain goal to entity goal
-            GoalEntity entity = _mapper.Map<GoalEntity>(goalDomain);
+            bool shareIntent = sharedWithUserIds != null && sharedWithUserIds.Any();
 
-            // Insert goal, assigning only the owner immediately
-            _goalRepo.InsertGoalAndAssignToUsers(ownerId, entity, Enumerable.Empty<int>());
+            _goalRepo.InsertGoal(ownerId, entity);
 
-           
-            int newGoalId = entity.Id;
+            int goalId = entity.Id;
 
-            // Insert invitations for friends instead of immediate assignment
-            if (sharedWithUserIds != null)
+            if (!shareIntent)
+            { 
+                _goalRepo.AssignUsersToGoal(goalId, new[] { ownerId });
+            }
+            else
             {
-                foreach (var friendId in sharedWithUserIds)
+                foreach (int friendId in sharedWithUserIds!)
                 {
-                    if (friendId == ownerId) continue; 
-                    _inviteRepo.InsertInvitation(newGoalId, ownerId, friendId);
+                    if (friendId == ownerId) continue;
+                    _inviteRepo.InsertInvitation(goalId, ownerId, friendId);
                 }
             }
         }
-
-
 
 
         public List<Goal> LoadPersonalGoalsByCategory(string category)
@@ -302,26 +298,47 @@ namespace BucketProject.BLL.Business_Logic.Services
         {
               return _inviteRepo.GetPendingFor(userId, category);
         }
-      
+        public List<GoalInvitation> GetInvitationsOf(int userId, string category)
+        {
+            return _inviteRepo.GetInvitationsOf(userId, category);
+        }
 
         public void RespondToInvitation(int invitationId, bool accept, int currentUserId)
         {
             var inv = _inviteRepo.GetById(invitationId);
             if (inv == null || inv.InvitedId != currentUserId)
-                throw new InvalidOperationException("Unauthorized or not found.");
+                throw new InvalidOperationException("Invitation not found or user not authorised.");
+
+            if (inv.Status != "Pending")
+                throw new InvalidOperationException($"Invitation already {inv.Status.ToLower()}.");
 
             _inviteRepo.UpdateStatus(invitationId, accept ? "Accepted" : "Declined");
-            if (accept)
-                _goalRepo.AssignUserToGoal(inv.GoalId, currentUserId);
+
+            if (!accept) return;                
+            var participants = new[] { inv.InviterId, currentUserId }.Distinct();
+            _goalRepo.AssignUsersToGoal(inv.GoalId, participants);
         }
+
 
         public string GetGoalDescription(int goalId)
         {
             GoalEntity goal = _goalRepo.GetGoalById(goalId);
-            return goal?.Description ?? "(Deleted Goal)";
+            return goal.Description;
+        }
+
+        public DateTime GetCreatedAt(int goalId)
+        {
+            GoalEntity goal = _goalRepo.GetGoalById(goalId);
+            return goal.CreatedAt;
+        }
+        public string GetInvitationStatus(int goalId, int invitedId)
+        {
+            string status = _inviteRepo.GetInvitationStatus(goalId, invitedId);
+            return status;
         }
         
-
+       
+       
     }
 
 }

@@ -327,9 +327,40 @@
                         </div>
                     }
 
-                </div> <!-- 🔥 CLOSE goal-item div here -->
+
+                </div>
             }
 
+            @if (!Model.SentInvitations.Any())
+            {
+                <p class="text-muted">No sent invitations.</p>
+            }
+            else
+            {
+                <ul class="list-group">
+                    @foreach (var inv in Model.SentInvitations)
+                    {
+                        <li class="list-group-item mb-2 position-relative" id="invite-@inv.InvitationId">
+                            <!-- Close button -->
+                            <button type="button"
+                                    class="btn-close position-absolute top-0 end-0 m-2"
+                                    aria-label="Close"
+                                    onclick="document.getElementById('invite-@inv.InvitationId').remove();">
+                            </button>
+
+                            <!-- Invitation info -->
+                            <div class="me-4">
+                                <em>@inv.GoalDescription</em><br />
+                                <small>sent @inv.CreatedAt.ToShortDateString()</small>
+                                <small class="ms-3">@inv.Status</small>
+                                <small class="ms-3">@inv.InvitedUsername</small>
+                            </div>
+                        </li>
+                    }
+
+
+                </ul>
+            }
 
         }
     </div>
@@ -368,7 +399,16 @@
                 }
             </ul>
         }
+       
+        
     </div>
-
+    
 </div>
 
+<script>
+    document.querySelectorAll('.invite-close').forEach(btn => {
+      btn.addEventListener('click', e => {
+        e.currentTarget.closest('li').remove();
+      });
+    });
+</script>

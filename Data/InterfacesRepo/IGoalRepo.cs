@@ -3,16 +3,11 @@ using BucketProject.DAL.Models.Enums;
 using BucketProject.DAL.Models.Entities;
 
 
-
 namespace BucketProject.DAL.Data.InterfacesRepo;
 
     public interface IGoalRepo
     {
     int GetIdOfUser(string username);
-    void InsertGoalAndAssignToUsers(
-     int ownerUserId,
-     GoalEntity goal,
-     IEnumerable<int> sharedWithUserIds);
  
      List<GoalEntity> LoadPersonalGoalsOfUserbyCategory(int userId, Category category);
     List<GoalEntity> LoadSharedGoalsOfUserByCategory(int userId, Category category);
@@ -28,5 +23,7 @@ namespace BucketProject.DAL.Data.InterfacesRepo;
     GoalEntity GetGoalById(int id);
     List<GoalEntity> LoadChildGoalsOfGoals(int goalId);
     List<UserEntity> LoadSharedUsersForGoal(int goalId, int ownerId);
-    void AssignUserToGoal(int goalId, int userId);
+   
+    int InsertGoal(int ownerUserId, GoalEntity goal);
+    void AssignUsersToGoal(int goalId, IEnumerable<int> userIds);
 } 

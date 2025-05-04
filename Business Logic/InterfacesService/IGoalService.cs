@@ -23,8 +23,9 @@ namespace BucketProject.BLL.Business_Logic.InterfacesService
         void RespondToInvitation(int invitationId, bool accept, int currentUserId);
         string GetGoalDescription(int goalId);
         int GetCurrentUserId();
+        List<GoalInvitation> GetInvitationsOf(int userId, string category);
 
-
-
+        DateTime GetCreatedAt(int goalId);
+        string GetInvitationStatus(int goalId, int invitedId);
     }
 }

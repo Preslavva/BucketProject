@@ -25,5 +25,10 @@ namespace BucketProject.DAL.Models.Entities
             CreatedAt = createdAt;
                 
         }
+        public GoalInvitation(int invitedId, string status)
+        {
+            InvitedId = invitedId;
+            Status = status;
+        }
     }
 }

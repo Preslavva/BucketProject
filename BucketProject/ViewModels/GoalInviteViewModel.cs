@@ -5,5 +5,9 @@
         public int InvitationId { get; set; }
         public string GoalDescription { get; set; }
         public string InviterUsername { get; set; }
+        public string InvitedUsername { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public string Status { get; set; }
+       
     }
 }
