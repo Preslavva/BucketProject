@@ -359,7 +359,8 @@ namespace BucketProject.UI.BucketProject.Controllers
                 {
                     InvitationId = inv.Id,
                     GoalDescription = _goalService.GetGoalDescription(inv.GoalId),
-                    InviterUsername = _socialService.GetUsername(inv.InviterId)
+                    InviterUsername = _socialService.GetUsername(inv.InviterId),
+                    ParentGoalDescription = _goalService.GetParentGoalDescription(inv.GoalId)
                 })
                 .ToList();
 
@@ -374,7 +375,9 @@ namespace BucketProject.UI.BucketProject.Controllers
                  GoalDescription = _goalService.GetGoalDescription(inv.GoalId),
                  CreatedAt = _goalService.GetCreatedAt(inv.GoalId),
                  InvitedUsername = _socialService.GetUsername(inv.InvitedId),
-                 Status = _goalService.GetInvitationStatus(inv.GoalId, inv.InvitedId)
+                 Status = _goalService.GetInvitationStatus(inv.GoalId, inv.InvitedId),
+                 ParentGoalDescription = _goalService.GetParentGoalDescription(inv.GoalId)
+
              })    
              .ToList();
 

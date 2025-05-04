@@ -336,7 +336,11 @@ namespace BucketProject.BLL.Business_Logic.Services
             string status = _inviteRepo.GetInvitationStatus(goalId, invitedId);
             return status;
         }
-        
+        public string? GetParentGoalDescription(int subGoalId)
+        {
+            string? description = _inviteRepo.GetParentGoalDescription(subGoalId);
+            return description;
+        }
        
        
     }

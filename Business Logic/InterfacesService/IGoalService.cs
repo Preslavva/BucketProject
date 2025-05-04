@@ -27,5 +27,6 @@ namespace BucketProject.BLL.Business_Logic.InterfacesService
 
         DateTime GetCreatedAt(int goalId);
         string GetInvitationStatus(int goalId, int invitedId);
+        string? GetParentGoalDescription(int subGoalId);
     }
 }

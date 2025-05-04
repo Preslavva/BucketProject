@@ -15,5 +15,6 @@ namespace BucketProject.DAL.Data.InterfacesRepo
         void UpdateStatus(int invitationId, string newStatus);
         List<GoalInvitation> GetInvitationsOf(int userId, string category);
         string GetInvitationStatus(int goalId, int invitedId);
+        string? GetParentGoalDescription(int subGoalId);
     }
 }

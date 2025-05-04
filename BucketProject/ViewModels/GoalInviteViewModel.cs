@@ -8,6 +8,8 @@
         public string InvitedUsername { get; set; }
         public DateTime CreatedAt { get; set; }
         public string Status { get; set; }
-       
+        public string? ParentGoalDescription { get; set; }
+
+
     }
 }

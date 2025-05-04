@@ -161,7 +161,30 @@ WHERE  GoalId    = @GoalId
             object? result = cmd.ExecuteScalar();
             return result is string s ? s : null;
         }
+        public string? GetParentGoalDescription(int subGoalId)
+        {
+            const string sql = @"
+SELECT Description
+FROM dbo.Goal
+WHERE Id = (
+    SELECT ParentGoalId
+    FROM dbo.Goal
+    WHERE Id = @Id
+);
+";
+
+            using var conn = GetSqlConnection();
+            conn.Open();
+            using var cmd = new SqlCommand(sql, conn);
+            cmd.Parameters.AddWithValue("@Id", subGoalId);
+
+            var result = cmd.ExecuteScalar();
+            return result as string;  
+        }
+
     }
+
+
 }
 
 

@@ -714,20 +714,22 @@ WHERE ug.GoalId   = @GoalId
         }
         return list;
     }
-    public void AssignUserToGoal(int goalId, int userId)
-    {
-        const string sql = @"
-INSERT INTO dbo.User_Goal (UserId, GoalId)
-VALUES (@UserId, @GoalId);";
+    //    public void AssignUserToGoal(int goalId, int userId)
+    //    {
+    //        const string sql = @"
+    //INSERT INTO dbo.User_Goal (UserId, GoalId)
+    //VALUES (@UserId, @GoalId);";
 
-        using var conn = GetSqlConnection();
-        conn.Open();
-        using var cmd = new SqlCommand(sql, conn);
-        cmd.Parameters.AddWithValue("@UserId", userId);
-        cmd.Parameters.AddWithValue("@GoalId", goalId);
-        cmd.ExecuteNonQuery();
-    }
+    //        using var conn = GetSqlConnection();
+    //        conn.Open();
+    //        using var cmd = new SqlCommand(sql, conn);
+    //        cmd.Parameters.AddWithValue("@UserId", userId);
+    //        cmd.Parameters.AddWithValue("@GoalId", goalId);
+    //        cmd.ExecuteNonQuery();
+    //    }
 
+
+  
 }
 
 

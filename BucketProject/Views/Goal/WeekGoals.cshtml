@@ -354,6 +354,15 @@
                                 <small>sent @inv.CreatedAt.ToShortDateString()</small>
                                 <small class="ms-3">@inv.Status</small>
                                 <small class="ms-3">@inv.InvitedUsername</small>
+                                @if (!string.IsNullOrEmpty(inv.ParentGoalDescription))
+                                {
+                                    <div>
+                                        <small class="text-muted">
+                                            Parent goal: @inv.ParentGoalDescription
+                                        </small>
+                                    </div>
+                                }
+
                             </div>
                         </li>
                     }
@@ -382,6 +391,15 @@
                         <div>
                             <strong>@inv.InviterUsername</strong> invited you to:<br />
                             <em>@inv.GoalDescription</em>
+                            @if (!string.IsNullOrEmpty(inv.ParentGoalDescription))
+                            {
+                                <div>
+                                    <small class="text-muted">
+                                        Parent goal: @inv.ParentGoalDescription
+                                    </small>
+                                </div>
+                            }
+
                         </div>
                         <div class="d-flex">
                             <form method="post" asp-action="RespondInvitationWeek" class="me-1">
