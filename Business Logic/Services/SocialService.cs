@@ -16,19 +16,14 @@ namespace BucketProject.BLL.Business_Logic.Services
 {
     public class SocialService: ISocialService
     {
-        private readonly IHttpContextAccessor _contextAccessor;
         private readonly ISocialRepo _socialRepo;
-        private readonly IGoalRepo _goalRepo;
-
         private readonly IMapper _mapper;
 
 
-        public SocialService(ISocialRepo socialRepo, IHttpContextAccessor contextAccessor, IMapper mapper, IGoalRepo goalRepo)
+        public SocialService(ISocialRepo socialRepo, IMapper mapper)
         {
             _socialRepo = socialRepo;
-            _contextAccessor = contextAccessor;
             _mapper = mapper;
-            _goalRepo = goalRepo;
         }
 
         public List<UserSummaryDTO> GetFriends(int userId)

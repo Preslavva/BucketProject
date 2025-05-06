@@ -77,8 +77,25 @@ public class Goal
 
     public List<UserEntity> Users { get; private set; }
     public List<User> Recipients { get; set; } = new();
-
-
+   
+    
+public Goal(int id, Category category, GoalType type, DateTime createdAt, DateTime? completedAt, string description, DateTime? deadline, bool isDone, bool isDeleted, bool isPostponed, int? parentGoalId, int ownerId)
+    {
+        Id = id;
+        Category = category;
+        Type = type;
+        CreatedAt = createdAt;
+        CompletedAt = completedAt;
+        Description = description;
+        Deadline = deadline;
+        Deadline = deadline;
+        IsDone = isDone;
+        IsDone = isDone;
+        IsDeleted = isDeleted;
+        IsPostponed = isPostponed;
+        ParentGoalId = parentGoalId;
+        OwnerId = ownerId;
+    }
 
     public void MarkAsDone()
     {

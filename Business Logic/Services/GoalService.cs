@@ -129,7 +129,6 @@ namespace BucketProject.BLL.Business_Logic.Services
         public void UpdateGoal(int goalId, Goal goalDomain)
         {
 
-
             int userId = GetCurrentUserId();
             EnsureUserIsOwner(goalId, userId);
 
@@ -179,7 +178,6 @@ namespace BucketProject.BLL.Business_Logic.Services
 
         public void PostponeGoal(int goalId)
         {
-
 
             int userId = GetCurrentUserId();
             EnsureUserIsOwner(goalId, userId);
