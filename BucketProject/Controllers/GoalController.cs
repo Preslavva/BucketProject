@@ -434,14 +434,13 @@ namespace BucketProject.UI.BucketProject.Controllers
         [HttpGet]
         public IActionResult YearGoals()
         {
-            // 1. Load personal and shared goals
             List<Goal> personalDomains = _goalService.LoadPersonalGoalsByCategory("Year");
             List<Goal> sharedDomains = _goalService.LoadSharedGoalsByCategory("Year");
 
             List<GoalViewModel> personalVMs = _mapper.Map<List<GoalViewModel>>(personalDomains);
             List<GoalViewModel> sharedVMs = _mapper.Map<List<GoalViewModel>>(sharedDomains);
 
-            // 2. Structure parent-child for personal goals
+   
             List<GoalViewModel> personalParents = personalVMs
                 .Where(g => g.ParentGoalId == null)
                 .ToList();
@@ -473,7 +472,7 @@ namespace BucketProject.UI.BucketProject.Controllers
                 })
                 .ToList();
 
-            // 6. Build the Page ViewModel
+            
             GoalsPageViewModel pageModel = new GoalsPageViewModel
             {
                 Goals = personalParents,
@@ -481,7 +480,7 @@ namespace BucketProject.UI.BucketProject.Controllers
                 PendingInvitations = pendingInvitationVMs
             };
 
-            // 7. Additional ViewBag settings
+           
             ViewBag.AvailableTypes = GetAvailableTypes();
             ViewBag.Friends = _socialService.GetFriends(CurrentUserId);
 
@@ -492,7 +491,6 @@ namespace BucketProject.UI.BucketProject.Controllers
         public IActionResult BucketList()
         {
 
-            // 1. Load personal and shared goals
             List<Goal> personalDomains = _goalService.LoadPersonalGoalsByCategory("Bucket_list");
             List<Goal> sharedDomains = _goalService.LoadSharedGoalsByCategory("Bucket_list");
 

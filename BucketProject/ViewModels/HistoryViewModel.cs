@@ -1,5 +1,7 @@
 ﻿
 
+using BucketProject.BLLBusiness_Logic.Domain;
+
 namespace BucketProject.UI.ViewModels.ViewModels
 {
     public class HistoryViewModel
@@ -11,5 +13,6 @@ namespace BucketProject.UI.ViewModels.ViewModels
         public bool IsDone { get; set; }
         public string Type { get; set; }
         public string Category { get; set; }
+        public List<UserSummaryDTO> Recipients { get; set; } = new();
     }
 }

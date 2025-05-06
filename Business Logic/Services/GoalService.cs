@@ -205,48 +205,62 @@ namespace BucketProject.BLL.Business_Logic.Services
         {
             var grouped = new Dictionary<string, Dictionary<string, Dictionary<string, List<Goal>>>>();
 
+            // 1) get current user
             string? username = _contextAccessor.HttpContext.Session.GetString("Username");
             if (string.IsNullOrEmpty(username))
                 return grouped;
 
             int userId = _goalRepo.GetIdOfUser(username);
+
+            // 2) load & map expired GoalEntities
             List<GoalEntity> expiredEntities = _goalRepo.LoadExpiredGoalsOfUser(userId);
             List<Goal> expiredGoals = _mapper.Map<List<Goal>>(expiredEntities);
 
-            // thie dictionary holds int value for the ParentGoalId and List<GoalDomain> with the goals that share the same parent goal
+            // 3) populate Recipients on each Goal
+            foreach (var goal in expiredGoals)
+            {
+                var sharedEntities = _goalRepo.LoadSharedUsersForGoal(
+                    goal.Id,
+                    userId
+                );
+                // map UserEntity → UserSummaryDTO
+                goal.Recipients = _mapper.Map<List<User>>(sharedEntities);
+            }
+
+            // 4) group child goals by ParentGoalId
             var childGoals = expiredGoals
                 .Where(g => g.ParentGoalId.HasValue)
                 .GroupBy(g => g.ParentGoalId.Value)
                 .ToDictionary(g => g.Key, g => g.ToList());
 
-            foreach (Goal goal in expiredGoals.Where(g => g.ParentGoalId == null))
+            // 5) for each root goal, bucket and add it (plus children)
+            foreach (var root in expiredGoals.Where(g => g.ParentGoalId == null))
             {
-                if (!goal.Deadline.HasValue) continue;
+                if (!root.Deadline.HasValue)
+                    continue;
 
-                DateTime date = goal.Deadline.Value.Date;
-                string category = goal.Category.ToString();
-                string type = goal.Type.ToString();
-                string key = GetGroupingKey(goal.Category, date);
+                DateTime date = root.Deadline.Value.Date;
+                string category = root.Category.ToString();
+                string type = root.Type.ToString();
+                string key = GetGroupingKey(root.Category, date);
 
- 
-                AddToGroup(grouped, category, key, type, goal);
+                AddToGroup(grouped, category, key, type, root);
 
-                if (childGoals.ContainsKey(goal.Id))
+                if (childGoals.TryGetValue(root.Id, out var children))
                 {
-                    foreach (var child in childGoals[goal.Id])
-                    {
+                    foreach (var child in children)
                         AddToGroup(grouped, category, key, type, child);
-                    }
                 }
             }
 
             return grouped;
         }
+
         private string GetGroupingKey(Category category, DateTime date)
         {
             return category switch
             {
-                Category.Week => $"Week {date.AddDays((int)date.DayOfWeek-6):dd.MM.yyyy} - {date:dd.MM.yyyy}",
+                Category.Week => $"Week {date.AddDays((int)date.DayOfWeek-8):dd.MM.yyyy} - {date.AddDays((int)date.DayOfWeek - 2):dd.MM.yyyy}",
                 Category.Month => $"{date:MMMM yyyy}",
                 Category.Year => $"{date.Year}",
                 _ => "Other"

@@ -21,9 +21,11 @@ namespace BucketProject.DAL.Data.InterfacesRepo;
     List<GoalEntity> LoadGoalsOfUser(int userId);
 
     GoalEntity GetGoalById(int goalId, int userId);
-   // List<GoalEntity> LoadChildGoalsOfGoals(int goalId);
     List<UserEntity> LoadSharedUsersForGoal(int goalId, int ownerId);
    
     int InsertGoal(int ownerUserId, GoalEntity goal);
     void AssignUsersToGoal(int goalId, IEnumerable<int> userIds);
+    List<GoalEntity> LoadSharedGoalsCompletedByOthers(int currentUserId);
+    List<GoalEntity> LoadSharedDeletedGoals(int currentUserId);
+    List<GoalEntity> LoadSharedPostponedGoals(int currentUserId);
 } 

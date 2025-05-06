@@ -17,6 +17,7 @@ namespace BucketProject.UI.ViewModels.ViewModels
         [Required]
         public string Description { get; set; }
         public bool IsDone { get; set; }
+        public DateTime? CompletedAt { get; set; }
         public List<GoalViewModel> Children { get; set; } = new();
         public int? ParentGoalId { get; set; }
 

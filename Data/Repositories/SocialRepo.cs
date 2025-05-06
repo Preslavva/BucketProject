@@ -1,7 +1,5 @@
-﻿using System.Data;
-using System.Reflection;
+﻿using System.Reflection;
 using BucketProject.DAL.Data.InterfacesRepo;
-using BucketProject.DAL.Data.Repositories;
 using BucketProject.DAL.Models.Entities;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
@@ -89,7 +87,6 @@ WHERE u.UserId <> @Id
             if (userId == friendId)
                 throw new ArgumentException("A user cannot befriend themself.");
 
-            // ensure the smaller ID is always in @UserIdNorm so the PK is consistent
             int userIdNorm = Math.Min(userId, friendId);
             int friendIdNorm = Math.Max(userId, friendId);
 
@@ -126,8 +123,8 @@ COMMIT TRANSACTION;
                 return true;
             }
             catch (SqlException ex)
-            {
-                // you’ll no longer get a PK violation here
+            { 
+           
                 throw new Exception($"DB error in {MethodBase.GetCurrentMethod().Name}: {ex.Message}", ex);
             }
             catch (Exception ex)
@@ -195,9 +192,6 @@ WHERE f.Status      = 'Pending'
             return list;
         }
 
-        /// <summary>
-        /// Remove an existing friendship (or cancel a pending/declined request).
-        /// </summary>
         public bool TryRemoveFriend(int userId, int friendId)
         {
             if (userId == friendId)

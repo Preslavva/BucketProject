@@ -119,6 +119,7 @@
                         Done
                     </label>
                 </form>
+               
                 <form method="post" asp-action="DeleteGoalWeek" style="display:inline; margin-left:10px;">
                     <input type="hidden" name="Id" value="@goal.Id" />
                     <button type="submit">Delete</button>
@@ -127,7 +128,12 @@
                     <input type="hidden" name="id" value="@goal.Id" />
                     <button type="submit">Break Down</button>
                 </form>
-
+                @if (goal.IsDone && goal.CompletedAt.HasValue)
+                {
+                    <span class="ml-2 text-muted">
+                        Completed on @goal.CompletedAt.Value.ToString("MMMM dd, yyyy")
+                    </span>
+                }
 
                 @if (subGoalForId == goal.Id.ToString() && brokenDownGoals.Any())
                 {
@@ -178,6 +184,12 @@
                                     <input type="hidden" name="Id" value="@sub.Id" />
                                     <button type="submit">Delete</button>
                                 </form>
+                                @if (sub.IsDone && sub.CompletedAt.HasValue)
+                                {
+                                    <span class="ml-2 text-muted">
+                                        Completed on @goal.CompletedAt.Value.ToString("MMMM dd, yyyy")
+                                    </span>
+                                }
                             </div>
                         }
                     </div>
@@ -208,7 +220,7 @@
                     <input type="checkbox" name="isDone" value="true" class="form-check-input" @(goal.IsDone ? "checked" : "") onchange="this.form.submit()" />
                     Done
                 </form>
-
+                    
                 
 
                     @if (goal.OwnerId == ViewBag.CurrentUserId)
@@ -236,7 +248,13 @@
                         <span class="mx-2">@goal.Description</span>
                     }
 
-                    <!-- Shared with info -->
+                    @if (goal.IsDone && goal.CompletedAt.HasValue)
+                    {
+                        <span class="ml-2 text-muted">
+                            Completed on @goal.CompletedAt.Value.ToString("MMMM dd, yyyy")
+                        </span>
+                    }
+
                     <div class="mt-2">
                         <strong>Also shared with:</strong>
                         @if (goal.Recipients == null || !goal.Recipients.Any())
@@ -262,7 +280,7 @@
                         }
                     </div>
 
-                    <!-- Broken down goals -->
+                
                     @if (subGoalForId == goal.Id.ToString() && brokenDownGoals.Any())
                     {
                         <div class="mt-2 p-2 bg-light">
@@ -293,7 +311,6 @@
                         </div>
                     }
 
-                    <!-- Children goals -->
                     @if (goal.Children?.Any() == true)
                     {
                         <div class="ms-4 mt-2 border-start ps-3">
@@ -323,6 +340,13 @@
                                         <span class="ms-2">@sub.Description</span>
                                     }
                                 </div>
+
+                                @if (sub.IsDone && sub.CompletedAt.HasValue)
+                                {
+                                    <span class="ml-2 text-muted">
+                                        Completed on @sub.CompletedAt.Value.ToString("MMMM dd, yyyy")
+                                    </span>
+                                }
                             }
                         </div>
                     }
@@ -346,14 +370,13 @@
                 @foreach (var inv in Model.SentInvitations)
                 {
                     <li class="list-group-item mb-2 position-relative" id="invite-@inv.InvitationId">
-                        <!-- Close button -->
+                        
                         <button type="button"
                                 class="btn-close position-absolute top-0 end-0 m-2"
                                 aria-label="Close"
                                 onclick="document.getElementById('invite-@inv.InvitationId').remove();">
                         </button>
 
-                        <!-- Invitation info -->
                         <div class="me-4">
                             <em>@inv.GoalDescription</em><br />
                             <small>sent @inv.CreatedAt.ToShortDateString()</small>
