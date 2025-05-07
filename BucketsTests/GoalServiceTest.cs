@@ -96,7 +96,7 @@ namespace BucketsTests
           
             _goalRepo.Setup(r => r.InsertGoal(ownerId, It.IsAny<GoalEntity>())).Callback<int, GoalEntity>((u, e) => e.Id = 42);
 
-            // Mock AssignUsersToGoal
+            
             _goalRepo.Setup(r => r.AssignUsersToGoal(42, new[] { ownerId }));
 
             
