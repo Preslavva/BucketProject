@@ -107,6 +107,7 @@ namespace BucketsTests
             _goalRepo.Verify(r => r.AssignUsersToGoal(42, new[] { ownerId }), Times.Once);
 
             _inviteRepo.Verify(r => r.InsertInvitation(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>()), Times.Never);
+            //test 4
         }
     }
 }
