@@ -34,7 +34,7 @@ namespace BucketsTests
 
             var config = new MapperConfiguration(cfg =>
             {
-                cfg.AddProfile(new AutoMapperBL());  // Ensure your AutoMapper profile is set up correctly
+                cfg.AddProfile(new AutoMapperBL());  
             });
             _mapper = config.CreateMapper();
 
@@ -56,7 +56,7 @@ namespace BucketsTests
         {
             int ownerId = 123;
             string username = "testuser";
-            //UserEntity user = new UserEntity(ownerId, username, new byte[] { 0x01 });
+          
 
             SetSession(username);
 
