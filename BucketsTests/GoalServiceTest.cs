@@ -76,7 +76,6 @@ namespace BucketsTests
                 ownerId: ownerId
             );
 
-            // Mock the repository behavior
             var entity = new GoalEntity(
                 id: 1,
                 category: Category.Week,
