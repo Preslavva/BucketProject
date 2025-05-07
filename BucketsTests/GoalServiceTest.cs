@@ -60,9 +60,7 @@ namespace BucketsTests
 
             SetSession(username);
 
-      
-
-            // Create a Goal instance with sample data
+     
             Goal goalDomain = new Goal(
                 id: 1,
                 category: Category.Week,
@@ -95,7 +93,7 @@ namespace BucketsTests
             );
 
             _goalRepo.Setup(r => r.GetIdOfUser(username)).Returns(ownerId);
-            // Mock the InsertGoal method to simulate insertion and setting the ID
+          
             _goalRepo.Setup(r => r.InsertGoal(ownerId, It.IsAny<GoalEntity>())).Callback<int, GoalEntity>((u, e) => e.Id = 42);
 
             // Mock AssignUsersToGoal
@@ -104,12 +102,10 @@ namespace BucketsTests
             // Act
             _goalService.CreateGoal(goalDomain, sharedWithUserIds: null);
 
-            // Assert
-            // Ensure InsertGoal was called once with the ownerId
+            
             _goalRepo.Verify(r => r.InsertGoal(ownerId, It.IsAny<GoalEntity>()), Times.Once);
-            // Ensure AssignUsersToGoal was called with the goal ID and ownerId
+            
             _goalRepo.Verify(r => r.AssignUsersToGoal(42, new[] { ownerId }), Times.Once);
-            // Ensure no invitations were sent because sharedWithUserIds is null
 
             _inviteRepo.Verify(r => r.InsertInvitation(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>()), Times.Never);
         }
