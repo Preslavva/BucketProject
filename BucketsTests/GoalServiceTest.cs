@@ -99,7 +99,7 @@ namespace BucketsTests
             // Mock AssignUsersToGoal
             _goalRepo.Setup(r => r.AssignUsersToGoal(42, new[] { ownerId }));
 
-            // Act
+            
             _goalService.CreateGoal(goalDomain, sharedWithUserIds: null);
 
             
