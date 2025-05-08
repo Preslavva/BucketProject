@@ -9,7 +9,6 @@ using BucketProject.BLL.Business_Logic.Mapping;
 using BucketProject.BLL.Business_Logic.Domain;
 using BucketProject.DAL.Models.Entities;
 using BucketProject.DAL.Models.Enums;
-using BucketProject.BLL.Business_Logic.InterfacesService;
 
 
 namespace BucketsTests
@@ -107,9 +106,65 @@ namespace BucketsTests
             _goalRepo.Verify(r => r.AssignUsersToGoal(42, new[] { ownerId }), Times.Once);
 
             _inviteRepo.Verify(r => r.InsertInvitation(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>()), Times.Never);
-            //test 4
+
+
+            
             //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
-            //test 5
+           
+        }
+        [TestMethod]
+        public void CreateGoal_ShouldInviteFriends_WhenSharedUsersProvided()
+        {
+            // Arrange
+            int ownerId = 123;
+            string username = "testuser";
+            SetSession(username);
+
+            Goal goalDomain = new Goal(
+                id: 1,
+                category: Category.Week,
+                type: GoalType.Education,
+                createdAt: DateTime.UtcNow,
+                completedAt: DateTime.UtcNow.AddDays(1),
+                description: "Learn to program",
+                deadline: DateTime.UtcNow.AddDays(30),
+                isDone: false,
+                isDeleted: false,
+                isPostponed: false,
+                parentGoalId: null,
+                ownerId: ownerId
+            );
+
+            var entity = new GoalEntity(
+                id: 1,
+                category: Category.Week,
+                type: GoalType.Education,
+                createdAt: DateTime.UtcNow,
+                completedAt: DateTime.UtcNow.AddDays(1),
+                description: "Learn to program",
+                deadline: DateTime.UtcNow.AddDays(30),
+                isDone: false,
+                isDeleted: false,
+                isPostponed: false,
+                parentGoalId: null,
+                ownerId: ownerId
+            );
+
+            var sharedWith = new List<int> { 124, 125 };
+
+            _goalRepo.Setup(r => r.GetIdOfUser(username)).Returns(ownerId);
+
+            _goalRepo.Setup(r => r.InsertGoal(ownerId, It.IsAny<GoalEntity>()))
+                     .Callback<int, GoalEntity>((u, e) => e.Id = 99);
+
+            _goalService.CreateGoal(goalDomain, sharedWith);
+
+            _goalRepo.Verify(r => r.InsertGoal(ownerId, It.IsAny<GoalEntity>()), Times.Once);
+
+            _goalRepo.Verify(r => r.AssignUsersToGoal(It.IsAny<int>(), It.IsAny<IEnumerable<int>>()), Times.Never);
+
+            _inviteRepo.Verify(r => r.InsertInvitation(99, ownerId, 124), Times.Once);
+            _inviteRepo.Verify(r => r.InsertInvitation(99, ownerId, 125), Times.Once);
         }
     }
 }
