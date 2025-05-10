@@ -16,7 +16,7 @@ namespace BucketProject.UI.ViewModels.ViewModels
             public string Email { get; set; }
 
             [Required, DataType(DataType.Date)]
-            public DateTime DateOfBirth { get; set; }      // <-- swapped to DateTime
+            public DateTime DateOfBirth { get; set; }    
 
             [Required]
             public string Nationality { get; set; }
@@ -30,7 +30,7 @@ namespace BucketProject.UI.ViewModels.ViewModels
             [Required, Compare(nameof(Password))]
             public string ConfirmPassword { get; set; }
 
-            [ValidateNever]                                // <-- not validated
+            [ValidateNever]                           
             public IEnumerable<SelectListItem> Countries { get; set; }
         }
 

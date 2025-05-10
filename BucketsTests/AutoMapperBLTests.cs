@@ -14,11 +14,11 @@ using BucketProject.DAL.Models.Enums;
 namespace BucketsTests
 {
     [TestClass]
-    public class AutoMapperTests
+    public class AutoMapperBLTests
     {
         private readonly IMapper _mapper;
 
-        public AutoMapperTests()
+        public AutoMapperBLTests()
         {
             var config = new MapperConfiguration(cfg =>
             {
