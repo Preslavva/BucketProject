@@ -257,31 +257,35 @@ WHERE ug.UserId   = @UserId
         var goals = new List<GoalEntity>();
 
         const string queryGetGoals = @"
-SELECT 
-    g.Id,              
-    g.Category,        
-    g.[Description],   
-    ug.IsDone,          
-    g.IsDeleted,       
-    g.CreatedAt,       
-    g.Deadline,        
-    g.Type,            
-    ug.CompletedAt,     
-    g.IsPostponed,     
-    g.ParentGoalId,    
-    g.OwnerId          
+SELECT
+  g.Id,
+  g.Category,
+  g.[Description],
+  ug.IsDone,
+  g.IsDeleted,
+  g.CreatedAt,
+  g.Deadline,
+  g.Type,
+  ug.CompletedAt,
+  g.IsPostponed,
+  g.ParentGoalId,
+  g.OwnerId
 FROM dbo.Goal AS g
-INNER JOIN dbo.User_Goal AS ug
-    ON g.Id      = ug.GoalId
-   AND ug.UserId = @UserId         
+INNER JOIN (
+  SELECT DISTINCT GoalId, IsDone, CompletedAt
+  FROM dbo.User_Goal
+  WHERE UserId = @UserId
+) AS ug
+  ON g.Id = ug.GoalId
 WHERE
-    g.Category   = @Category       
-  AND g.IsDeleted = 0              
+  g.Category   = @Category
+  AND g.IsDeleted = 0
   AND (
-      SELECT COUNT(*) 
-      FROM dbo.User_Goal AS x
-      WHERE x.GoalId = g.Id
-  ) > 1                          
+    SELECT COUNT(*) 
+    FROM dbo.User_Goal AS x
+    WHERE x.GoalId = g.Id
+  ) > 1;
+                     
 ;                  
 ";
 
@@ -335,7 +339,7 @@ WHERE
             {
                 conn.Open();
 
-                string queryGetGoals = @"SELECT 
+                string queryGetGoals = @"SELECT DISTINCT
     g.Id,
     g.Category,
     g.[Description],
@@ -668,7 +672,7 @@ WHERE Id            = @Id
                 conn.Open();
 
                 string queryGetGoals = @"
-SELECT
+SELECT DISTINCT
     g.Id,                  
     g.Category,            
     g.[Description],
@@ -749,22 +753,26 @@ ORDER BY g.Deadline;
         return goals;
     }
 
-    public List<UserEntity> LoadSharedUsersForGoal(int goalId, int ownerId)
+    public List<UserEntity> LoadSharedUsersForGoal(int goalId, int currentId)
     {
         var list = new List<UserEntity>();
         const string sql = @"
-SELECT u.UserId, u.Username, u.Picture
+SELECT DISTINCT
+  u.UserId, 
+  u.Username, 
+  u.Picture
 FROM dbo.User_Goal ug
-JOIN dbo.[User] u
+JOIN dbo.[User]  u
   ON ug.UserId = u.UserId
-WHERE ug.GoalId   = @GoalId
-  AND ug.UserId  <> @OwnerId;
+WHERE ug.GoalId       = @GoalId
+  AND ug.UserId      <> @CurrentUserId;
+
 ";
         using var conn = GetSqlConnection();
         conn.Open();
         using var cmd = new SqlCommand(sql, conn);
         cmd.Parameters.AddWithValue("@GoalId", goalId);
-        cmd.Parameters.AddWithValue("@OwnerId", ownerId);
+        cmd.Parameters.AddWithValue("@CurrentUserId", currentId);
         using var rdr = cmd.ExecuteReader();
         while (rdr.Read())
         {
@@ -807,10 +815,10 @@ JOIN dbo.Goal   g ON g.Id       = ug.GoalId
 JOIN dbo.[User] u ON u.UserId   = ug.UserId
 
 WHERE 
-    ug.UserId   <> @CurrentUserId    -- someone else
-    AND ug.IsDone    = 1              -- they’ve completed it
-    AND g.IsDeleted  = 0              -- goal not soft‑deleted
-    AND g.Deadline  >= CAST(GETDATE() AS DATE)  -- deadline today or in future
+    ug.UserId   <> @CurrentUserId   
+    AND ug.IsDone    = 1             
+    AND g.IsDeleted  = 0            
+    AND g.Deadline  >= CAST(GETDATE() AS DATE)
     AND EXISTS (
         SELECT 1
         FROM dbo.User_Goal ug2
@@ -863,7 +871,6 @@ WHERE
 
             goal.Recipients.Add(completer);
 
-            // 4) add to result
             list.Add(goal);
         }
 

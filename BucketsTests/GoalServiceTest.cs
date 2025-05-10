@@ -1,5 +1,4 @@
-﻿
-using AutoMapper;
+﻿using AutoMapper;
 using BucketProject.BLL.Business_Logic.Services;
 using BucketProject.DAL.Data.InterfacesRepo;
 using BucketProjetc.BLL.Business_Logic.InterfacesService;
@@ -75,7 +74,7 @@ namespace BucketsTests
                 ownerId: ownerId
             );
 
-            var entity = new GoalEntity(
+            GoalEntity entity = new GoalEntity(
                 id: 1,
                 category: Category.Week,
                 type: GoalType.Education,
@@ -93,29 +92,21 @@ namespace BucketsTests
             _goalRepo.Setup(r => r.GetIdOfUser(username)).Returns(ownerId);
           
             _goalRepo.Setup(r => r.InsertGoal(ownerId, It.IsAny<GoalEntity>())).Callback<int, GoalEntity>((u, e) => e.Id = 42);
-
-            
+    
             _goalRepo.Setup(r => r.AssignUsersToGoal(42, new[] { ownerId }));
-
-            
+  
             _goalService.CreateGoal(goalDomain, sharedWithUserIds: null);
 
-            
             _goalRepo.Verify(r => r.InsertGoal(ownerId, It.IsAny<GoalEntity>()), Times.Once);
             
             _goalRepo.Verify(r => r.AssignUsersToGoal(42, new[] { ownerId }), Times.Once);
 
             _inviteRepo.Verify(r => r.InsertInvitation(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>()), Times.Never);
-
-
-            
-            //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
            
         }
         [TestMethod]
         public void CreateGoal_ShouldInviteFriends_WhenSharedUsersProvided()
         {
-            // Arrange
             int ownerId = 123;
             string username = "testuser";
             SetSession(username);
@@ -135,7 +126,7 @@ namespace BucketsTests
                 ownerId: ownerId
             );
 
-            var entity = new GoalEntity(
+            GoalEntity entity = new GoalEntity(
                 id: 1,
                 category: Category.Week,
                 type: GoalType.Education,
@@ -150,7 +141,7 @@ namespace BucketsTests
                 ownerId: ownerId
             );
 
-            var sharedWith = new List<int> { 124, 125 };
+            List<int> sharedWith = new List<int> { 124, 125 };
 
             _goalRepo.Setup(r => r.GetIdOfUser(username)).Returns(ownerId);
 
@@ -166,5 +157,64 @@ namespace BucketsTests
             _inviteRepo.Verify(r => r.InsertInvitation(99, ownerId, 124), Times.Once);
             _inviteRepo.Verify(r => r.InsertInvitation(99, ownerId, 125), Times.Once);
         }
+
+        [TestMethod]
+        public void RespondToInvitation_DeclineOnly_UpdatesStatusAndDoesNotAssign()
+        {
+            GoalInvitation invitation = new GoalInvitation(23, 10, 1, 55, "Status", DateTime.Now);
+            _inviteRepo.Setup(r => r.GetById(123)).Returns(invitation);
+
+            _goalService.RespondToInvitation(invitationId: 123, accept: false, currentUserId: 20);
+
+            _inviteRepo.Verify(r => r.UpdateStatus(123, "Declined"), Times.Once);
+            _goalRepo.Verify(g => g.AssignUsersToGoal(It.IsAny<int>(), It.IsAny<IEnumerable<int>>()), Times.Never);
+        }
+
+        [TestMethod]
+        public void RespondToInvitation_Accept_UpdatesStatusAndAssignsBothUsers()
+        {
+            GoalInvitation invitation = new GoalInvitation (234, 10, 1, 55, "Status", DateTime.Now);
+            _inviteRepo.Setup(r => r.GetById(234)).Returns(invitation);
+
+            _goalService.RespondToInvitation(invitationId: 234, accept: true, currentUserId: 20);
+
+            _inviteRepo.Verify(r => r.UpdateStatus(234, "Accepted"), Times.Once);
+
+            _goalRepo.Verify(g =>
+                g.AssignUsersToGoal(
+                    55,
+                    It.Is<IEnumerable<int>>(users =>
+                        users.Count() == 2 &&
+                        users.Contains(10) &&
+                        users.Contains(20)
+                    )
+                ),
+                Times.Once
+            );
+        }
+
+        [TestMethod]
+        public void RespondToInvitation_AcceptWithSameUserIds_OnlyAssignsOnce()
+        {
+            
+            GoalInvitation invitation = new GoalInvitation(345,42,1, 99, "Status", DateTime.Now);
+            _inviteRepo.Setup(r => r.GetById(345)).Returns(invitation);
+
+            _goalService.RespondToInvitation(invitationId: 345, accept: true, currentUserId: 42);
+
+            _inviteRepo.Verify(r => r.UpdateStatus(345, "Accepted"), Times.Once);
+
+            _goalRepo.Verify(g =>
+                g.AssignUsersToGoal(
+                    99,
+                    It.Is<IEnumerable<int>>(users =>
+                        users.Count() == 1 &&
+                        users.Single() == 42
+                    )
+                ),
+                Times.Once
+            );
+        }
+
     }
 }

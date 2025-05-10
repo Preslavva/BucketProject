@@ -77,7 +77,8 @@ public class Goal
 
     public List<UserEntity> Users { get; private set; }
     public List<User> Recipients { get; set; } = new();
-   
+
+    public Goal() { }
     
 public Goal(int id, Category category, GoalType type, DateTime createdAt, DateTime? completedAt, string description, DateTime? deadline, bool isDone, bool isDeleted, bool isPostponed, int? parentGoalId, int ownerId)
     {

@@ -101,24 +101,22 @@ namespace BucketProject.BLL.Business_Logic.Services
         public List<Goal> LoadSharedGoalsByCategory(string category)
         {
 
-
             int userId = GetCurrentUserId();
 
             if (!Enum.TryParse<Category>(category, true, out var parsedCategory))
                 throw new ArgumentException($"Invalid category: {category}");
 
-            var entities = _goalRepo.LoadSharedGoalsOfUserByCategory(userId, parsedCategory);
+            List<GoalEntity> entities = _goalRepo.LoadSharedGoalsOfUserByCategory(userId, parsedCategory);
 
-            var goals = _mapper.Map<List<Goal>>(entities);
-
-            
-            foreach (var g in goals)
+            List<Goal> goals = _mapper.Map<List<Goal>>(entities);
+ 
+            foreach (Goal g in goals)
             {
-                var recipients = _goalRepo.LoadSharedUsersForGoal(g.Id, userId);
+                List<UserEntity> recipients = _goalRepo.LoadSharedUsersForGoal(g.Id, userId);
                 g.Recipients = _mapper.Map<List<User>>(recipients);
             }
 
-            var today = DateTime.Today;
+            DateTime today = DateTime.Today;
             return goals
                 .Where(g => !g.Deadline.HasValue || g.Deadline.Value.Date > today)
                 .ToList();
@@ -132,7 +130,7 @@ namespace BucketProject.BLL.Business_Logic.Services
             int userId = GetCurrentUserId();
             EnsureUserIsOwner(goalId, userId);
 
-            var entityGoal = _goalRepo.GetGoalById(goalId,GetCurrentUserId());
+            GoalEntity entityGoal = _goalRepo.GetGoalById(goalId,GetCurrentUserId());
             if (entityGoal == null)
                 throw new Exception("Goal not found");
 
@@ -203,35 +201,29 @@ namespace BucketProject.BLL.Business_Logic.Services
         {
             var grouped = new Dictionary<string, Dictionary<string, Dictionary<string, List<Goal>>>>();
 
-            // 1) get current user
             string? username = _contextAccessor.HttpContext.Session.GetString("Username");
             if (string.IsNullOrEmpty(username))
                 return grouped;
 
             int userId = _goalRepo.GetIdOfUser(username);
 
-            // 2) load & map expired GoalEntities
             List<GoalEntity> expiredEntities = _goalRepo.LoadExpiredGoalsOfUser(userId);
             List<Goal> expiredGoals = _mapper.Map<List<Goal>>(expiredEntities);
 
-            // 3) populate Recipients on each Goal
-            foreach (var goal in expiredGoals)
+            foreach (Goal goal in expiredGoals)
             {
                 var sharedEntities = _goalRepo.LoadSharedUsersForGoal(
                     goal.Id,
                     userId
                 );
-                // map UserEntity → UserSummaryDTO
                 goal.Recipients = _mapper.Map<List<User>>(sharedEntities);
             }
 
-            // 4) group child goals by ParentGoalId
             var childGoals = expiredGoals
                 .Where(g => g.ParentGoalId.HasValue)
                 .GroupBy(g => g.ParentGoalId.Value)
                 .ToDictionary(g => g.Key, g => g.ToList());
 
-            // 5) for each root goal, bucket and add it (plus children)
             foreach (var root in expiredGoals.Where(g => g.ParentGoalId == null))
             {
                 if (!root.Deadline.HasValue)
@@ -306,6 +298,7 @@ namespace BucketProject.BLL.Business_Logic.Services
 
             return subGoals;
         }
+
         public List<GoalInvitation> GetPendingInvitations(int userId, string category)
         {
               return _inviteRepo.GetPendingFor(userId, category);
@@ -318,11 +311,6 @@ namespace BucketProject.BLL.Business_Logic.Services
         public void RespondToInvitation(int invitationId, bool accept, int currentUserId)
         {
             var inv = _inviteRepo.GetById(invitationId);
-            if (inv == null || inv.InvitedId != currentUserId)
-                throw new InvalidOperationException("Invitation not found or user not authorised.");
-
-            if (inv.Status != "Pending")
-                throw new InvalidOperationException($"Invitation already {inv.Status.ToLower()}.");
 
             _inviteRepo.UpdateStatus(invitationId, accept ? "Accepted" : "Declined");
 

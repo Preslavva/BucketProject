@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿
 using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
-using BucketProject.DAL.Data.InterfacesRepo;
+using BucketProject.BLL.Business_Logic.InterfacesService;
 
 namespace BucketProject.DAL.Data.Repositories
 {

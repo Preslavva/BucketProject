@@ -32,14 +32,13 @@ namespace BucketProject.BLL.Business_Logic.Controllers
 
             DateTime today = DateTime.Today;
 
-            var notifications = new List<NotificationViewModel>();
+            List<NotificationViewModel> notifications = new List<NotificationViewModel>();
 
-         
-            var deadlineGoals = _notificationService.CheckAndNotify(today);
+            List<Goal> deadlineGoals = _notificationService.CheckAndNotify(today);
             foreach (var goal in deadlineGoals)
             {
                 
-                var vm = _mapper.Map<NotificationViewModel>(goal);
+                NotificationViewModel vm = _mapper.Map<NotificationViewModel>(goal);
 
             
                 var ds = DeadlineStrategyDeterminator.GetStrategy(goal.Category);

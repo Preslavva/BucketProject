@@ -51,19 +51,11 @@ public class UserEntity
       
     }
     public UserEntity() { }
-    public void UpdatePicture(byte[] newPicture)
-    {
-        Picture = newPicture;
-    }
+  
 
-    public void ChangeEmail(string newEmail)
+    public void SetPasswordAndSalt(string password, string salt)
     {
-        Email = newEmail;
-    }
-
-    public void ChangePassword(string newPassword, string newSalt)
-    {
-        Password = newPassword;
-        Salt = newSalt;
+        Password = password;
+        Salt = salt;
     }
 }

@@ -1,6 +1,6 @@
 ﻿
 
-namespace BucketProject.DAL.Data.InterfacesRepo
+namespace BucketProject.BLL.Business_Logic.InterfacesService
 {
     public interface IPasswordHasher
     {

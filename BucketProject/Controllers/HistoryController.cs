@@ -35,7 +35,7 @@ namespace BucketProject.Controllers
 
                     foreach (var type in timeframe.Value)
                     {
-                        var viewModels = type.Value
+                        List<HistoryViewModel> viewModels = type.Value
                             .Select(goal => _mapper.Map<HistoryViewModel>(goal))
                             .ToList();
 
