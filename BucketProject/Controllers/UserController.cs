@@ -5,6 +5,7 @@ using BucketProject.UI.ViewModels.ViewModels;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Text.Json;
+using System.ComponentModel.DataAnnotations;
 
 
 namespace BucketProject.UI.BucketProject.Controllers
@@ -47,34 +48,39 @@ namespace BucketProject.UI.BucketProject.Controllers
         [HttpGet]
         public async Task<IActionResult> Register()
         {
-            var vm = new RegisterViewModel
+            RegisterViewModel vm = new RegisterViewModel
             {
                 Countries = await LoadCountriesAsync()
             };
             return View(vm);
         }
-
         [HttpPost]
-        public async Task<IActionResult> Register(RegisterViewModel user)
+        public async Task<IActionResult> Register(RegisterViewModel vm)
         {
-            user.Countries = await LoadCountriesAsync();
+            vm.Countries = await LoadCountriesAsync();
 
             if (!ModelState.IsValid)
-                return View(user);
+                return View(vm);
 
-            User newUser = _mapper.Map<User>(user);
+            var user = _mapper.Map<User>(vm);
             try
             {
-                if (_userService.Register(newUser))
+                if (_userService.Register(user))
                     return RedirectToAction("LogIn", "User");
+
+                ModelState.AddModelError(string.Empty, "Registration failed. Please try again.");
+                return View(vm);
+            }
+            catch (ValidationException vex)
+            {
+                ModelState.AddModelError(string.Empty, vex.Message);
+                return View(vm);
             }
             catch (ApplicationException ex)
             {
                 ModelState.AddModelError(string.Empty, ex.Message);
-                return View(user);
+                return View(vm);
             }
-
-            return View(user);
         }
 
 
@@ -85,36 +91,25 @@ namespace BucketProject.UI.BucketProject.Controllers
         }
 
         [HttpPost]
-        public IActionResult LogIn(LogInViewModel user)
+        public IActionResult LogIn(LogInViewModel vm)
         {
             try
             {
-                User loggedUser = _mapper.Map<User>(user);
-                loggedUser = _userService.LogIn(user.Username, user.Password);
+                User? loggedUser = _userService.LogIn(vm.Username, vm.Password);
 
-                if (loggedUser != null)
-                {
-                    HttpContext.Session.SetString("Username", loggedUser.Username);
-                    HttpContext.Session.SetString("Role", loggedUser.Role);
+                HttpContext.Session.SetString("Username", loggedUser.Username);
+                HttpContext.Session.SetString("Role", loggedUser.Role);
 
-                    if (loggedUser.Role == "Manager")
-                        return RedirectToAction("Manager", "Manager");  
-                    else
-                        return RedirectToAction("Index", "Home");
-                }
-                else
-                {
-                    ViewBag.ErrorMessage = "Wrong username or password";
-                    return View();
-                }
+                return loggedUser.Role == "Manager"
+                    ? RedirectToAction("Manager", "Manager")
+                    : RedirectToAction("Index", "Home");
             }
-            catch (ArgumentException ex)
+            catch (ValidationException ex)
             {
-                ViewBag.ErrorMessage = ex.Message;
-                return View();
+                ModelState.AddModelError(string.Empty, ex.Message);
+                return View(vm);
             }
         }
-
 
 
         [HttpGet]
@@ -131,19 +126,42 @@ namespace BucketProject.UI.BucketProject.Controllers
         [HttpPost]
         public IActionResult UpdateUsername(string newUsername)
         {
-            _userService.UpdateUsername(newUsername);
+            try
+            {
+                _userService.UpdateUsername(newUsername);
 
-            return RedirectToAction("Account", "User");
+                return RedirectToAction("Account", "User");
+            }
+            catch (ValidationException ex)
+            {
+
+                ModelState.AddModelError(string.Empty, ex.Message);
+                User userDomain = _userService.GetUserByUsername();
+                UserViewModel vm = _mapper.Map<UserViewModel>(userDomain);
+                return View("Account", vm);
+            }
         }
 
         [HttpPost]
         public async Task<IActionResult> AddPhoto(IFormFile photoFile)
         {
-            await _userService.UpdateProfilePicture(photoFile);
-            return RedirectToAction("Account", "User");
+            try
+            {
+                await _userService.UpdateProfilePicture(photoFile);
+                return RedirectToAction("Account", "User");
+            }
+            catch (ValidationException ex)
+            {
+                ModelState.AddModelError(string.Empty, ex.Message);
+
+                var userDomain = _userService.GetUserByUsername();
+                var vm = _mapper.Map<UserViewModel>(userDomain);
+
+                return View("Account", vm);
+            }
         }
 
-        [HttpGet]
+            [HttpGet]
         public IActionResult LogOut()
         {
             HttpContext.Session.Clear();

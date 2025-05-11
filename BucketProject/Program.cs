@@ -12,6 +12,7 @@ using BucketProjetc.BLL.Business_Logic.InterfacesService;
 
 
 
+
 var builder = WebApplication.CreateBuilder(args);
 
 
@@ -46,6 +47,17 @@ builder.Services.AddAutoMapper(cfg => {
     cfg.AddProfile<AutoMapperUI>();
 });
 builder.Services.AddScoped<IGoalInviteRepo, GoalInviteRepo>();
+
+builder.Services.AddScoped<MvcTryCatchFilter>();
+
+// 2) Plug it into MVC's pipeline
+builder.Services.AddControllersWithViews(options =>
+{
+    // **Use AddService** if you registered it via DI:
+    options.Filters.AddService<MvcTryCatchFilter>();
+    // OR, if you prefer, register by type:
+    // options.Filters.Add<MvcTryCatchFilter>();
+});
 
 
 

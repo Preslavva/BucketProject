@@ -1,9 +1,11 @@
-﻿using AutoMapper;
+﻿using System.ComponentModel.DataAnnotations;
+using AutoMapper;
 using BucketProject.BLL.Business_Logic.InterfacesService;
 using BucketProject.BLLBusiness_Logic.Domain;
 using BucketProject.DAL.Data.InterfacesRepo;
 using BucketProject.DAL.Models.Entities;
 using Microsoft.AspNetCore.Http;
+using MimeKit.Encodings;
 
 
 namespace BucketProject.BLL.Business_Logic.Services
@@ -26,25 +28,44 @@ namespace BucketProject.BLL.Business_Logic.Services
 
         public User? LogIn(string username, string password)
         {
-            if (string.IsNullOrWhiteSpace(password))
-                throw new ArgumentException("Enter a password", nameof(password));
+            if (string.IsNullOrEmpty(password))
+            {
+                throw new ValidationException("Enter your password");
+            }
+            if (string.IsNullOrEmpty(username))
+            {
+                throw new ValidationException("Enter your username");
+            }
 
-            UserEntity? entity = _userRepo.GetUserByUsername(username);
-            if (entity is null)
-                return null;   
+            UserEntity? entity = _userRepo.GetUserByUsername(username) ?? throw new ValidationException("Wrong username or password");
 
-            bool valid = _hasher.VerifyPassword(password, entity.Password, entity.Salt);
-            if (!valid)
-                return null;  
+            if (!_hasher.VerifyPassword(password, entity.Password, entity.Salt))
+                throw new ValidationException("Wrong username or password");
 
             return _mapper.Map<User>(entity);
         }
 
 
 
-
         public bool Register(User userDomain)
         {
+            if (string.IsNullOrWhiteSpace(userDomain.Username))
+                throw new ValidationException("Username is required.");
+            if (string.IsNullOrWhiteSpace(userDomain.Email))
+                throw new ValidationException("Email is required.");
+            if (string.IsNullOrWhiteSpace(userDomain.Nationality))
+                throw new ValidationException("Nationality is required.");
+            if (string.IsNullOrWhiteSpace(userDomain.Gender))
+                throw new ValidationException("Gender is required.");
+            if (string.IsNullOrWhiteSpace(userDomain.Password))
+                throw new ValidationException("Password is required.");
+           
+
+            var emailAttr = new EmailAddressAttribute();
+            if (!emailAttr.IsValid(userDomain.Email))
+                throw new ValidationException("Email is not a valid address.");
+
+
             var (hash, salt) = _hasher.HashPassword(userDomain.Password);
             UserEntity entity = _mapper.Map<UserEntity>(userDomain);
             entity.SetPasswordAndSalt(hash, salt);
@@ -66,27 +87,38 @@ namespace BucketProject.BLL.Business_Logic.Services
 
         public void UpdateUsername(string newUsername)
         {
-            string? username = _contextAccessor.HttpContext.Session.GetString("Username");
-
             if (string.IsNullOrWhiteSpace(newUsername))
-                throw new ArgumentException("newUsername cannot be empty or whitespace.", nameof(newUsername));
+                throw new ValidationException("The new Username cannot be empty or whitespace.");
 
-            UserEntity user = _userRepo.GetUserByUsername(username);
+            string currentUsername = _contextAccessor.HttpContext!
+                                      .Session
+                                      .GetString("Username")
+                                  ?? throw new ValidationException("No logged-in user found.");
 
-            _contextAccessor.HttpContext.Session.SetString("Username", newUsername);
+            UserEntity user = _userRepo.GetUserByUsername(currentUsername)
+                       ?? throw new ValidationException("Logged-in user does not exist.");
 
             _userRepo.UpdateName(user, newUsername);
+
+            _contextAccessor.HttpContext!
+                 .Session
+                 .SetString("Username", newUsername);
         }
+
 
         public async Task UpdateProfilePicture(IFormFile? photoFile)
         {
             if (photoFile == null || photoFile.Length == 0)
-                throw new Exception("No file uploaded.");
+                throw new ValidationException("Please select a photo to upload");
 
-            string? username = _contextAccessor.HttpContext?.Session.GetString("Username");
+            string username = _contextAccessor.HttpContext!
+                                      .Session
+                                      .GetString("Username")
+                                  ?? throw new ValidationException("No logged-in user found.");
 
 
-            UserEntity? user = _userRepo.GetUserByUsername(username);
+            UserEntity user = _userRepo.GetUserByUsername(username)
+                      ?? throw new ValidationException("Logged-in user does not exist.");
 
             using (var memoryStream = new MemoryStream())
             {

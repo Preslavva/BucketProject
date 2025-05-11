@@ -1,11 +1,14 @@
 ﻿
 
+using System.ComponentModel.DataAnnotations;
+
 namespace BucketProject.UI.ViewModels.ViewModels
 {
     public class UserViewModel
     {
         public byte[] Picture { get; set; }
 
+        [Required(ErrorMessage = "The new Username cannot be empty or whitespace.")]
         public string Username { get; set; }
 
         public string Email { get; set; }

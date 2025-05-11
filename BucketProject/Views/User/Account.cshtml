@@ -15,10 +15,13 @@ else
     <p>No profile picture uploaded.</p>
 }
 
+<div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
 <form asp-action="AddPhoto" asp-controller="User" method="post" enctype="multipart/form-data">
+   
     <div>
         <label for="photoFile">Select a photo:</label><br />
-        <input type="file" name="photoFile" id="photoFile" accept="image/*" required />
+        <input type="file" name="photoFile" id="photoFile" accept="image/*"  />
     </div>
     <br />
     <button type="submit">Upload</button>
@@ -27,9 +30,10 @@ else
 <hr />
 
 <form asp-action="UpdateUsername" asp-controller="User" method="post">
+    
     <div class="form-group">
         <label for="username">Username</label>
-        <input type="text" name="newUsername" id="username" value="@Model.Username" class="form-control" required />
+        <input type="text" name="newUsername" id="username" value="@Model.Username" class="form-control" />
     </div>
     <button type="submit" class="btn btn-primary">Update Username</button>
 </form>
