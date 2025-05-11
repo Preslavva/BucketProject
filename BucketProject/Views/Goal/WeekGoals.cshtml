@@ -3,6 +3,13 @@
 
 <h2>Weekly Goals</h2>
 
+@if (!string.IsNullOrEmpty(ViewBag.ErrorMessage as string))
+{
+    <div class="alert alert-danger">
+        @ViewBag.ErrorMessage
+    </div>
+}
+
 @{
     var brokenDownGoals = TempData["SubGoals"] != null
         ? JsonConvert.DeserializeObject<List<GoalViewModel>>(TempData["SubGoals"].ToString())
@@ -14,14 +21,15 @@
         TempData["SubGoalForId"] = subGoalForId;
 }
 
+
 <form method="post" asp-controller="Goal" asp-action="CreateWeekGoal">
     <div class="input-container">
-        <input type="text" name="Description" required />
+        <input type="text" name="Description" required  />
         <label class="label">Enter Goal</label>
         <div class="underline"></div>
     </div>
     <input type="hidden" name="Category" value="Week" />
-    <select name="Type" required class="form-select mb-3">
+    <select name="Type"  required class="form-select mb-3">
         <option value="" disabled selected>Select goal type</option>
         @foreach (var type in (List<string>)ViewBag.AvailableTypes)
         {
@@ -106,7 +114,7 @@
 
                 <form method="post" asp-action="EditWeekGoal" style="display:inline;">
                     <input type="hidden" name="Id" value="@goal.Id" />
-                    <input type="text" name="Description" value="@goal.Description" required />
+                    <input type="text" name="Description" value="@goal.Description"  />
                     <button type="submit">Edit</button>
                 </form>
                 <form method="post" asp-action="ChangeGoalStatusWeek" style="display:inline; margin-left:10px;">

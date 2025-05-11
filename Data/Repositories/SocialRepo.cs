@@ -3,12 +3,16 @@ using BucketProject.DAL.Data.InterfacesRepo;
 using BucketProject.DAL.Models.Entities;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace BucketProject.DAL.Data.Repositories
 {
     public class SocialRepo : Repository, ISocialRepo
     {
-        public SocialRepo(IConfiguration configuration) : base(configuration) { }
+        private readonly ILogger<ISocialRepo> _logger;
+        public SocialRepo(IConfiguration configuration,ILogger<SocialRepo> logger) : base(configuration) {
+            _logger = logger;
+        }
 
     
         public List<UserEntity> LoadFriends(int userId)
@@ -39,8 +43,22 @@ WHERE f.Status = 'Accepted';
                           : (byte[])rdr["Picture"]));
                 }
             }
-            catch (SqlException ex) { throw new Exception($"DB error in {MethodBase.GetCurrentMethod().Name}: {ex.Message}", ex); }
-            catch (Exception ex) { throw new Exception($"Unexpected error in {MethodBase.GetCurrentMethod().Name}: {ex.Message}", ex); }
+            catch (SqlException sqlEx)
+            {
+                _logger.LogError(sqlEx,
+                    "SQL error in LoadFriends (UserId={userId})",
+                    userId);
+
+                throw new Exception("A database error occurred while loading friends.", sqlEx);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex,
+                    "SQL error in LoadFriends (UserId={userId})",
+                    userId);
+
+                throw;
+            }
             return friends;
         }
 
@@ -76,8 +94,23 @@ WHERE u.UserId <> @Id
                           : (byte[])rdr["Picture"]));
                 }
             }
-            catch (SqlException ex) { throw new Exception($"DB error in {MethodBase.GetCurrentMethod().Name}: {ex.Message}", ex); }
-            catch (Exception ex) { throw new Exception($"Unexpected error in {MethodBase.GetCurrentMethod().Name}: {ex.Message}", ex); }
+            catch (SqlException sqlEx)
+            {
+                _logger.LogError(sqlEx,
+                    "SQL error in LoadNonFriends (UserId={userId})",
+                    userId);
+
+                throw new Exception("A database error occurred while loading non friends.", sqlEx);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex,
+                    "SQL error in LoadnonFriends (UserId={userId})",
+                    userId);
+
+                throw;
+            }
+
             return users;
         }
 
@@ -122,14 +155,21 @@ COMMIT TRANSACTION;
                 cmd.ExecuteNonQuery();
                 return true;
             }
-            catch (SqlException ex)
-            { 
-           
-                throw new Exception($"DB error in {MethodBase.GetCurrentMethod().Name}: {ex.Message}", ex);
+            catch (SqlException sqlEx)
+            {
+                _logger.LogError(sqlEx,
+                    "SQL error in SendFriendRequest (UserId={userId}, FriendId={friendId})",
+                    userId, friendId);
+
+                throw new Exception("A database error occurred while sending freind request.", sqlEx);
             }
             catch (Exception ex)
             {
-                throw new Exception($"Unexpected error in {MethodBase.GetCurrentMethod().Name}: {ex.Message}", ex);
+                _logger.LogError(ex,
+                   "SQL error in SendFriendRequest (UserId={userId}, FriendId={friendId})",
+                   userId, friendId);
+
+                throw;
             }
         }
 
@@ -187,8 +227,22 @@ WHERE f.Status      = 'Pending'
                           : (byte[])rdr["Picture"]));
                 }
             }
-            catch (SqlException ex) { throw new Exception($"DB error in {MethodBase.GetCurrentMethod().Name}: {ex.Message}", ex); }
-            catch (Exception ex) { throw new Exception($"Unexpected error in {MethodBase.GetCurrentMethod().Name}: {ex.Message}", ex); }
+            catch (SqlException sqlEx)
+            {
+                _logger.LogError(sqlEx,
+                    "SQL error in LoadIncomingRequests (UserId={userId})",
+                    userId);
+
+                throw new Exception("A database error occurred while loading incoming friend requests.", sqlEx);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex,
+                     "SQL error in LoadIncomingRequests (UserId={userId})",
+                     userId);
+
+                throw;
+            }
             return list;
         }
 

@@ -9,6 +9,7 @@ using BucketProject.BLL.Business_Logic.Domain;
 using System.Text;
 using BucketProjetc.BLL.Business_Logic.InterfacesService;
 using BucketProject.BLLBusiness_Logic.Domain;
+using System.ComponentModel.DataAnnotations;
 
 
 
@@ -43,7 +44,7 @@ namespace BucketProject.BLL.Business_Logic.Services
         }
         private void EnsureUserIsOwner(int goalId, int currentUserId)
         {
-            var goalEntity = _goalRepo.GetGoalById(goalId,GetCurrentUserId());
+            GoalEntity goalEntity = _goalRepo.GetGoalById(goalId,GetCurrentUserId());
 
             if (goalEntity == null)
                 throw new Exception("Goal not found.");
@@ -55,8 +56,17 @@ namespace BucketProject.BLL.Business_Logic.Services
 
         public void CreateGoal(Goal goalDomain, IEnumerable<int>? sharedWithUserIds)
         {
+            if (string.IsNullOrWhiteSpace(goalDomain.Description))
+                throw new ValidationException("Goal description cannot be empty.");
+
+            if (goalDomain.Type == null)
+            {
+                throw new ValidationException("Goal type cannot be empty.");
+
+            }
+
             int ownerId = GetCurrentUserId();
-            var entity = _mapper.Map<GoalEntity>(goalDomain);
+            GoalEntity entity = _mapper.Map<GoalEntity>(goalDomain);
 
             bool shareIntent = sharedWithUserIds != null && sharedWithUserIds.Any();
 
@@ -81,10 +91,7 @@ namespace BucketProject.BLL.Business_Logic.Services
 
         public List<Goal> LoadPersonalGoalsByCategory(string category)
         {
-           
-
-            if (!Enum.TryParse<Category>(category, true, out var parsedCategory))
-                throw new ArgumentException($"Invalid category: {category}");
+            Enum.TryParse<Category>(category, true, out var parsedCategory);
 
             int userId = GetCurrentUserId();
 
@@ -102,9 +109,7 @@ namespace BucketProject.BLL.Business_Logic.Services
         {
 
             int userId = GetCurrentUserId();
-
-            if (!Enum.TryParse<Category>(category, true, out var parsedCategory))
-                throw new ArgumentException($"Invalid category: {category}");
+            Enum.TryParse<Category>(category, true, out var parsedCategory);
 
             List<GoalEntity> entities = _goalRepo.LoadSharedGoalsOfUserByCategory(userId, parsedCategory);
 
@@ -126,15 +131,17 @@ namespace BucketProject.BLL.Business_Logic.Services
 
         public void UpdateGoal(int goalId, Goal goalDomain)
         {
-
+            if (string.IsNullOrWhiteSpace(goalDomain.Description))
+            {
+                throw new ValidationException("New description cannot be empty");
+            }
             int userId = GetCurrentUserId();
             EnsureUserIsOwner(goalId, userId);
 
             GoalEntity entityGoal = _goalRepo.GetGoalById(goalId,GetCurrentUserId());
-            if (entityGoal == null)
-                throw new Exception("Goal not found");
+           
 
-            entityGoal.Description = goalDomain.Description;
+            entityGoal.Description = goalDomain.Description.Trim();
 
             _goalRepo.UpdateGoalDescription(entityGoal);
         }
@@ -148,8 +155,6 @@ namespace BucketProject.BLL.Business_Logic.Services
             EnsureUserIsOwner(goalId, userId);
 
             GoalEntity goal = _goalRepo.GetGoalById(goalId, GetCurrentUserId());
-            if (goal == null)
-                throw new Exception("Goal not found");
 
             _goalRepo.DeleteGoal(goal);
         }
@@ -158,8 +163,6 @@ namespace BucketProject.BLL.Business_Logic.Services
         public void ChangeGoalStatus(int goalId, bool isDone)
         {
             GoalEntity entityGoal = _goalRepo.GetGoalById(goalId,GetCurrentUserId());
-            if (entityGoal == null)
-                throw new Exception("Goal not found");
 
             Goal goal = _mapper.Map<Goal>(entityGoal);
 
@@ -181,8 +184,6 @@ namespace BucketProject.BLL.Business_Logic.Services
             EnsureUserIsOwner(goalId, userId);
 
             GoalEntity entityGoal = _goalRepo.GetGoalById(goalId,GetCurrentUserId());
-            if (entityGoal == null)
-                throw new Exception("Goal not found");
 
             Goal goal = _mapper.Map<Goal>(entityGoal);
 
@@ -281,8 +282,6 @@ namespace BucketProject.BLL.Business_Logic.Services
         public async Task<List<Goal>> BreakDownGoalAsync(int goalId)
         {
             GoalEntity entity = _goalRepo.GetGoalById(goalId, GetCurrentUserId());
-            if (entity == null || string.IsNullOrWhiteSpace(entity.Description))
-                throw new ArgumentException("Invalid goal.");
 
             Goal goal = _mapper.Map<Goal>(entity);
 

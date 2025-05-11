@@ -6,6 +6,7 @@ using BucketProject.UI.BucketProject.Mapping;
 using BucketProject.DAL.Data.Repositories;
 using BucketProject.BLL.Business_Logic.Mapping;
 using BucketProjetc.BLL.Business_Logic.InterfacesService;
+using BucketProject.Filters;
 
 
 
@@ -48,16 +49,14 @@ builder.Services.AddAutoMapper(cfg => {
 });
 builder.Services.AddScoped<IGoalInviteRepo, GoalInviteRepo>();
 
-builder.Services.AddScoped<MvcTryCatchFilter>();
+builder.Services.AddScoped<GlobalExceptionFilter>();
 
-// 2) Plug it into MVC's pipeline
-builder.Services.AddControllersWithViews(options =>
-{
-    // **Use AddService** if you registered it via DI:
-    options.Filters.AddService<MvcTryCatchFilter>();
-    // OR, if you prefer, register by type:
-    // options.Filters.Add<MvcTryCatchFilter>();
-});
+builder.Services
+    .AddControllersWithViews(options =>
+    {
+        // Add the filter globally
+        options.Filters.AddService<GlobalExceptionFilter>();
+    });
 
 
 

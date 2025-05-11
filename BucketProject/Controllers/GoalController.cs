@@ -8,6 +8,7 @@ using BucketProject.UI.ViewModels.ViewModels;
 using BucketProjetc.BLL.Business_Logic.InterfacesService;
 using BucketProject.BLLBusiness_Logic.Domain;
 using BucketProject.DAL.Models.Entities;
+using System.ComponentModel.DataAnnotations;
 
 namespace BucketProject.UI.BucketProject.Controllers
 {
@@ -193,30 +194,36 @@ namespace BucketProject.UI.BucketProject.Controllers
         }
 
         [HttpPost]
-        public IActionResult CreateWeekGoal(GoalViewModel viewModel, int[]friendIds)
+        public IActionResult CreateWeekGoal(GoalViewModel viewModel, int[] friendIds)
         {
             viewModel.Category = "Week";
+            ViewBag.AvailableTypes = GetAvailableTypes();
+            ViewBag.Friends = _socialService.GetFriends(CurrentUserId);
+            TempData.Keep("SubGoals");
+            TempData.Keep("SubGoalForId");
 
             if (!ModelState.IsValid)
+                return RedirectToAction("WeekGoals");
+
+            try
             {
-                ViewBag.AvailableTypes = GetAvailableTypes();
-                ViewBag.Friends = _socialService.GetFriends(CurrentUserId);
-                TempData.Keep("SubGoals");
-                TempData.Keep("SubGoalForId");
+                Goal domainModel = _mapper.Map<Goal>(viewModel);
+                _goalService.CreateGoal(domainModel, friendIds);
+            }
+            catch (ValidationException vex)
+            {
+                TempData["ErrorMessage"] = vex.Message;
                 return RedirectToAction("WeekGoals");
             }
-
-            Goal domainModel = _mapper.Map<Goal>(viewModel);
-            _goalService.CreateGoal(domainModel,friendIds);
 
             if (TempData.ContainsKey("SubGoals"))
             {
                 string raw = TempData["SubGoals"]?.ToString();
                 if (!string.IsNullOrWhiteSpace(raw))
                 {
-                    List<GoalViewModel> subGoals = JsonConvert.DeserializeObject<List<GoalViewModel>>(raw);
+                    var subGoals = JsonConvert.DeserializeObject<List<GoalViewModel>>(raw);
 
-                    List<GoalViewModel> updated = subGoals
+                    var updated = subGoals!
                         .Where(g => !string.Equals(
                             g.Description?.Trim(),
                             viewModel.Description?.Trim(),
@@ -227,7 +234,6 @@ namespace BucketProject.UI.BucketProject.Controllers
                     {
                         TempData["SubGoals"] = JsonConvert.SerializeObject(updated);
                         TempData.Keep("SubGoals");
-
                         TempData["SubGoalForId"] = viewModel.ParentGoalId?.ToString();
                         TempData.Keep("SubGoalForId");
                     }
@@ -244,24 +250,39 @@ namespace BucketProject.UI.BucketProject.Controllers
 
 
 
+
         [HttpPost]
         public IActionResult EditWeekGoal(GoalViewModel viewModel)
         {
-            Goal newGoal = _mapper.Map<Goal>(viewModel);
-
-            _goalService.UpdateGoal(viewModel.Id, newGoal);
-
-            return RedirectToAction("WeekGoals");
+            
+                try
+                {
+                    var updated = _mapper.Map<Goal>(viewModel);
+                    _goalService.UpdateGoal(viewModel.Id, updated);
+                }
+                catch (ValidationException vex)
+                {
+                   
+                    TempData["ErrorMessage"] = vex.Message;
+                }
+                return RedirectToAction("WeekGoals");
+            
         }
 
 
         [HttpPost]
         public IActionResult EditMonthGoal(GoalViewModel viewModel)
         {
-            Goal newGoal = _mapper.Map<Goal>(viewModel);
+            try
+            {
+                var updated = _mapper.Map<Goal>(viewModel);
+                _goalService.UpdateGoal(viewModel.Id, updated);
+            }
+            catch (ValidationException vex)
+            {
 
-            _goalService.UpdateGoal(viewModel.Id, newGoal);
-
+                TempData["ErrorMessage"] = vex.Message;
+            }
             return RedirectToAction("MonthGoals");
         }
 
@@ -270,10 +291,16 @@ namespace BucketProject.UI.BucketProject.Controllers
         public IActionResult EditYearGoal(GoalViewModel viewModel)
         {
 
-            Goal newGoal = _mapper.Map<Goal>(viewModel);
+            try
+            {
+                var updated = _mapper.Map<Goal>(viewModel);
+                _goalService.UpdateGoal(viewModel.Id, updated);
+            }
+            catch (ValidationException vex)
+            {
 
-            _goalService.UpdateGoal(viewModel.Id, newGoal);
-
+                TempData["ErrorMessage"] = vex.Message;
+            }
             return RedirectToAction("YearGoals");
         }
 
@@ -281,11 +308,17 @@ namespace BucketProject.UI.BucketProject.Controllers
         [HttpPost]
         public IActionResult EdiBucketListGoal(GoalViewModel viewModel)
         {
-            Goal newGoal = _mapper.Map<Goal>(viewModel);
+            try
+            {
+                var updated = _mapper.Map<Goal>(viewModel);
+                _goalService.UpdateGoal(viewModel.Id, updated);
+            }
+            catch (ValidationException vex)
+            {
 
-            _goalService.UpdateGoal(viewModel.Id, newGoal);
-
-            return RedirectToAction("YearGoals");
+                TempData["ErrorMessage"] = vex.Message;
+            }
+            return RedirectToAction("BucketList");
         }
 
         [HttpPost]
@@ -395,6 +428,15 @@ namespace BucketProject.UI.BucketProject.Controllers
             ViewBag.Friends = _socialService.GetFriends(CurrentUserId);
             ViewBag.CurrentUserId = _goalService.GetCurrentUserId();
 
+            if (TempData.TryGetValue("ErrorMessage", out var obj)
+       && obj is string msg && !string.IsNullOrEmpty(msg))
+            {
+                ViewBag.ErrorMessage = msg;
+            }
+
+            
+
+
             return View(pageModel);
         }
 
@@ -497,7 +539,7 @@ namespace BucketProject.UI.BucketProject.Controllers
             List<GoalViewModel> personalVMs = _mapper.Map<List<GoalViewModel>>(personalDomains);
             List<GoalViewModel> sharedVMs = _mapper.Map<List<GoalViewModel>>(sharedDomains);
 
-            // 2. Structure parent-child for personal goals
+         
             List<GoalViewModel> personalParents = personalVMs
                 .Where(g => g.ParentGoalId == null)
                 .ToList();
@@ -508,7 +550,7 @@ namespace BucketProject.UI.BucketProject.Controllers
                     .ToList();
             }
 
-            // 3. Structure parent-child for shared goals
+          
             List<GoalViewModel> sharedParents = sharedVMs
                 .Where(g => g.ParentGoalId == null)
                 .ToList();
@@ -519,10 +561,10 @@ namespace BucketProject.UI.BucketProject.Controllers
                     .ToList();
             }
 
-            // 4. Load pending invitations
+
             List<GoalInvitation> pendingInvitations = _goalService.GetPendingInvitations(CurrentUserId, "Bucket_list");
 
-            // 5. Map invitations into ViewModels
+
             List<GoalInviteViewModel> pendingInvitationVMs = pendingInvitations
                 .Select(inv => new GoalInviteViewModel
                 {
@@ -532,7 +574,7 @@ namespace BucketProject.UI.BucketProject.Controllers
                 })
                 .ToList();
 
-            // 6. Build the Page ViewModel
+        
             GoalsPageViewModel pageModel = new GoalsPageViewModel
             {
                 Goals = personalParents,
@@ -540,7 +582,6 @@ namespace BucketProject.UI.BucketProject.Controllers
                 PendingInvitations = pendingInvitationVMs
             };
 
-            // 7. Additional ViewBag settings
             ViewBag.AvailableTypes = GetAvailableTypes();
             ViewBag.Friends = _socialService.GetFriends(CurrentUserId);
 
@@ -549,14 +590,12 @@ namespace BucketProject.UI.BucketProject.Controllers
         [HttpGet]
         public IActionResult MonthGoals()
         {
-            // 1. Load personal and shared goals
             List<Goal> personalDomains = _goalService.LoadPersonalGoalsByCategory("Month");
             List<Goal> sharedDomains = _goalService.LoadSharedGoalsByCategory("Month");
 
             List<GoalViewModel> personalVMs = _mapper.Map<List<GoalViewModel>>(personalDomains);
             List<GoalViewModel> sharedVMs = _mapper.Map<List<GoalViewModel>>(sharedDomains);
 
-            // 2. Structure parent-child for personal goals
             List<GoalViewModel> personalParents = personalVMs
                 .Where(g => g.ParentGoalId == null)
                 .ToList();
@@ -567,7 +606,6 @@ namespace BucketProject.UI.BucketProject.Controllers
                     .ToList();
             }
 
-            // 3. Structure parent-child for shared goals
             List<GoalViewModel> sharedParents = sharedVMs
                 .Where(g => g.ParentGoalId == null)
                 .ToList();
@@ -578,10 +616,8 @@ namespace BucketProject.UI.BucketProject.Controllers
                     .ToList();
             }
 
-            // 4. Load pending invitations
             List<GoalInvitation> pendingInvitations = _goalService.GetPendingInvitations(CurrentUserId, "Month");
 
-            // 5. Map invitations into ViewModels
             List<GoalInviteViewModel> pendingInvitationVMs = pendingInvitations
                 .Select(inv => new GoalInviteViewModel
                 {
@@ -591,7 +627,6 @@ namespace BucketProject.UI.BucketProject.Controllers
                 })
                 .ToList();
 
-            // 6. Build the Page ViewModel
             GoalsPageViewModel pageModel = new GoalsPageViewModel
             {
                 Goals = personalParents,
@@ -599,7 +634,7 @@ namespace BucketProject.UI.BucketProject.Controllers
                 PendingInvitations = pendingInvitationVMs
             };
 
-            // 7. Additional ViewBag settings
+
             ViewBag.AvailableTypes = GetAvailableTypes();
             ViewBag.Friends = _socialService.GetFriends(CurrentUserId);
             ViewBag.CurrentUserId = _goalService.GetCurrentUserId();
@@ -952,6 +987,8 @@ namespace BucketProject.UI.BucketProject.Controllers
 
             return RedirectToAction("BucketList");
         }
+
+        
     }
 }
 

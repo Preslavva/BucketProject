@@ -4,16 +4,19 @@ using BucketProject.DAL.Data.InterfacesRepo;
 using BucketProject.DAL.Models.Entities;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace BucketProject.DAL.Data.Repositories
 
 {
     public class UserRepo : Repository, IUserRepo
     {
+        private readonly ILogger<UserRepo> _logger;
 
-        public UserRepo(IConfiguration configuration) : base(configuration)
+
+        public UserRepo(IConfiguration configuration, ILogger<UserRepo>logger) : base(configuration)
         {
-   
+            _logger = logger;
         }
 
         public bool Register(UserEntity user)
@@ -55,65 +58,6 @@ namespace BucketProject.DAL.Data.Repositories
             
         }
 
-//        public UserEntity? ValidateUser(string username, string password)
-//        {
-//            try
-//            {
-//                using (SqlConnection sqlConn = GetSqlConnection())
-//                {
-//                    sqlConn.Open();
-//                    string query = @"SELECT UserId, [Username], Email, [Password], Picture, Salt, Nationality, DateofBirth, Gender, CreatedAt, Role
-//                             FROM [User]
-//                             WHERE Username = @Username";
-
-//                    using (SqlCommand cmd = new SqlCommand(query, sqlConn))
-//                    {
-//                        cmd.Parameters.AddWithValue("@Username", username);
-
-//                        using (SqlDataReader reader = cmd.ExecuteReader())
-//                        {
-//                            if (reader.Read())
-//                            {
-//                                string storedHash = reader["Password"].ToString();
-//                                string storedSalt = reader["Salt"].ToString();
-
-//                                bool isValid = _passwordHasher.VerifyPassword(password, storedHash, storedSalt);
-
-//                                if (isValid)
-//                                {
-//                                    return new UserEntity(
-//                                      (int)reader["UserId"],
-//                                      reader["Username"].ToString(),
-//                                      reader["Email"].ToString(),
-//                                      storedHash,
-//                                      reader.IsDBNull(reader.GetOrdinal("Picture")) ? null : (byte[])reader["Picture"],
-//                                      storedSalt,
-//                                      reader["Nationality"].ToString(),
-//                                      (DateTime)reader["DateOfBirth"],
-//                                      reader["Gender"].ToString(),
-//                                      DateOnly.FromDateTime((DateTime)reader["CreatedAt"]),
-//                                      reader["Role"].ToString()
-
-//);
-//                                }
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//            catch (SqlException sqlEx)
-//            {
-//                throw new Exception($"Database error occurred while validating user: {sqlEx.Message}", sqlEx);
-//            }
-//            catch (Exception ex)
-//            {
-//                throw new Exception($"An unexpected error occurred : {ex.Message}", ex);
-//            }
-
-//            return null;
-//        }
-
-
 
         public void AddPhoto(UserEntity user, byte[] picture)
         {
@@ -136,11 +80,19 @@ namespace BucketProject.DAL.Data.Repositories
 
             catch (SqlException sqlEx)
             {
-                throw new Exception($"Database error occurred while adding photo: {sqlEx.Message}", sqlEx);
+                _logger.LogError(sqlEx,
+                    "SQL error in AddPhoto (UserId={user.Id}, Picture={picture})",
+                    user.Id, picture);
+
+                throw new Exception("A database error occurred while adding a photo.", sqlEx);
             }
             catch (Exception ex)
             {
-                throw new Exception($"An unexpected error occurred in: {ex.Message}", ex);
+                _logger.LogError(ex,
+                   "SQL error in AddPhoto (UserId={user.Id}, Picture={picture})",
+                   user.Id, picture);
+
+                throw;
             }
         }
 
@@ -165,71 +117,22 @@ namespace BucketProject.DAL.Data.Repositories
 
             catch (SqlException sqlEx)
             {
-                throw new Exception($"Database error occurred while updatting name: {sqlEx.Message}", sqlEx);
+                _logger.LogError(sqlEx,
+                    "SQL error in UpdateName (UserId={user.Id}, Username={username})",
+                    user.Id, username);
+
+                throw new Exception("A database error occurred while updating username.", sqlEx);
             }
             catch (Exception ex)
             {
-                throw new Exception($"An unexpected error occurred in: {ex.Message}", ex);
+                _logger.LogError(ex,
+                   "SQL error in UpdateName (UserId={user.Id}, Username={username})",
+                   user.Id, username);
+
+                throw;
             }
         }
-        public void UpdateEmail(UserEntity user, string email)
-        {
-            try
-            {
-                using (SqlConnection conn = GetSqlConnection())
-                {
-                    conn.Open();
-                    string queryUpdateName = @"update [User] set Email = @Email where UserId = @UserId";
-
-                    using (SqlCommand changeStatus = new SqlCommand(queryUpdateName, conn))
-                    {
-                        changeStatus.Parameters.AddWithValue("@Email", email);
-                        changeStatus.Parameters.AddWithValue("@UserId", user.Id);
-
-                        changeStatus.ExecuteNonQuery();
-                    }
-                }
-            }
-
-            catch (SqlException sqlEx)
-            {
-                throw new Exception($"Database error occurred while updatting email: {sqlEx.Message}", sqlEx);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"An unexpected error occurred in {MethodBase.GetCurrentMethod().Name}: {ex.Message}", ex);
-            }
-        }
-
-        public int GetIdOfUser(string username)
-        {
-            try
-            {
-                using (SqlConnection conn = GetSqlConnection())
-                {
-                    conn.Open();
-                    string queryUpdateName = @"select UserId from [User] where Username = @Username";
-
-                    using (SqlCommand changeStatus = new SqlCommand(queryUpdateName, conn))
-                    {
-                        changeStatus.Parameters.AddWithValue("@Username", username);
-
-                        int id = (int)changeStatus.ExecuteScalar();
-                        return id;
-                    }
-                }
-            }
-
-            catch (SqlException sqlEx)
-            {
-                throw new Exception($"Database error occurred while updatting email: {sqlEx.Message}", sqlEx);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"An unexpected error occurred : {ex.Message}", ex);
-            }
-        }
-       
+      
 
         public UserEntity? GetUserByUsername(string username)
         {
@@ -273,12 +176,20 @@ namespace BucketProject.DAL.Data.Repositories
             }
             catch (SqlException sqlEx)
             {
-                throw new Exception($"Database error occurred while validating user: {sqlEx.Message}", sqlEx);
+                _logger.LogError(sqlEx,
+                    "SQL error in GetUserByUsername (Username={username})",
+                     username);
+
+                throw new Exception("A database error occurred while getting user by username.", sqlEx);
             }
             catch (Exception ex)
             {
-                throw new Exception($"An unexpected error occurred: {ex.Message}", ex);
-        }
+                _logger.LogError(ex,
+                    "SQL error in GetUserByUsername (Username={username})",
+                     username);
+
+                throw;
+            }
             return null;
         }
     }

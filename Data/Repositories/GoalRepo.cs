@@ -1,6 +1,6 @@
 ﻿using System.Data;
 using System.Reflection;
-using System.Reflection.PortableExecutable;
+using Microsoft.Extensions.Logging;
 using BucketProject.DAL.Data.InterfacesRepo;
 using BucketProject.DAL.Models.Entities;
 using BucketProject.DAL.Models.Enums;
@@ -11,9 +11,11 @@ namespace BucketProject.DAL.Data.Repositories;
 
 public class GoalRepo: Repository, IGoalRepo
 {
+    private readonly ILogger<GoalRepo> _logger;
 
-    public GoalRepo(IConfiguration configuration):base(configuration)
-    { 
+    public GoalRepo(IConfiguration configuration, ILogger<GoalRepo> logger) :base(configuration)
+    {
+        _logger = logger;
     }
 
     public int InsertGoal(int ownerUserId, GoalEntity goal)
@@ -148,11 +150,19 @@ WHERE g.Id = @GoalId;
         }
         catch (SqlException sqlEx)
         {
-            throw new Exception($"Database error occurred while loading goal: {sqlEx.Message}", sqlEx);
+            _logger.LogError(sqlEx,
+                "SQL error in GetGoalById (GoalId={GoalId}, UserId={UserId})",
+                goalId, userId);
+
+            throw new Exception("A database error occurred while retrieving the goal.", sqlEx);
         }
         catch (Exception ex)
         {
-            throw new Exception($"Unexpected error in {MethodBase.GetCurrentMethod().Name}: {ex.Message}", ex);
+            _logger.LogError(ex,
+                "Unexpected error in GetGoalById (GoalId={GoalId}, UserId={UserId})",
+                goalId, userId);
+
+            throw;
         }
     }
 
@@ -243,11 +253,19 @@ WHERE ug.UserId   = @UserId
         }
         catch (SqlException sqlEx)
         {
-            throw new Exception($"Database error occurred while loading goals: {sqlEx.Message}", sqlEx);
+            _logger.LogError(sqlEx,
+                "SQL error in LoadPersonalGoalsOfuserByCategory (Category={category}, UserId={UserId})",
+                category, userId);
+
+            throw new Exception("A database error occurred while loading perosnal goals.", sqlEx);
         }
         catch (Exception ex)
         {
-            throw new Exception($"An unexpected error occurred in {MethodBase.GetCurrentMethod().Name}: {ex.Message}", ex);
+            _logger.LogError(ex,
+                  "SQL error in LoadPersonalGoalsOfuserByCategory (Category={category}, UserId={UserId})",
+                  category, userId);
+
+            throw;
         }
 
         return goals;
@@ -319,11 +337,19 @@ WHERE
         }
         catch (SqlException sqlEx)
         {
-            throw new Exception($"Database error occurred while loading shared goals: {sqlEx.Message}", sqlEx);
+            _logger.LogError(sqlEx,
+                "SQL error in LoadSharedGoalsOfuserByCategory (Category={category}, UserId={UserId})",
+                category, userId);
+
+            throw new Exception("A database error occurred while loading shared goals.", sqlEx);
         }
         catch (Exception ex)
         {
-            throw new Exception($"An unexpected error occurred in {MethodBase.GetCurrentMethod().Name}: {ex.Message}", ex);
+            _logger.LogError(ex,
+                  "SQL error in LoadSharedGoalsOfuserByCategory (Category={category}, UserId={UserId})",
+                  category, userId);
+
+            throw;
         }
 
         return goals;
@@ -406,100 +432,24 @@ WHERE ug.UserId    = @UserId
         }
         catch (SqlException sqlEx)
         {
-            throw new Exception($"Database error occurred while loading goals: {sqlEx.Message}", sqlEx);
+            _logger.LogError(sqlEx,
+                "SQL error in LoadPersonalGoalsOfUser (User={UserId})",
+                 userId);
+
+            throw new Exception("A database error occurred while loading  goals.", sqlEx);
         }
         catch (Exception ex)
         {
-            throw new Exception($"An unexpected error occurred in {MethodBase.GetCurrentMethod().Name}: {ex.Message}", ex);
+            _logger.LogError(ex,
+                  "SQL error in LoadPersonalGoalsOfUser (UserId={UserId})",
+                   userId);
+
+            throw;
         }
 
         return goals;
     }
 
-//    public List<GoalEntity> LoadChildGoalsOfGoals(int goalId)
-//    {
-//        List<GoalEntity> goals = new List<GoalEntity>();
-
-//        try
-//        {
-//            using (SqlConnection conn = GetSqlConnection())
-//            {
-//                conn.Open();
-
-//                string queryGetGoal = @"SELECT
-//    g.Id,
-//    g.Category,
-//    g.[Description],
-//    ug.IsDone,          
-//    ug.CompletedAt,     
-//    g.IsDeleted,
-//    g.CreatedAt,
-//    g.Deadline,
-//    g.Type,
-//    g.IsPostponed,
-//    g.ParentGoalId,
-//    g.OwnerId
-//FROM dbo.Goal      AS g
-//JOIN dbo.User_Goal AS ug
-//  ON ug.GoalId   = g.Id
-//WHERE g.ParentGoalId = @Id
-//  AND g.IsDeleted    = 0; ";
-
-//                using (SqlCommand getGoal = new SqlCommand(queryGetGoal, conn))
-//                {
-//                    getGoal.Parameters.AddWithValue("@Id", goalId);
-
-
-//                    using (SqlDataReader reader = getGoal.ExecuteReader())
-//                    {
-//                        while (reader.Read())
-//                        {
-//                            int id = reader.GetInt32(0);
-//                            Category cat = Enum.Parse<Category>(reader.GetString(1));
-//                            string description = reader.GetString(2);
-//                            bool isDone = reader.GetBoolean(3);
-//                            bool isDeleted = reader.GetBoolean(4);
-//                            DateTime createdAt = reader.GetDateTime(5);
-//                            DateTime? deadline = reader.IsDBNull(6) ? (DateTime?)null : reader.GetDateTime(6);
-//                            GoalType type = Enum.Parse<GoalType>(reader.GetString(7));
-//                            DateTime? completedAt = reader.IsDBNull(8) ? (DateTime?)null : reader.GetDateTime(8);
-//                            bool isPostponed = reader.GetBoolean(9);
-//                            int? parentGoalId = reader.IsDBNull(10) ? (int?)null : reader.GetInt32(10);
-//                            int ownerId = reader.GetInt32(11);
-
-
-//                            GoalEntity goal = new GoalEntity(
-//                               id,
-//                               cat,
-//                               type,
-//                               description,
-//                               createdAt,
-//                               deadline,
-//                               completedAt,
-//                               isDone,
-//                               isDeleted,
-//                               isPostponed,
-//                               parentGoalId,
-//                               ownerId
-//                           );
-
-//                            goals.Add(goal);
-//                        }
-//                    }
-//                    }
-//                }
-            
-//            return null;
-//        }
-//        catch (SqlException sqlEx)
-//        {
-//            throw new Exception($"Database error occurred while loading goals: {sqlEx.Message}", sqlEx);
-//        }
-//        catch (Exception ex)
-//        {
-//            throw new Exception($"An unexpected error occurred in {MethodBase.GetCurrentMethod().Name}: {ex.Message}", ex);
-//        }
-//    }
     public void ChangeGoalStatus(GoalEntity goal, int userId)
     {
         try
@@ -527,11 +477,18 @@ WHERE ug.UserId    = @UserId
 
         catch (SqlException sqlEx)
         {
-            throw new Exception($"Database error occurred while changing goal status: {sqlEx.Message}", sqlEx);
+            _logger.LogError(sqlEx,
+                "SQL error in ChangeGoalStatus (GoalId={goal.Id}, UserId={UserId})",
+                goal.Id, userId);
+
+            throw new Exception("A database error occurred while changing status of goal.", sqlEx);
         }
         catch (Exception ex)
         {
-            throw new Exception($"An unexpected error occurred in {MethodBase.GetCurrentMethod().Name}: {ex.Message}", ex);
+            _logger.LogError(ex,
+               "SQL error in ChangeGoalStatus (GoalId={goal.Id}, UserId={UserId})",
+               goal.Id, userId);
+            throw;
         }
     }
 
@@ -557,14 +514,20 @@ WHERE ug.UserId    = @UserId
                 }
             }
         }
-
         catch (SqlException sqlEx)
         {
-            throw new Exception($"Database error occurred while changing goal description: {sqlEx.Message}", sqlEx);
+            _logger.LogError(sqlEx,
+                "SQL error in UpdateGoalDescription (GoalId={goal.Id}",
+                goal.Id);
+
+            throw new Exception("A database error occurred while updating goal description.", sqlEx);
         }
         catch (Exception ex)
         {
-            throw new Exception($"An unexpected error occurred in {MethodBase.GetCurrentMethod().Name}: {ex.Message}", ex);
+            _logger.LogError(ex,
+              "SQL error in UpdateGoalDescription (GoalId={goal.Id}",
+              goal.Id);
+            throw;
         }
     }
 
@@ -594,11 +557,18 @@ WHERE Id            = @Id
 
         catch (SqlException sqlEx)
         {
-            throw new Exception($"Database error occurred while deleting goal: {sqlEx.Message}", sqlEx);
+            _logger.LogError(sqlEx,
+                "SQL error in DeleteGoal (GoalId={goal.Id}",
+                goal.Id);
+
+            throw new Exception("A database error occurred while deleting goal", sqlEx);
         }
         catch (Exception ex)
         {
-            throw new Exception($"An unexpected error occurred in {MethodBase.GetCurrentMethod().Name}: {ex.Message}", ex);
+            _logger.LogError(ex,
+              "SQL error in DeleteGoal (GoalId={goal.Id}",
+              goal.Id);
+            throw;
         }
     }
 
@@ -624,11 +594,18 @@ WHERE Id            = @Id
 
         catch (SqlException sqlEx)
         {
-            throw new Exception($"Database error occurred while deleting goal: {sqlEx.Message}", sqlEx);
+            _logger.LogError(sqlEx,
+                "SQL error in PosponeGoal (GoalId={goal.Id}",
+                goal.Id);
+
+            throw new Exception("A database error occurred while postponing a goal", sqlEx);
         }
         catch (Exception ex)
         {
-            throw new Exception($"An unexpected error occurred in {MethodBase.GetCurrentMethod().Name}: {ex.Message}", ex);
+            _logger.LogError(ex,
+              "SQL error in PostponeGoal (GoalId={goal.Id}",
+              goal.Id);
+            throw;
         }
     }
 
@@ -653,11 +630,18 @@ WHERE Id            = @Id
 
         catch (SqlException sqlEx)
         {
-            throw new Exception($"Database error occurred while updatting email: {sqlEx.Message}", sqlEx);
+            _logger.LogError(sqlEx,
+                "SQL error in GetIdofUser (Username={username}",
+                username);
+
+            throw new Exception("A database error occurred while getting id of user", sqlEx);
         }
         catch (Exception ex)
         {
-            throw new Exception($"An unexpected error occurred in {MethodBase.GetCurrentMethod().Name}: {ex.Message}", ex);
+            _logger.LogError(ex,
+                "SQL error in GetIdofUser (Username={username}",
+                username);
+            throw;
         }
     }
 
@@ -743,11 +727,18 @@ ORDER BY g.Deadline;
         }
         catch (SqlException sqlEx)
         {
-            throw new Exception($"Database error occurred while loading goals: {sqlEx.Message}", sqlEx);
+            _logger.LogError(sqlEx,
+                "SQL error in LoadExpiredGoalsOfUser (userId={userId}",
+                userId);
+
+            throw new Exception("A database error occurred while getting id of user", sqlEx);
         }
         catch (Exception ex)
         {
-            throw new Exception($"An unexpected error occurred in {MethodBase.GetCurrentMethod().Name}: {ex.Message}", ex);
+            _logger.LogError(ex,
+               "SQL error in LoadExpiredGoalsOfUser (userId={userId}",
+               userId);
+            throw;
         }
 
         return goals;
