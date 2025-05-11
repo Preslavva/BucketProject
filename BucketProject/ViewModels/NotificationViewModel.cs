@@ -12,7 +12,6 @@ namespace BucketProject.UI.ViewModels.ViewModels
         public string Type { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? Deadline { get; set; }
-        public bool IsPostponed { get; set; }
         public bool IsDone { get; set; }
         public bool IsDeleted { get; set; }
         public string Message { get; set; }

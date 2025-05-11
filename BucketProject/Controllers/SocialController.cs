@@ -41,10 +41,10 @@ namespace BucketProject.Controllers
         {
             int uid = CurrentUserId;
 
-            var incoming = _socialService.GetIncomingFriendRequests(uid);
-            var friends = _socialService.GetFriends(uid);
-            var nonFriends = _socialService.GetNonFriends(uid);
-            var outgoingUsers = _socialService.GetOutgoingFriendRequests(uid);
+            List<UserSummaryDTO> incoming = _socialService.GetIncomingFriendRequests(uid);
+            List<UserSummaryDTO> friends = _socialService.GetFriends(uid);
+            List<UserSummaryDTO> nonFriends = _socialService.GetNonFriends(uid);
+            List<UserSummaryDTO> outgoingUsers = _socialService.GetOutgoingFriendRequests(uid);
 
             if (!string.IsNullOrWhiteSpace(searchTerm))
             {
@@ -62,7 +62,7 @@ namespace BucketProject.Controllers
                 .Select(g => g.First())
                 .ToList();
 
-            var vm = new SocialViewModel
+            SocialViewModel vm = new SocialViewModel
             {
                 IncomingRequests = incoming,
                 Friends = friends,

@@ -13,15 +13,13 @@ namespace BucketProject.UI.BucketProject.Controllers
     public class UserController : Controller
     {
         private readonly IUserService _userService;
-        private readonly IPasswordHasher _passwordHasher;
         private readonly IMapper _mapper;
         private readonly IHttpClientFactory _httpClientFactory;
 
 
-        public UserController(IUserService userService, IPasswordHasher passwordHasher, IMapper mapper, IHttpClientFactory httpClientFactory)
+        public UserController(IUserService userService, IMapper mapper, IHttpClientFactory httpClientFactory)
         {
             _userService = userService;
-            _passwordHasher = passwordHasher;
             _mapper = mapper;
             _httpClientFactory = httpClientFactory;
         }
