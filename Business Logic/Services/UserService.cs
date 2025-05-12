@@ -65,6 +65,11 @@ namespace BucketProject.BLL.Business_Logic.Services
             if (!emailAttr.IsValid(userDomain.Email))
                 throw new ValidationException("Email is not a valid address.");
 
+            if (userDomain.Username.Length>20)
+            {
+                throw new ValidationException("Username must be under 20 characters");
+            }
+
 
             var (hash, salt) = _hasher.HashPassword(userDomain.Password);
             UserEntity entity = _mapper.Map<UserEntity>(userDomain);
