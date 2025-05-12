@@ -28,11 +28,11 @@ namespace BucketProject.BLL.Business_Logic.Services
 
         public User? LogIn(string username, string password)
         {
-            if (string.IsNullOrEmpty(password))
+            if (string.IsNullOrWhiteSpace(password))
             {
                 throw new ValidationException("Enter your password");
             }
-            if (string.IsNullOrEmpty(username))
+            if (string.IsNullOrWhiteSpace(username))
             {
                 throw new ValidationException("Enter your username");
             }

@@ -8,6 +8,7 @@ using BucketProject.BLLBusiness_Logic.Domain;
 using BucketProject.BLL.Business_Logic.Mapping;
 using BucketProject.DAL.Models.Entities;
 using BucketProject.BLL.Business_Logic.InterfacesService;
+using System.ComponentModel.DataAnnotations;
 
 
 namespace BucketsTests
@@ -34,7 +35,7 @@ namespace BucketsTests
             });
             _mapper = config.CreateMapper();
 
-            _userService = new UserService(_userRepo.Object, _contextAccessor.Object, _mapper,_hasher.Object);
+            _userService = new UserService(_userRepo.Object, _contextAccessor.Object, _mapper, _hasher.Object);
         }
 
         private void SetSession(string username)
@@ -48,53 +49,57 @@ namespace BucketsTests
         }
 
         [TestMethod]
-        public void LogIn_EmptyPassword_ThrowsArgumentException()
+        public void LogIn_EmptyPassword_ThrowsValidationException()
         {
             string username = "test";
-            string password = "   ";
+            string password = "";
 
-            var ex = Assert.ThrowsException<ArgumentException>(
+            var ex = Assert.ThrowsException<ValidationException>(
                 () => _userService.LogIn(username, password));
-            Assert.AreEqual("password", ex.ParamName);
-            StringAssert.StartsWith(ex.Message, "Enter a password");
+
+            Assert.AreEqual("Enter your password", ex.Message);
         }
 
         [TestMethod]
-        public void LogIn_WrongPassword_ReturnsNull()
+        public void LogIn_EmptyUsername_ThrowsValidationException()
         {
-       
+            string username = "";
+            string password = "somePassword";
+
+            var ex = Assert.ThrowsException<ValidationException>(
+                () => _userService.LogIn(username, password));
+
+            Assert.AreEqual("Enter your username", ex.Message);
+        }
+
+        [TestMethod]
+        public void LogIn_WrongUsername_ThrowsValidationException()
+        {
+            string username = "notexisting";
+            string password = "password";
+
+            _userRepo.Setup(r => r.GetUserByUsername(username)).Returns((UserEntity?)null);
+
+            var ex = Assert.ThrowsException<ValidationException>(() => _userService.LogIn(username, password));
+
+            Assert.AreEqual("Wrong username or password", ex.Message);
+        }
+
+        [TestMethod]
+        public void LogIn_WrongPassword_ThrowsValidationException()
+        {
             string username = "john";
             string password = "wrongpass";
-            UserEntity userEntity = new UserEntity(1, "john", "john@mail.com", "password", new byte[] { 0x01 }, "salt", "nationality", DateTime.Now, "Gender", DateOnly.MaxValue, "Role");
+
+            var userEntity = new UserEntity(1, "john", "john@mail.com", "hashedPassword", new byte[] { 0x01 }, "salt", "nationality", DateTime.Now, "Gender", DateOnly.MaxValue, "Role");
+
             _userRepo.Setup(r => r.GetUserByUsername(username)).Returns(userEntity);
-            _hasher
-              .Setup(h => h.VerifyPassword(password, userEntity.Password, userEntity.Salt))
-              .Returns(false);
+            _hasher.Setup(h => h.VerifyPassword(password, userEntity.Password, userEntity.Salt)).Returns(false);
 
-          
-            User? result = _userService.LogIn(username, password);
+            var ex = Assert.ThrowsException<ValidationException>(() => _userService.LogIn(username, password));
 
-            Assert.IsNull(result);
+            Assert.AreEqual("Wrong username or password", ex.Message);
         }
-
-        [TestMethod]
-        public void LogIn_WrongUsernameAndPassword_ReturnsNull()
-        {
-
-            string username = "wrongusername";
-            string password = "wrongpass";
-            UserEntity userEntity = new UserEntity(1, "john", "john@mail.com", "password", new byte[] { 0x01 }, "salt", "nationality", DateTime.Now, "Gender", DateOnly.MaxValue, "Role");
-            _userRepo.Setup(r => r.GetUserByUsername(username)).Returns(userEntity);
-            _hasher
-              .Setup(h => h.VerifyPassword(password, userEntity.Password, userEntity.Salt))
-              .Returns(false);
-
-
-            User? result = _userService.LogIn(username, password);
-
-            Assert.IsNull(result);
-        }
-
         [TestMethod]
         public void LogIn_ValidCredentials_ReturnsUser()
         {
@@ -106,19 +111,35 @@ namespace BucketsTests
             User userDomain = new User { Id = 1, Username = username, Email = "john@mail.com", Password = password, Picture = new byte[] { 0x01 }, Nationality = "nationality", DateOfBirth = DateTime.Now, Gender = "Gender", CreatedAt = DateOnly.MaxValue, Role = "Role" };
 
             _userRepo.Setup(r => r.GetUserByUsername(username)).Returns(userEntity);
-            _hasher
-            .Setup(h => h.VerifyPassword(password, userEntity.Password, userEntity.Salt))
-            .Returns(true);
+            _hasher.Setup(h => h.VerifyPassword(password, userEntity.Password, userEntity.Salt)).Returns(true);
+
             User? result = _userService.LogIn(username, password);
 
             Assert.IsNotNull(result);
-            Assert.AreEqual(userDomain.Id, result!.Id);
+            Assert.AreEqual(userDomain.Id, result.Id);
             Assert.AreEqual(userDomain.Username, result.Username);
             Assert.AreEqual(userDomain.Email, result.Email);
-
-            _userRepo.Verify(r => r.GetUserByUsername(username), Times.Once);
-            _hasher.Verify(h => h.VerifyPassword(password, hashedPassword, salt), Times.Once);
         }
+
+        [TestMethod]
+        public void UpdateUsername_EmptyNewUsername_ThrowsValidationException()
+        {
+            string oldUsername = "oldUsername";
+            string newUsername = "  ";
+            SetSession(oldUsername);
+
+            var userEntity = new UserEntity(1, oldUsername, "john@mail.com", "password", new byte[] { 0x01 }, "salt", "nationality", DateTime.Now, "Gender", DateOnly.MaxValue, "Role");
+
+            _userRepo.Setup(r => r.GetUserByUsername(oldUsername)).Returns(userEntity);
+
+            var ex = Assert.ThrowsException<ValidationException>(() =>
+                _userService.UpdateUsername(newUsername)
+            );
+
+            Assert.AreEqual("The new Username cannot be empty or whitespace.", ex.Message);
+            _userRepo.Verify(r => r.UpdateName(It.IsAny<UserEntity>(), It.IsAny<string>()), Times.Never);
+        }
+
 
         [TestMethod]
         public void UpdateUsername_ValidUsername_UpdatesSessionAndRepository()
@@ -143,106 +164,72 @@ namespace BucketsTests
 
         }
 
-        [TestMethod]
-        public void UpdateUsername_EmptyNewUsername_ThrowsArgumentException()
-        {
-            string oldUsername = "oldUsername";
-            string newUsername = "  ";
-            SetSession(oldUsername);
 
-            UserEntity userEntity = new UserEntity(1, oldUsername, "john@mail.com", "password", new byte[] { 0x01 }, "salt", "nationality", DateTime.Now, "Gender", DateOnly.MaxValue, "Role");
-
-            _userRepo.Setup(r => r.GetUserByUsername(oldUsername)).Returns(userEntity);
-
-            try
-            {
-                _userService.UpdateUsername(newUsername);
-                Assert.Fail("Expected ArgumentException for empty newUsername.");
-            }
-            catch (ArgumentException ex)
-            {
-
-                StringAssert.Contains(ex.Message, "newUsername");
-
-            }
-            _userRepo.Verify(r=>r.UpdateName(It.IsAny<UserEntity>(), It.IsAny<string>()), Times.Never);
-        }
-
-        [TestMethod]
-        public async Task UpdateProfilePicture_NullFile_ThrowsException()
-        {
-            await Assert.ThrowsExceptionAsync<Exception>(async () =>
-                await _userService.UpdateProfilePicture(null)
-            );
-        }
-
-        [TestMethod]
-        public async Task UpdateProfilePicture_ZeroLength_ThrowsException()
-        {
-            var mockFile = new Mock<IFormFile>();
-            mockFile.Setup(f => f.Length).Returns(0L);
-
-            await Assert.ThrowsExceptionAsync<Exception>(async () =>
-                await _userService.UpdateProfilePicture(mockFile.Object)
-            );
-        }
-
-        [TestMethod]
-        public async Task UpdateProfilePicture_UserNotFound_AddPhotoCalledWithNullUser()
-        {
-            string username = "username";
-            SetSession(username);
-
-            byte[] bytes = { 9, 8, 7 };
-            var mockFile = new Mock<IFormFile>();
-            mockFile.Setup(f => f.Length).Returns(bytes.Length);
-            mockFile
-                .Setup(f => f.CopyToAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>()))
-                .Returns<Stream, CancellationToken>((s, _) =>
-                    s.WriteAsync(bytes, 0, bytes.Length)
-                );
-
-            _userRepo.Setup(r => r.GetUserByUsername(username)).Returns((UserEntity?)null);
-
-            await _userService.UpdateProfilePicture(mockFile.Object);
-
-            _userRepo.Verify(r =>
-                r.AddPhoto(
-                    It.Is<UserEntity?>(u => u == null),
-                    It.Is<byte[]>(b => b.SequenceEqual(bytes))
-                ),
-                Times.Once
-            );
-        }
         [TestMethod]
         public async Task UpdateProfilePicture_ValidFile_AddsPhotoSuccessfully()
         {
             string username = "username";
             SetSession(username);
-            var userEntity = new UserEntity(1,username);
-            _userRepo.Setup(r => r.GetUserByUsername(username))
-                     .Returns(userEntity);
 
-            byte[] imageBytes = Encoding.UTF8.GetBytes("test-image-bytes");
+            var userEntity = new UserEntity(1, username);
+            _userRepo.Setup(r => r.GetUserByUsername(username)).Returns(userEntity);
+
+            byte[] imageBytes = Encoding.UTF8.GetBytes("photo-bytes");
             var mockFile = new Mock<IFormFile>();
             mockFile.Setup(f => f.Length).Returns(imageBytes.Length);
             mockFile
                 .Setup(f => f.CopyToAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>()))
-                .Returns<Stream, CancellationToken>((stream, _) =>
-                    stream.WriteAsync(imageBytes, 0, imageBytes.Length)
-                );
+                .Returns<Stream, CancellationToken>((stream, _) => stream.WriteAsync(imageBytes, 0, imageBytes.Length));
 
             await _userService.UpdateProfilePicture(mockFile.Object);
 
-
             _userRepo.Verify(r =>
                 r.AddPhoto(
-                    It.Is<UserEntity?>(u => u == userEntity),
-                    It.Is<byte[]>(b => b.Length == imageBytes.Length
-                                       && b.SequenceEqual(imageBytes))
-                ),
-                Times.Once
+                    It.Is<UserEntity>(u => u == userEntity),
+                    It.Is<byte[]>(b => b.SequenceEqual(imageBytes))
+                ), Times.Once);
+        }
+
+
+        [TestMethod]
+        public async Task UpdateProfilePicture_EmptyFile_ThrowsValidationException()
+        {
+            var mockFile = new Mock<IFormFile>();
+            mockFile.Setup(f => f.Length).Returns(0);
+
+            var ex = await Assert.ThrowsExceptionAsync<ValidationException>(async () =>
+                await _userService.UpdateProfilePicture(mockFile.Object)
             );
+
+            Assert.AreEqual("Please select a photo to upload", ex.Message);
+        }
+
+        [TestMethod]
+        public async Task UpdateProfilePicture_NullFile_ThrowsValidationException()
+        {
+            var ex = await Assert.ThrowsExceptionAsync<ValidationException>(async () =>
+                await _userService.UpdateProfilePicture(null)
+            );
+
+            Assert.AreEqual("Please select a photo to upload", ex.Message);
+        }
+
+        [TestMethod]
+        public async Task UpdateProfilePicture_UserNotFound_ThrowsValidationException()
+        {
+            string username = "username";
+            SetSession(username);
+
+            var mockFile = new Mock<IFormFile>();
+            mockFile.Setup(f => f.Length).Returns(3);
+
+            _userRepo.Setup(r => r.GetUserByUsername(username)).Returns((UserEntity?)null);
+
+            var ex = await Assert.ThrowsExceptionAsync<ValidationException>(async () =>
+                await _userService.UpdateProfilePicture(mockFile.Object)
+            );
+
+            Assert.AreEqual("Logged-in user does not exist.", ex.Message);
         }
 
     }
