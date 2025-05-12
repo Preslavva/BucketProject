@@ -65,6 +65,9 @@ namespace BucketProject.BLL.Business_Logic.Services
 
             }
 
+            if (goalDomain.Description.Length > 50)
+                throw new ValidationException("Goal description is too long. Maximum allowed is 50 characters.");
+
             int ownerId = GetCurrentUserId();
             GoalEntity entity = _mapper.Map<GoalEntity>(goalDomain);
 

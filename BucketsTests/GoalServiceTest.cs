@@ -8,6 +8,7 @@ using BucketProject.BLL.Business_Logic.Mapping;
 using BucketProject.BLL.Business_Logic.Domain;
 using BucketProject.DAL.Models.Entities;
 using BucketProject.DAL.Models.Enums;
+using System.ComponentModel.DataAnnotations;
 
 
 namespace BucketsTests
@@ -39,6 +40,8 @@ namespace BucketsTests
             _goalService = new GoalService(_goalRepo.Object, _contextAccessor.Object, _mapper, _aIClient.Object, _inviteRepo.Object);
         }
 
+       
+
         private void SetSession(string username)
         {
             byte[] usernameBytes = System.Text.Encoding.UTF8.GetBytes(username);
@@ -47,6 +50,58 @@ namespace BucketsTests
             session.Setup(s => s.TryGetValue("Username", out usernameBytes)).Returns(true);
 
             _contextAccessor.Setup(a => a.HttpContext).Returns(new DefaultHttpContext() { Session = session.Object });
+        }
+
+        [TestMethod]
+        public void CreateGoal_EmptyDescription_ThrowsValidationException()
+        {
+            string? invalidDescription = "";
+            Goal goalDomain = new Goal(
+                id: 1,
+                category: Category.Week,
+                type: GoalType.Education,
+                createdAt: DateTime.UtcNow,
+                completedAt: DateTime.UtcNow.AddDays(1),
+                description: invalidDescription,
+                deadline: DateTime.UtcNow.AddDays(30),
+                isDone: false,
+                isDeleted: false,
+                isPostponed: false,
+                parentGoalId: null,
+                ownerId: 123
+            );
+
+            var ex = Assert.ThrowsException<ValidationException>(() =>
+                _goalService.CreateGoal(goalDomain, null)
+            );
+
+            Assert.AreEqual("Goal description cannot be empty.", ex.Message);
+        }
+
+        [TestMethod]
+        public void CreateGoal_DescriptionTooLong_ThrowsValidationException()
+        {
+            string? invalidDescription = "This is a sample description that exceeds fifty characters.";
+            Goal goalDomain = new Goal(
+                id: 1,
+                category: Category.Week,
+                type: GoalType.Education,
+                createdAt: DateTime.UtcNow,
+                completedAt: DateTime.UtcNow.AddDays(1),
+                description: invalidDescription,
+                deadline: DateTime.UtcNow.AddDays(30),
+                isDone: false,
+                isDeleted: false,
+                isPostponed: false,
+                parentGoalId: null,
+                ownerId: 123
+            );
+
+            var ex = Assert.ThrowsException<ValidationException>(() =>
+                _goalService.CreateGoal(goalDomain, null)
+            );
+
+            Assert.AreEqual("Goal description is too long. Maximum allowed is 50 characters.", ex.Message);
         }
 
         [TestMethod]
