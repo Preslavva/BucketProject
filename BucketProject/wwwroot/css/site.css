@@ -145,100 +145,57 @@ h3 {
     .input-container input[type="text"]:valid ~ .underline {
         transform: scaleX(1);
     }
-/* The design is inspired from the mockapi.io */
 
-.popup {
-    --burger-line-width: 1.125em;
-    --burger-line-height: 0.125em;
-    --burger-offset: 0.625em;
-    --burger-bg: rgba(0, 0, 0, .15);
-    --burger-color: #333;
-    --burger-line-border-radius: 0.1875em;
-    --burger-diameter: 2.125em;
-    --burger-btn-border-radius: calc(var(--burger-diameter) / 2);
-    --burger-line-transition: .3s;
-    --burger-transition: all .1s ease-in-out;
-    --burger-hover-scale: 1.1;
-    --burger-active-scale: .95;
-    --burger-enable-outline-color: var(--burger-bg);
-    --burger-enable-outline-width: 0.125em;
-    --burger-enable-outline-offset: var(--burger-enable-outline-width);
-    /* nav */
-    --nav-padding-x: 0.25em;
-    --nav-padding-y: 0.625em;
-    --nav-border-radius: 0.375em;
-    --nav-border-color: #ccc;
-    --nav-border-width: 0.0625em;
-    --nav-shadow-color: rgba(0, 0, 0, .2);
-    --nav-shadow-width: 0 1px 5px;
-    --nav-bg: #eee;
-    --nav-font-family: Menlo, Roboto Mono, monospace;
-    --nav-default-scale: .8;
-    --nav-active-scale: 1;
-    --nav-position-left: 0;
-    --nav-position-right: unset;
-    /* if you want to change sides just switch one property */
-    /* from properties to "unset" and the other to 0 */
-    /* title */
-    --nav-title-size: 0.625em;
-    --nav-title-color: #777;
-    --nav-title-padding-x: 1rem;
-    --nav-title-padding-y: 0.25em;
-    /* nav button */
-    --nav-button-padding-x: 1rem;
-    --nav-button-padding-y: 0.375em;
-    --nav-button-border-radius: 0.375em;
-    --nav-button-font-size: 12px;
-    --nav-button-hover-bg: #6495ed;
-    --nav-button-hover-text-color: #fff;
-    --nav-button-distance: 0.875em;
-    /* underline */
-    --underline-border-width: 0.0625em;
-    --underline-border-color: #ccc;
-    --underline-margin-y: 0.3125em;
+.register-container,
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    
 }
 
-.checkbox-wrapper input[type="checkbox"] {
-    visibility: hidden;
-    display: none;
+.register-form,
+.login-form {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 8px;
+    width: 320px;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
-.checkbox-wrapper *,
-.checkbox-wrapper ::after,
-.checkbox-wrapper ::before {
-    box-sizing: border-box;
-    user-select: none;
+label {
+    font-size: 0.9rem;
+    color: #333;
 }
 
-.checkbox-wrapper {
-    position: relative;
+.input-field {
+    padding: 0.75rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 1rem;
+}
+
+.button {
+    background-color: #2c2c2c;
+    color: white;
+    padding: 0.75rem;
+    border: none;
+    border-radius: 6px;
+    text-align: center;
+    text-decoration: none;
+    font-size: 1rem;
+    cursor: pointer;
     display: block;
-    overflow: hidden;
 }
 
-    .checkbox-wrapper .label {
-        cursor: pointer;
+    .button:hover {
+        background-color: #1f1f1f;
     }
 
-    .checkbox-wrapper .check {
-        width: 50px;
-        height: 50px;
-        position: absolute;
-        opacity: 0;
-    }
-
-    .checkbox-wrapper .label svg {
-        vertical-align: middle;
-    }
-
-    .checkbox-wrapper .path1 {
-        stroke-dasharray: 400;
-        stroke-dashoffset: 400;
-        transition: .5s stroke-dashoffset;
-        opacity: 0;
-    }
-
-    .checkbox-wrapper .check:checked + label svg g path {
-        stroke-dashoffset: 0;
-        opacity: 1;
-    }
+.text-danger {
+    color: red;
+    font-size: 0.875rem;
+}

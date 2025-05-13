@@ -39,6 +39,7 @@ INNER JOIN dbo.Goal g ON gi.GoalId = g.Id
 WHERE gi.InvitedId = @InvitedId 
   AND gi.Status = 'Pending'
   AND g.Category = @Category
+AND g.Deadline > GetDate()
  
 ORDER BY gi.CreatedAt DESC;";
 
@@ -118,6 +119,7 @@ FROM dbo.GoalInvitation AS gi
 JOIN dbo.Goal AS g ON g.Id = gi.GoalId
 WHERE gi.InviterId = @InviterId
   AND g.Category = @Category
+  AND g.Deadline > GETDATE()  -- this line ensures the deadline is in the future
   AND gi.Status IN ('Pending', 'Declined')
   AND NOT EXISTS (
       SELECT 1 FROM dbo.DismissedNotifications dn
@@ -128,6 +130,7 @@ WHERE gi.InviterId = @InviterId
           AND dn.TriggeredByUserId = gi.InvitedId
   )
 ORDER BY gi.CreatedAt DESC;
+
 ";
 
             var list = new List<GoalInvitation>();

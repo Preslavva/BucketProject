@@ -1,66 +1,41 @@
-﻿
+﻿@model RegisterViewModel
 
-@model RegisterViewModel
 @{
     ViewData["Title"] = "Register";
 }
 
-<h2>Register</h2>
-@Html.ValidationSummary(true, "", new { @class = "alert alert-danger" })
+<div class="register-container">
+    <form asp-controller="User" asp-action="Register" method="post" class="register-form">
+        <h2>Register</h2>
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-<div class="row">
-    <div class="col-md-4">
-        <form asp-controller="User" asp-action="Register" method="post">
+        <input asp-for="Username" class="input-field" placeholder="Enter your username" />
+        <span asp-validation-for="Username" class="text-danger"></span>
 
-            <div class="form-group">
-                <label asp-for="Username" class="control-label">Username:</label>
-                <input asp-for="Username" class="form-control" />
-                <span asp-validation-for="Username" class="text-danger"></span>
-            </div>
+        <input asp-for="Email" class="input-field" placeholder="Enter your email" />
+        <span asp-validation-for="Email" class="text-danger"></span>
 
-            <div class="form-group">
-                <label asp-for="Email" class="control-label">Email:</label>
-                <input asp-for="Email" class="form-control" />
-                <span asp-validation-for="Email" class="text-danger"></span>
-            </div>
+        <label asp-for="DateOfBirth">Date of Birth</label>
+        <input asp-for="DateOfBirth" type="date" class="input-field" />
+        <span asp-validation-for="DateOfBirth" class="text-danger"></span>
 
-            <div class="form-group">
-                <label asp-for="DateOfBirth" class="control-label">Date of Birth:</label>
-                <input asp-for="DateOfBirth" type="date" class="form-control" />
-                <span asp-validation-for="DateOfBirth" class="text-danger"></span>
-            </div>
+    
+        <select asp-for="Nationality" asp-items="Model.Countries" class="input-field">
+            <option value="">-- Select Nationality --</option>
+        </select>
+        <span asp-validation-for="Nationality" class="text-danger"></span>
 
-            <div class="form-group">
-                <label asp-for="Nationality" class="control-label">Nationality:</label>
-                <select asp-for="Nationality"
-                        asp-items="Model.Countries"
-                        class="form-control">
-                    <option value="">-- Select Nationality --</option>
-                </select>
-                <span asp-validation-for="Nationality" class="text-danger"></span>
-            </div>
+        @Html.DropDownListFor(model => model.Gender, new SelectList(new[] { "Male", "Female", "Other" }), "-- Select Gender --", new { @class = "input-field" })
+        <span asp-validation-for="Gender" class="text-danger"></span>
 
-            <div class="form-group">
-                <label asp-for="Gender" class="control-label">Gender:</label>
-                @Html.DropDownListFor(model => model.Gender, new SelectList(new[] { "Male", "Female", "Other" }), "-- Select Gender --", new { @class = "form-control" })
-                <span asp-validation-for="Gender" class="text-danger"></span>
-            </div>
+        <input asp-for="Password" type="password" class="input-field" placeholder="Enter a password" />
+        <span asp-validation-for="Password" class="text-danger"></span>
 
-            <div class="form-group">
-                <label asp-for="Password" class="control-label">Password:</label>
-                <input asp-for="Password" type="password" class="form-control" />
-                <span asp-validation-for="Password" class="text-danger"></span>
-            </div>
+       
+        <input asp-for="ConfirmPassword" type="password" class="input-field" placeholder="Confirm your password" />
+        <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
 
-            <div class="form-group">
-                <label asp-for="ConfirmPassword" class="control-label">Confirm Password:</label>
-                <input asp-for="ConfirmPassword" type="password" class="form-control" />
-                <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
-            </div>
-
-            <div class="form-group">
-                <input type="submit" value="Register" class="btn btn-primary" />
-            </div>
-        </form>
-    </div>
+        <button type="submit" class="button">Register</button>
+        <a asp-controller="User" asp-action="LogIn" class="button">Back to Login</a>
+    </form>
 </div>
