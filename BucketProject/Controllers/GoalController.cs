@@ -9,6 +9,7 @@ using BucketProjetc.BLL.Business_Logic.InterfacesService;
 using BucketProject.BLLBusiness_Logic.Domain;
 using BucketProject.DAL.Models.Entities;
 using System.ComponentModel.DataAnnotations;
+using BucketProject.BLL.Business_Logic.Services;
 
 namespace BucketProject.UI.BucketProject.Controllers
 {
@@ -19,17 +20,19 @@ namespace BucketProject.UI.BucketProject.Controllers
         private readonly IConfiguration _configuration;
         private readonly ISocialService _socialService;
         private readonly IUserService _userService;
+        private readonly NotificationService _notificationService;
 
 
 
 
-        public GoalController(IGoalService goalService, IMapper mapper, IConfiguration configuration, ISocialService socialService, IUserService userService)
+        public GoalController(IGoalService goalService, IMapper mapper, IConfiguration configuration, ISocialService socialService, IUserService userService, NotificationService notificationService)
         {
             _goalService = goalService;
             _mapper = mapper;
             _configuration = configuration;
             _socialService = socialService;
             _userService = userService;
+            _notificationService = notificationService;
 
         }
         private int CurrentUserId
@@ -402,17 +405,18 @@ namespace BucketProject.UI.BucketProject.Controllers
 
             List<GoalInvitation> sentInvitationsOfUser = _goalService.GetInvitationsOf(CurrentUserId, "Week");
             List<GoalInviteViewModel> sentInvitationsOFVMs = sentInvitationsOfUser
-             .Select(inv => new GoalInviteViewModel
-             {
-                 InvitationId = inv.Id,
-                 GoalDescription = _goalService.GetGoalDescription(inv.GoalId),
-                 CreatedAt = _goalService.GetCreatedAt(inv.GoalId),
-                 InvitedUsername = _socialService.GetUsername(inv.InvitedId),
-                 Status = _goalService.GetInvitationStatus(inv.GoalId, inv.InvitedId),
-                 ParentGoalDescription = _goalService.GetParentGoalDescription(inv.GoalId)
-
-             })    
-             .ToList();
+  .Select(inv => new GoalInviteViewModel
+  {
+      InvitationId = inv.Id,
+      GoalDescription = _goalService.GetGoalDescription(inv.GoalId),
+      CreatedAt = _goalService.GetCreatedAt(inv.GoalId),
+      InvitedUsername = _socialService.GetUsername(inv.InvitedId),
+      Status = _goalService.GetInvitationStatus(inv.GoalId, inv.InvitedId),
+      ParentGoalDescription = _goalService.GetParentGoalDescription(inv.GoalId),
+      GoalId = inv.GoalId,
+      TriggeredByUserId = inv.InvitedId
+  })
+  .ToList();
 
 
             GoalsPageViewModel pageModel = new GoalsPageViewModel
@@ -433,9 +437,6 @@ namespace BucketProject.UI.BucketProject.Controllers
             {
                 ViewBag.ErrorMessage = msg;
             }
-
-            
-
 
             return View(pageModel);
         }
@@ -988,7 +989,15 @@ namespace BucketProject.UI.BucketProject.Controllers
             return RedirectToAction("BucketList");
         }
 
-        
+        [HttpPost]
+        public IActionResult DismissNotification(int goalId, string notificationType, int triggeredByUserId)
+        {
+            int userId = _goalService.GetCurrentUserId();
+            _notificationService.DismissNotification(userId, goalId, notificationType, triggeredByUserId);
+            return RedirectToAction("WeekGoals");
+        }
+
+
     }
 }
 

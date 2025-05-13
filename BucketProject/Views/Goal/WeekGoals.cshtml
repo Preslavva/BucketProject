@@ -378,12 +378,14 @@
                 @foreach (var inv in Model.SentInvitations)
                 {
                     <li class="list-group-item mb-2 position-relative" id="invite-@inv.InvitationId">
-                        
-                        <button type="button"
-                                class="btn-close position-absolute top-0 end-0 m-2"
-                                aria-label="Close"
-                                onclick="document.getElementById('invite-@inv.InvitationId').remove();">
-                        </button>
+
+                        <form asp-action="DismissNotification" method="post" class="position-absolute top-0 end-0 m-2">
+                 
+                            <input type="hidden" name="goalId" value="@inv.GoalId" />
+                            <input type="hidden" name="notificationType" value="Invite" />
+                            <input type="hidden" name="triggeredByUserId" value="@inv.TriggeredByUserId" />
+                            <button type="submit" class="btn-close" aria-label="Dismiss invitation notification"></button>
+                        </form>
 
                         <div class="me-4">
                             <em>@inv.GoalDescription</em><br />
@@ -398,10 +400,10 @@
                                     </small>
                                 </div>
                             }
-
                         </div>
                     </li>
                 }
+
 
 
             </ul>
@@ -457,10 +459,3 @@
     
 </div>
 
-<script>
-    document.querySelectorAll('.invite-close').forEach(btn => {
-      btn.addEventListener('click', e => {
-        e.currentTarget.closest('li').remove();
-      });
-    });
-</script>

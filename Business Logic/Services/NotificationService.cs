@@ -71,7 +71,7 @@ namespace BucketProject.BLL.Business_Logic.Services
         }
         public List<Goal> GetSharedCompletionGoals()
         {
-            var username = _contextAccessor.HttpContext?.Session.GetString("Username");
+            string? username = _contextAccessor.HttpContext?.Session.GetString("Username");
             if (string.IsNullOrEmpty(username))
                 return new List<Goal>();
 
@@ -155,6 +155,10 @@ namespace BucketProject.BLL.Business_Logic.Services
             return grouped;
         }
 
+        public void DismissNotification(int userId, int goalId, string type, int triggeredByUserId)
+        {
+            _goalRepo.DismissNotification(userId, goalId, type, triggeredByUserId);
+        }
 
     }
 }

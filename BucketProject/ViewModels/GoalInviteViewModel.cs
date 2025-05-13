@@ -11,7 +11,8 @@ namespace BucketProject.UI.ViewModels.ViewModels
         public DateTime CreatedAt { get; set; }
         public string Status { get; set; }
         public string? ParentGoalDescription { get; set; }
-        
+        public int TriggeredByUserId { get; set; }
+        public int GoalId { get; set; }
 
 
     }

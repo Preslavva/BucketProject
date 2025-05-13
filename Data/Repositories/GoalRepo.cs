@@ -20,7 +20,9 @@ public class GoalRepo: Repository, IGoalRepo
 
     public int InsertGoal(int ownerUserId, GoalEntity goal)
     {
-        const string sql = @"
+        try
+        {
+            const string sql = @"
 INSERT INTO dbo.Goal
        (Category, Description, Type, Deadline, IsDeleted,
         CreatedAt, IsPostponed, ParentGoalId, OwnerId)
@@ -28,61 +30,83 @@ OUTPUT INSERTED.Id
 VALUES (@Category, @Description, @Type, @Deadline, @IsDeleted,
         @CreatedAt, @IsPostponed, @ParentGoalId, @OwnerId);";
 
-        using var conn = GetSqlConnection();
-        conn.Open();
+            using var conn = GetSqlConnection();
+            conn.Open();
 
-        using var cmd = new SqlCommand(sql, conn);
-        cmd.Parameters.AddWithValue("@Category", goal.Category.ToString());
-        cmd.Parameters.AddWithValue("@Description", goal.Description);
-        cmd.Parameters.AddWithValue("@Type", goal.Type.ToString());
-        cmd.Parameters.AddWithValue("@Deadline", goal.Deadline ?? (object)DBNull.Value);
-        cmd.Parameters.AddWithValue("@IsDeleted", goal.IsDeleted);
-        cmd.Parameters.AddWithValue("@CreatedAt", goal.CreatedAt);
-        cmd.Parameters.AddWithValue("@IsPostponed", goal.IsPostponed);
-        cmd.Parameters.AddWithValue("@ParentGoalId", goal.ParentGoalId ?? (object)DBNull.Value);
-        cmd.Parameters.AddWithValue("@OwnerId", ownerUserId);
+            using var cmd = new SqlCommand(sql, conn);
+            cmd.Parameters.AddWithValue("@Category", goal.Category.ToString());
+            cmd.Parameters.AddWithValue("@Description", goal.Description);
+            cmd.Parameters.AddWithValue("@Type", goal.Type.ToString());
+            cmd.Parameters.AddWithValue("@Deadline", goal.Deadline ?? (object)DBNull.Value);
+            cmd.Parameters.AddWithValue("@IsDeleted", goal.IsDeleted);
+            cmd.Parameters.AddWithValue("@CreatedAt", goal.CreatedAt);
+            cmd.Parameters.AddWithValue("@IsPostponed", goal.IsPostponed);
+            cmd.Parameters.AddWithValue("@ParentGoalId", goal.ParentGoalId ?? (object)DBNull.Value);
+            cmd.Parameters.AddWithValue("@OwnerId", ownerUserId);
 
-        int newId = (int)cmd.ExecuteScalar();
-        goal.Id = newId;                 
-        return newId;
+            int newId = (int)cmd.ExecuteScalar();
+            goal.Id = newId;
+            return newId;
+        }
+        catch (SqlException sqlEx)
+        {
+            _logger.LogError(sqlEx,
+                "SQL error in InsertGoal (OwnerUserId={ownerUserId}, GoalId={goal.Id})",
+                ownerUserId, goal.Id);
+
+            throw new Exception("A database error occurred while inserting a goal.", sqlEx);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex,
+              "SQL error in InsertGoal (OwnerUserId={ownerUserId}, GoalId={goal.Id})",
+              ownerUserId, goal.Id);
+
+            throw;
+        }
     }
 
     public void AssignUsersToGoal(int goalId, IEnumerable<int> userIds)
     {
         const string sql = @"
-INSERT INTO dbo.User_Goal (UserId, GoalId, IsDone, CompletedAt)
-VALUES (@UserId, @GoalId, @IsDone, @CompletedAt);
-";
+        INSERT INTO dbo.User_Goal (UserId, GoalId, IsDone, CompletedAt)
+        VALUES (@UserId, @GoalId, @IsDone, @CompletedAt);
+    ";
 
         using var conn = GetSqlConnection();
         conn.Open();
         using var tx = conn.BeginTransaction();
+
         try
         {
             using var cmd = new SqlCommand(sql, conn, tx);
 
             foreach (var userId in userIds.Distinct())
             {
-                cmd.Parameters.Clear();                              
+                cmd.Parameters.Clear();
                 cmd.Parameters.AddWithValue("@UserId", userId);
                 cmd.Parameters.AddWithValue("@GoalId", goalId);
-                cmd.Parameters.AddWithValue("@IsDone", false);           
-                cmd.Parameters.AddWithValue("@CompletedAt", DBNull.Value);  
+                cmd.Parameters.AddWithValue("@IsDone", false);
+                cmd.Parameters.AddWithValue("@CompletedAt", DBNull.Value);
 
                 cmd.ExecuteNonQuery();
             }
 
             tx.Commit();
         }
-        catch
+        catch (SqlException sqlEx)
         {
             tx.Rollback();
+            _logger.LogError(sqlEx, "SQL error in AssignUsersToGoal (GoalId={GoalId})", goalId);
+            throw new Exception("A database error occurred while assigning users to the goal.", sqlEx);
+        }
+        catch (Exception ex)
+        {
+            tx.Rollback();
+            _logger.LogError(ex, "Unexpected error in AssignUsersToGoal (GoalId={GoalId})", goalId);
             throw;
         }
     }
-
-
-
 
     public GoalEntity? GetGoalById(int goalId, int userId)
     {
@@ -151,7 +175,7 @@ WHERE g.Id = @GoalId;
         catch (SqlException sqlEx)
         {
             _logger.LogError(sqlEx,
-                "SQL error in GetGoalById (GoalId={GoalId}, UserId={UserId})",
+                "SQL error in GetGoalById (GoalId={goalId}, UserId={userId})",
                 goalId, userId);
 
             throw new Exception("A database error occurred while retrieving the goal.", sqlEx);
@@ -159,7 +183,7 @@ WHERE g.Id = @GoalId;
         catch (Exception ex)
         {
             _logger.LogError(ex,
-                "Unexpected error in GetGoalById (GoalId={GoalId}, UserId={UserId})",
+                "Unexpected error in GetGoalById (GoalId={goalId}, UserId={userId})",
                 goalId, userId);
 
             throw;
@@ -492,7 +516,6 @@ WHERE ug.UserId    = @UserId
         }
     }
 
-
     public void UpdateGoalDescription(GoalEntity goal)
     {
         try
@@ -816,7 +839,18 @@ WHERE
         WHERE 
             ug2.UserId = @CurrentUserId
             AND ug2.GoalId = ug.GoalId
-    );
+    )
+   AND NOT EXISTS (
+    SELECT 1
+    FROM DismissedNotifications dn
+    WHERE 
+        dn.UserId = @CurrentUserId
+        AND dn.GoalId = ug.GoalId
+        AND dn.NotificationType = 'Completion'
+        AND dn.TriggeredByUserId = ug.UserId
+)
+
+
 
 ";
 
@@ -891,13 +925,26 @@ SELECT
     u.Username     AS DeleterUsername,
     u.Picture      AS DeleterPicture
 
-FROM dbo.Goal        g
-JOIN dbo.User_Goal  ug ON ug.GoalId = g.Id
-    AND ug.UserId   = @CurrentUserId    
-JOIN dbo.[User]     u  ON u.UserId   = g.OwnerId
-WHERE g.IsDeleted    = 1                 
-  AND g.OwnerId     <> @CurrentUserId   
+FROM dbo.Goal g
+JOIN dbo.User_Goal ug ON ug.GoalId = g.Id
+    AND ug.UserId = @CurrentUserId    
+JOIN dbo.[User] u ON u.UserId = g.OwnerId
+WHERE 
+    g.IsDeleted = 1                 
+    AND g.OwnerId <> @CurrentUserId
+    AND (g.Deadline IS NULL OR g.Deadline >= CAST(GETDATE() AS DATE))
+    AND NOT EXISTS (
+        SELECT 1 
+        FROM dbo.DismissedNotifications dn
+        WHERE 
+            dn.UserId = @CurrentUserId
+            AND dn.GoalId = g.Id
+            AND dn.NotificationType = 'Deleted'
+            AND dn.TriggeredByUserId = g.OwnerId
+    );
+
 ";
+
 
         using var conn = GetSqlConnection();
         conn.Open();
@@ -946,7 +993,7 @@ WHERE g.IsDeleted    = 1
 
     public List<GoalEntity> LoadSharedPostponedGoals(int currentUserId)
     {
-        var list = new List<GoalEntity>();
+        List<GoalEntity> list = new List<GoalEntity>();
 
         const string sql = @"
 SELECT 
@@ -963,17 +1010,30 @@ SELECT
     g.OwnerId,
     g.IsPostponed,
 
-    u.UserId       AS DeleterId,
-    u.Username     AS DeleterUsername,
-    u.Picture      AS DeleterPicture
+    u.UserId       AS PostponerId,
+    u.Username     AS PostponerUsername,
+    u.Picture      AS PostponerPicture
 
-FROM dbo.Goal        g
-JOIN dbo.User_Goal  ug ON ug.GoalId = g.Id
-    AND ug.UserId   = @CurrentUserId    
-JOIN dbo.[User]     u  ON u.UserId   = g.OwnerId
-WHERE g.IsPostponed    = 1                 
-  AND g.OwnerId     <> @CurrentUserId   
-";
+FROM dbo.Goal g
+JOIN dbo.User_Goal ug ON ug.GoalId = g.Id
+    AND ug.UserId = @CurrentUserId    
+JOIN dbo.[User] u ON u.UserId = g.OwnerId
+WHERE 
+    g.IsPostponed = 1
+    AND g.OwnerId <> @CurrentUserId
+    AND (g.Deadline IS NULL OR g.Deadline >= CAST(GETDATE() AS DATE))
+    AND NOT EXISTS (
+        SELECT 1 
+        FROM dbo.DismissedNotifications dn
+        WHERE 
+            dn.UserId = @CurrentUserId
+            AND dn.GoalId = g.Id
+            AND dn.NotificationType = 'Postponed'
+            AND dn.TriggeredByUserId = g.OwnerId
+   
+
+    );";
+
 
         using var conn = GetSqlConnection();
         conn.Open();
@@ -1019,6 +1079,32 @@ WHERE g.IsPostponed    = 1
 
         return list;
     }
+
+    public void DismissNotification(int userId, int goalId, string type, int triggeredByUserId)
+    {
+        const string sql = @"
+        IF NOT EXISTS (
+            SELECT 1 FROM DismissedNotifications 
+            WHERE UserId = @UserId AND GoalId = @GoalId 
+              AND NotificationType = @Type AND TriggeredByUserId = @TriggeredByUserId
+        )
+        INSERT INTO DismissedNotifications (UserId, GoalId, NotificationType, TriggeredByUserId, DismissedAt)
+        VALUES (@UserId, @GoalId, @Type, @TriggeredByUserId, GETDATE());";
+
+        using var conn = GetSqlConnection();
+        conn.Open();
+
+        using var cmd = new SqlCommand(sql, conn);
+        cmd.Parameters.AddWithValue("@UserId", userId);
+        cmd.Parameters.AddWithValue("@GoalId", goalId);
+        cmd.Parameters.AddWithValue("@Type", type);
+        cmd.Parameters.AddWithValue("@TriggeredByUserId", triggeredByUserId);
+
+        cmd.ExecuteNonQuery();
+    }
+
+
+
 }
 
 

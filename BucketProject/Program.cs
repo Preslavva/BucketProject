@@ -2,22 +2,13 @@ using BucketProject.DAL.Data.InterfacesRepo;
 using BucketProject.BLL.Business_Logic.Services;
 using BucketProject.BLL.Business_Logic.InterfacesService;
 using BucketProject.UI.BucketProject.Mapping;
-
 using BucketProject.DAL.Data.Repositories;
 using BucketProject.BLL.Business_Logic.Mapping;
 using BucketProjetc.BLL.Business_Logic.InterfacesService;
 using BucketProject.Filters;
 
-
-
-
-
-
-
 var builder = WebApplication.CreateBuilder(args);
 
-
-// Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddSession();
 
@@ -53,8 +44,7 @@ builder.Services.AddScoped<GlobalExceptionFilter>();
 
 builder.Services
     .AddControllersWithViews(options =>
-    {
-        // Add the filter globally
+    { 
         options.Filters.AddService<GlobalExceptionFilter>();
     });
 

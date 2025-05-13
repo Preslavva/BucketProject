@@ -70,7 +70,6 @@ namespace BucketProject.BLL.Business_Logic.Services
                 throw new ValidationException("Username must be under 20 characters");
             }
 
-
             var (hash, salt) = _hasher.HashPassword(userDomain.Password);
             UserEntity entity = _mapper.Map<UserEntity>(userDomain);
             entity.SetPasswordAndSalt(hash, salt);
@@ -84,7 +83,6 @@ namespace BucketProject.BLL.Business_Logic.Services
 
             UserEntity user = _userRepo.GetUserByUsername(username);
             User userDomain = _mapper.Map<User>(user);
-
 
             return userDomain;
 

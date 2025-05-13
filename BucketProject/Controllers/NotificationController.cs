@@ -4,6 +4,7 @@ using BucketProject.BLL.Business_Logic.Domain;
 using BucketProject.BLL.Business_Logic.InterfacesService;
 using BucketProject.BLL.Business_Logic.Services;
 using BucketProject.BLL.Business_Logic.Strategies;
+using BucketProject.BLLBusiness_Logic.Domain;
 using BucketProject.UI.ViewModels.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 
@@ -22,25 +23,22 @@ namespace BucketProject.BLL.Business_Logic.Controllers
             _goalService = goalService;
             _mapper = mapper;
         }
-
         [HttpGet]
         public IActionResult Notification()
         {
             var username = HttpContext.Session.GetString("Username");
             ViewBag.Username = username;
-            ViewBag.CurrentUserId = _goalService.GetCurrentUserId();
+
+            int currentUserId = _goalService.GetCurrentUserId();
+            ViewBag.CurrentUserId = currentUserId;
 
             DateTime today = DateTime.Today;
-
             List<NotificationViewModel> notifications = new List<NotificationViewModel>();
 
+            // deadline notifications
             List<Goal> deadlineGoals = _notificationService.CheckAndNotify(today);
-            foreach (var goal in deadlineGoals)
+            foreach (Goal goal in deadlineGoals)
             {
-                
-                NotificationViewModel vm = _mapper.Map<NotificationViewModel>(goal);
-
-            
                 var ds = DeadlineStrategyDeterminator.GetStrategy(goal.Category);
                 var ns = NotificationStrategyManager.GetStrategy(goal.Category);
                 if (ds == null || ns == null)
@@ -50,56 +48,61 @@ namespace BucketProject.BLL.Business_Logic.Controllers
                 if (!dl.HasValue)
                     continue;
 
-                vm.Deadline = dl.Value;
+                NotificationViewModel vm = _mapper.Map<NotificationViewModel>(goal);
+                vm.TypeOfNotification = "Deadline";
                 vm.Message = ns.GetNotificationMessage(goal.Description, dl.Value);
+                vm.TriggeredByUserId = goal.Recipients.First().Id; 
+
 
                 notifications.Add(vm);
             }
 
-          
-            var completionGoals = _notificationService.GetSharedCompletionGoals();
-            foreach (var goal in completionGoals)
-            {
-                var vm = _mapper.Map<NotificationViewModel>(goal);
+            //completion notifications
 
-           
+            List<Goal> completionGoals = _notificationService.GetSharedCompletionGoals();
+            foreach (Goal goal in completionGoals)
+            {
+                NotificationViewModel vm = _mapper.Map<NotificationViewModel>(goal);
+                vm.TypeOfNotification = "Completion";
+                vm.TriggeredByUserId = goal.Recipients.First().Id; 
+
                 var completer = goal.Recipients.First();
                 var when = goal.CompletedAt?.ToString("MMMM dd, yyyy");
-
-                vm.Deadline = goal.CompletedAt ?? today;
+      
                 vm.Message = $"{completer.Username} completed the goal “{goal.Description}” on {when}.";
 
                 notifications.Add(vm);
             }
 
-            var deletedGoals = _notificationService.GetSharedDeletedGoals();
-            foreach (var goal in deletedGoals)
+            // deleted notifications
+            List<Goal> deletedGoals = _notificationService.GetSharedDeletedGoals();
+            foreach (Goal goal in deletedGoals)
             {
-                var vm = _mapper.Map<NotificationViewModel>(goal);
+                NotificationViewModel vm = _mapper.Map<NotificationViewModel>(goal);
+                vm.TypeOfNotification = "Deleted";
+                vm.Id = goal.Id;
+                vm.TriggeredByUserId = goal.Recipients.First().Id; 
 
 
-                var completer = goal.Recipients.First();
-             
-                vm.Message = $" The goal “{goal.Description}” was deleted";
-
+                vm.Message = $"The goal “{goal.Description}” was deleted.";
                 notifications.Add(vm);
             }
 
-            var postponedGoals = _notificationService.GetSharedPostponedGoals();
+            // postponed notifications
+            List<Goal> postponedGoals = _notificationService.GetSharedPostponedGoals();
             foreach (var goal in postponedGoals)
             {
-                var vm = _mapper.Map<NotificationViewModel>(goal);
+                NotificationViewModel vm = _mapper.Map<NotificationViewModel>(goal);
+                vm.TypeOfNotification = "Postponed";
+                vm.Id = goal.Id;
+                vm.TriggeredByUserId = goal.Recipients.First().Id; 
 
-
-                var completer = goal.Recipients.First();
-
-                vm.Message = $" The goal “{goal.Description}” was postponed";
-
+                vm.Message = $"The goal “{goal.Description}” was postponed.";
                 notifications.Add(vm);
             }
+
             return View(notifications);
         }
-
 
 
         [HttpPost]
@@ -108,6 +111,15 @@ namespace BucketProject.BLL.Business_Logic.Controllers
             _goalService.PostponeGoal(id);
             return RedirectToAction("Notification");
         }
+
+        [HttpPost]
+        public IActionResult DismissNotification(int goalId, string notificationType, int triggeredByUserId)
+        {
+            int userId = _goalService.GetCurrentUserId();
+            _notificationService.DismissNotification(userId, goalId, notificationType, triggeredByUserId);
+            return RedirectToAction("Notification");
+        }
+
 
     }
 }

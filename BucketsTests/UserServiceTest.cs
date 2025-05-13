@@ -91,7 +91,7 @@ namespace BucketsTests
             string username = "john";
             string password = "wrongpass";
 
-            var userEntity = new UserEntity(1, "john", "john@mail.com", "hashedPassword", new byte[] { 0x01 }, "salt", "nationality", DateTime.Now, "Gender", DateOnly.MaxValue, "Role");
+            UserEntity userEntity = new UserEntity(1, "john", "john@mail.com", "hashedPassword", new byte[] { 0x01 }, "salt", "nationality", DateTime.Now, "Gender", DateOnly.MaxValue, "Role");
 
             _userRepo.Setup(r => r.GetUserByUsername(username)).Returns(userEntity);
             _hasher.Setup(h => h.VerifyPassword(password, userEntity.Password, userEntity.Salt)).Returns(false);
@@ -128,7 +128,7 @@ namespace BucketsTests
             string newUsername = "  ";
             SetSession(oldUsername);
 
-            var userEntity = new UserEntity(1, oldUsername, "john@mail.com", "password", new byte[] { 0x01 }, "salt", "nationality", DateTime.Now, "Gender", DateOnly.MaxValue, "Role");
+            UserEntity userEntity = new UserEntity(1, oldUsername, "john@mail.com", "password", new byte[] { 0x01 }, "salt", "nationality", DateTime.Now, "Gender", DateOnly.MaxValue, "Role");
 
             _userRepo.Setup(r => r.GetUserByUsername(oldUsername)).Returns(userEntity);
 
@@ -149,7 +149,6 @@ namespace BucketsTests
 
             UserEntity userEntity = new UserEntity(1, oldUsername, "john@mail.com", "password", new byte[] { 0x01 }, "salt", "nationality", DateTime.Now, "Gender", DateOnly.MaxValue, "Role");
 
-
             SetSession(oldUsername);
 
             _userRepo.Setup(r => r.GetUserByUsername(oldUsername)).Returns(userEntity);
@@ -157,7 +156,6 @@ namespace BucketsTests
             _userService.UpdateUsername(newUsername);
 
             SetSession(newUsername);
-
 
             _userRepo.Verify(r => r.GetUserByUsername(oldUsername), Times.Once);
             _userRepo.Verify(r => r.UpdateName(userEntity, newUsername), Times.Once);
@@ -171,7 +169,7 @@ namespace BucketsTests
             string username = "username";
             SetSession(username);
 
-            var userEntity = new UserEntity(1, username);
+            UserEntity userEntity = new UserEntity(1, username);
             _userRepo.Setup(r => r.GetUserByUsername(username)).Returns(userEntity);
 
             byte[] imageBytes = Encoding.UTF8.GetBytes("photo-bytes");

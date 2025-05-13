@@ -28,4 +28,5 @@ namespace BucketProject.DAL.Data.InterfacesRepo;
     List<GoalEntity> LoadSharedGoalsCompletedByOthers(int currentUserId);
     List<GoalEntity> LoadSharedDeletedGoals(int currentUserId);
     List<GoalEntity> LoadSharedPostponedGoals(int currentUserId);
+    void DismissNotification(int userId, int goalId, string type, int triggeredByUserId);
 } 

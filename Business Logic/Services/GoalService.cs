@@ -53,7 +53,6 @@ namespace BucketProject.BLL.Business_Logic.Services
                 throw new UnauthorizedAccessException("You are not the owner of this goal.");
         }
 
-
         public void CreateGoal(Goal goalDomain, IEnumerable<int>? sharedWithUserIds)
         {
             if (string.IsNullOrWhiteSpace(goalDomain.Description))
@@ -90,8 +89,6 @@ namespace BucketProject.BLL.Business_Logic.Services
                 }
             }
         }
-
-
         public List<Goal> LoadPersonalGoalsByCategory(string category)
         {
             Enum.TryParse<Category>(category, true, out var parsedCategory);
@@ -148,8 +145,6 @@ namespace BucketProject.BLL.Business_Logic.Services
 
             _goalRepo.UpdateGoalDescription(entityGoal);
         }
-
-
 
 
         public void DeleteGoal(int goalId)

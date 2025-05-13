@@ -115,11 +115,20 @@ SELECT
     gi.Status,
     gi.CreatedAt
 FROM dbo.GoalInvitation AS gi
-JOIN dbo.Goal           AS g  ON g.Id = gi.GoalId
+JOIN dbo.Goal AS g ON g.Id = gi.GoalId
 WHERE gi.InviterId = @InviterId
-  AND g.Category  = @Category
-  AND gi.Status IN ('Pending', 'Declined')   
-ORDER BY gi.CreatedAt DESC;";
+  AND g.Category = @Category
+  AND gi.Status IN ('Pending', 'Declined')
+  AND NOT EXISTS (
+      SELECT 1 FROM dbo.DismissedNotifications dn
+      WHERE
+          dn.UserId = @InviterId
+          AND dn.GoalId = gi.GoalId
+          AND dn.NotificationType = 'Invite'
+          AND dn.TriggeredByUserId = gi.InvitedId
+  )
+ORDER BY gi.CreatedAt DESC;
+";
 
             var list = new List<GoalInvitation>();
             using var conn = GetSqlConnection();
@@ -156,7 +165,7 @@ WHERE  GoalId    = @GoalId
             conn.Open();
             using var cmd = new SqlCommand(sql, conn);
             cmd.Parameters.AddWithValue("@GoalId", goalId);
-            cmd.Parameters.AddWithValue("@InvitedId", invitedId);  // ← fixed
+            cmd.Parameters.AddWithValue("@InvitedId", invitedId); 
 
             object? result = cmd.ExecuteScalar();
             return result is string s ? s : null;

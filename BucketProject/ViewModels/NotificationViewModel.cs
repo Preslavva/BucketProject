@@ -17,5 +17,8 @@ namespace BucketProject.UI.ViewModels.ViewModels
         public string Message { get; set; }
         public int OwnerId { get; set; }
         public List<UserSummaryDTO>? Recipients { get; set; }
+        public string TypeOfNotification { get; set; } = string.Empty;
+        public int TriggeredByUserId { get; set; }
+
     }
 }
