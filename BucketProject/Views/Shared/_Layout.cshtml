@@ -26,16 +26,32 @@
                 <div class="container-fluid">
                     @if (string.IsNullOrEmpty(username))
                     {
-                        <a class="navbar-brand fw-bold" asp-area="" asp-controller="User" asp-action="LogIn">BucketProject</a>
+                        <a class="navbar-brand d-flex align-items-center" asp-controller="User" asp-action="LogIn">
+                            <img src="~/images/logo.png"
+                                 alt="Logo"
+                                 height="80"
+                                 class="d-inline-block me-2" />
+                        </a>
                     }
                     else if (role?.Equals("User", StringComparison.OrdinalIgnoreCase) == true)
                     {
-                        <a class="navbar-brand fw-bold" asp-area="" asp-controller="Home" asp-action="Index">BucketProject</a>
+                        <a class="navbar-brand d-flex align-items-center" asp-controller="Home" asp-action="Index">
+                            <img src="~/images/logo.png"
+                                 alt="Logo"
+                                 height="80"
+                                 class="d-inline-block me-2" />
+                        </a>
+
 
                     }
                     else if (role?.Equals("Manager", StringComparison.OrdinalIgnoreCase) == true)
                     {
-                        <a class="navbar-brand fw-bold" asp-area="" asp-controller="Manager" asp-action="Manager">BucketProject</a>
+                        <a class="navbar-brand d-flex align-items-center" asp-controller="Manager" asp-action="Manager">
+                            <img src="~/images/logo.png"
+                                 alt="Logo"
+                                 height="80"
+                                 class="d-inline-block me-2" />
+                        </a>
 
                     }
 
@@ -58,6 +74,7 @@
                       
                             else if (role?.Equals("User", StringComparison.OrdinalIgnoreCase) == true)
                             {
+                              
                                 <li class="nav-item">
                                     <a class="nav-link" asp-controller="Home" asp-action="Index">Home</a>
                                 </li>
