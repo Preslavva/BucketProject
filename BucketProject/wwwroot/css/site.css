@@ -189,6 +189,7 @@ label {
     font-size: 1rem;
     cursor: pointer;
     display: block;
+    margin: 4px;
 }
 
     .button:hover {
@@ -198,4 +199,45 @@ label {
 .text-danger {
     color: red;
     font-size: 0.875rem;
+}
+.account-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.account-form {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 8px;
+    width: 900px;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.profile-pic {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 50%;
+    margin-bottom: 1rem;
+}
+.align-right {
+    display: block;
+    margin-left: auto;
+}
+input[type="file"] {
+    background-color: #2c2c2c;
+    color: white;
+    padding: 0.75rem;
+    border: none;
+    border-radius: 6px;
+    text-align: center;
+    text-decoration: none;
+    font-size: 1rem;
+    cursor: pointer;
+    display: block;
 }
