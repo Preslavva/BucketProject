@@ -1,6 +1,6 @@
 ﻿using BucketProject.BLL.Business_Logic.Domain;
+using BucketProject.BLLBusiness_Logic.Domain;
 using BucketProject.DAL.Models.Entities;
-using BucketProject.DAL.Models.Enums;
 
 
 namespace BucketProject.BLL.Business_Logic.InterfacesService
@@ -19,11 +19,11 @@ namespace BucketProject.BLL.Business_Logic.InterfacesService
 
         Dictionary<string, Dictionary<string, Dictionary<string, List<Goal>>>> LoadGroupedExpiredGoals();
         Task<List<Goal>> BreakDownGoalAsync(int goalId);
-        List<GoalInvitation> GetPendingInvitations(int userId, string category);
+        List<GoalInviteDTO> GetPendingInvitations(int userId, string category);
         void RespondToInvitation(int invitationId, bool accept, int currentUserId);
         string GetGoalDescription(int goalId);
         int GetCurrentUserId();
-        List<GoalInvitation> GetInvitationsOf(int userId, string category);
+        List<GoalInviteDTO> GetInvitationsOf(int userId, string category);
 
         DateTime GetCreatedAt(int goalId);
         string GetInvitationStatus(int goalId, int invitedId);

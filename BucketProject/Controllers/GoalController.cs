@@ -380,7 +380,8 @@ namespace BucketProject.UI.BucketProject.Controllers
             }
 
 
-            List<GoalInvitation> pendingInvitations = _goalService.GetPendingInvitations(CurrentUserId, "Week");
+            List<GoalInviteDTO> pendingInvitations = _goalService.GetPendingInvitations(CurrentUserId, "Week");
+
 
             List<GoalInviteViewModel> pendingInvitationVMs = pendingInvitations
                 .Select(inv => new GoalInviteViewModel
@@ -395,7 +396,7 @@ namespace BucketProject.UI.BucketProject.Controllers
 
 
 
-            List<GoalInvitation> sentInvitationsOfUser = _goalService.GetInvitationsOf(CurrentUserId, "Week");
+            List<GoalInviteDTO> sentInvitationsOfUser = _goalService.GetInvitationsOf(CurrentUserId, "Week");
             List<GoalInviteViewModel> sentInvitationsOFVMs = sentInvitationsOfUser
   .Select(inv => new GoalInviteViewModel
   {
@@ -496,7 +497,7 @@ namespace BucketProject.UI.BucketProject.Controllers
             }
 
 
-            List<GoalInvitation> pendingInvitations = _goalService.GetPendingInvitations(CurrentUserId, "Year");
+            List<GoalInviteDTO> pendingInvitations = _goalService.GetPendingInvitations(CurrentUserId, "Year");
 
             List<GoalInviteViewModel> pendingInvitationVMs = pendingInvitations
                 .Select(inv => new GoalInviteViewModel
@@ -511,7 +512,7 @@ namespace BucketProject.UI.BucketProject.Controllers
 
 
 
-            List<GoalInvitation> sentInvitationsOfUser = _goalService.GetInvitationsOf(CurrentUserId, "Year");
+            List<GoalInviteDTO> sentInvitationsOfUser = _goalService.GetInvitationsOf(CurrentUserId, "Year");
             List<GoalInviteViewModel> sentInvitationsOFVMs = sentInvitationsOfUser
   .Select(inv => new GoalInviteViewModel
   {
@@ -580,7 +581,7 @@ namespace BucketProject.UI.BucketProject.Controllers
             }
 
 
-            List<GoalInvitation> pendingInvitations = _goalService.GetPendingInvitations(CurrentUserId, "BucketList");
+            List<GoalInviteDTO> pendingInvitations = _goalService.GetPendingInvitations(CurrentUserId, "BucketList");
 
             List<GoalInviteViewModel> pendingInvitationVMs = pendingInvitations
                 .Select(inv => new GoalInviteViewModel
@@ -595,7 +596,7 @@ namespace BucketProject.UI.BucketProject.Controllers
 
 
 
-            List<GoalInvitation> sentInvitationsOfUser = _goalService.GetInvitationsOf(CurrentUserId, "BucketList");
+            List<GoalInviteDTO> sentInvitationsOfUser = _goalService.GetInvitationsOf(CurrentUserId, "BucketList");
             List<GoalInviteViewModel> sentInvitationsOFVMs = sentInvitationsOfUser
   .Select(inv => new GoalInviteViewModel
   {
@@ -663,7 +664,7 @@ namespace BucketProject.UI.BucketProject.Controllers
             }
 
 
-            List<GoalInvitation> pendingInvitations = _goalService.GetPendingInvitations(CurrentUserId, "Month");
+            List<GoalInviteDTO> pendingInvitations = _goalService.GetPendingInvitations(CurrentUserId, "Month");
 
             List<GoalInviteViewModel> pendingInvitationVMs = pendingInvitations
                 .Select(inv => new GoalInviteViewModel
@@ -676,7 +677,7 @@ namespace BucketProject.UI.BucketProject.Controllers
                 .ToList();
 
 
-            List<GoalInvitation> sentInvitationsOfUser = _goalService.GetInvitationsOf(CurrentUserId, "Month");
+            List<GoalInviteDTO> sentInvitationsOfUser = _goalService.GetInvitationsOf(CurrentUserId, "Month");
             List<GoalInviteViewModel> sentInvitationsOFVMs = sentInvitationsOfUser
   .Select(inv => new GoalInviteViewModel
   {

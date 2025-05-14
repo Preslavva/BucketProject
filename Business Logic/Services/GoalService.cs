@@ -296,13 +296,18 @@ namespace BucketProject.BLL.Business_Logic.Services
             return subGoals;
         }
 
-        public List<GoalInvitation> GetPendingInvitations(int userId, string category)
+        public List<GoalInviteDTO> GetPendingInvitations(int userId, string category)
         {
-              return _inviteRepo.GetPendingFor(userId, category);
+            List<GoalInvitation> entities = _inviteRepo.GetPendingFor(userId, category);
+            List<GoalInviteDTO> domains = _mapper.Map<List<GoalInviteDTO>>(entities);
+            return domains;
         }
-        public List<GoalInvitation> GetInvitationsOf(int userId, string category)
+        public List<GoalInviteDTO> GetInvitationsOf(int userId, string category)
         {
-            return _inviteRepo.GetInvitationsOf(userId, category);
+
+            List<GoalInvitation> entities = _inviteRepo.GetInvitationsOf(userId, category);
+            List<GoalInviteDTO> domains = _mapper.Map<List<GoalInviteDTO>>(entities);
+            return domains;
         }
 
         public void RespondToInvitation(int invitationId, bool accept, int currentUserId)

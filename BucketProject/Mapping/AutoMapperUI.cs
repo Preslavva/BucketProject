@@ -37,6 +37,7 @@ namespace BucketProject.UI.BucketProject.Mapping
     .ForMember(dest => dest.Category, opt => opt.MapFrom(src => src.Category.ToString()))
     .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id));
 
+
         }
     }
 }

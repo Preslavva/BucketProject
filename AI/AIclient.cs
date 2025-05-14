@@ -20,9 +20,11 @@ public class AIClient : IAIClient
     {
         string prompt = $@"Break down the following goal into 4 smaller, actionable sub-goals:
 ""{description}""
-Take into consideration that this is a goal supposed to be accomplished in the span of a {category.ToString().ToLower()}.
-Write each sub-goal as a plain sentence, one after another.
-Do not number them, do not use bullets, dashes, or any formatting. Just return four plain sentences separated by line breaks. Generate unique goals every time";
+Take into consideration that this goal is meant to be accomplished within a {category.ToString().ToLower()} timeframe.
+Write each sub-goal as a plain sentence.    
+Do not number them, do not use bullets, dashes, or any formatting.
+Return exactly four plain sentences, each separated by a line break.
+Ensure the sub-goals are unique and tailored to the main goal every time you generate them";
 
 
         var client = _httpClientFactory.CreateClient();
