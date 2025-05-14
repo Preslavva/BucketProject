@@ -257,7 +257,6 @@ namespace BucketProject.BLL.Business_Logic.Services
         }
 
 
-
         private void AddToGroup(
      Dictionary<string, Dictionary<string, Dictionary<string, List<Goal>>>> group,
      string category,
@@ -343,8 +342,6 @@ namespace BucketProject.BLL.Business_Logic.Services
             string? description = _inviteRepo.GetParentGoalDescription(subGoalId);
             return description;
         }
-       
-       
     }
 
 }

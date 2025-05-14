@@ -3,6 +3,13 @@
 
 <h2>Bucket List</h2>
 
+@if (!string.IsNullOrEmpty(ViewBag.ErrorMessage as string))
+{
+    <div class="alert alert-danger">
+        @ViewBag.ErrorMessage
+    </div>
+}
+
 @{
     var brokenDownGoals = TempData["SubGoals"] != null
         ? JsonConvert.DeserializeObject<List<GoalViewModel>>(TempData["SubGoals"].ToString())
@@ -13,6 +20,7 @@
     if (!string.IsNullOrEmpty(subGoalForId))
         TempData["SubGoalForId"] = subGoalForId;
 }
+
 
 <form method="post" asp-controller="Goal" asp-action="CreateBucketListGoal">
     <div class="input-container">
@@ -69,16 +77,15 @@
 </form>
 
 <hr />
-
 <ul class="nav nav-tabs mb-4" role="tablist">
     <li class="nav-item" role="presentation">
         <button class="nav-link active" id="personal-tab" data-bs-toggle="tab" data-bs-target="#personal" type="button">
-            Personal (@Model.Goals.Count)
+            Personal (@Model.TotalPersonal)
         </button>
     </li>
     <li class="nav-item" role="presentation">
         <button class="nav-link" id="shared-tab" data-bs-toggle="tab" data-bs-target="#shared" type="button">
-            Shared (@Model.SharedGoals.Count)
+            Shared (@Model.TotalShared)
         </button>
     </li>
     </li>
@@ -88,6 +95,7 @@
         </button>
     </li>
 </ul>
+
 
 <div class="tab-content">
 
@@ -103,11 +111,7 @@
         {
             <div class="goal-item mb-3 p-2 border">
 
-                <form method="post" asp-action="EditBucketListGoal" style="display:inline;">
-                    <input type="hidden" name="Id" value="@goal.Id" />
-                    <input type="text" name="Description" value="@goal.Description" required />
-                    <button type="submit">Edit</button>
-                </form>
+
                 <form method="post" asp-action="ChangeGoalStatusBucketList" style="display:inline; margin-left:10px;">
                     <input type="hidden" name="Id" value="@goal.Id" />
                     <label>
@@ -118,14 +122,30 @@
                         Done
                     </label>
                 </form>
-                <form method="post" asp-action="DeleteGoalBucketList" style="display:inline; margin-left:10px;">
+
+                <form method="post" asp-action="EditBucketListGoal" style="display:inline;">
                     <input type="hidden" name="Id" value="@goal.Id" />
-                    <button type="submit">Delete</button>
+                    <input type="text" name="Description" value="@goal.Description" />
+                    <button type="submit">Edit</button>
                 </form>
+
+
+                <form method="post" asp-action="DeleteGoalBucketList" style="display:inline; margin-left:10px;"
+                      onsubmit="return confirm('Are you sure you want to delete this goal?');">
+                    <input type="hidden" name="Id" value="@goal.Id" />
+                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                </form>
+
                 <form method="post" asp-action="BreakDownGoalBucketList" asp-controller="Goal" style="display:inline; margin-left:10px;">
                     <input type="hidden" name="id" value="@goal.Id" />
                     <button type="submit">Break Down</button>
                 </form>
+                @if (goal.IsDone && goal.CompletedAt.HasValue)
+                {
+                    <span class="ml-2 text-muted">
+                        Completed on @goal.CompletedAt.Value.ToString("MMMM dd, yyyy")
+                    </span>
+                }
 
                 @if (subGoalForId == goal.Id.ToString() && brokenDownGoals.Any())
                 {
@@ -150,6 +170,7 @@
                     </div>
                 }
 
+
                 @if (goal.Children?.Any() == true)
                 {
                     <div class="ms-4 mt-2 border-start ps-3">
@@ -161,7 +182,7 @@
                                     <input type="text" name="Description" value="@sub.Description" required />
                                     <button type="submit">Save</button>
                                 </form>
-                                <form method="post" asp-action="ChangeGoalStatusBcuketList" style="display:inline; margin-left:10px;">
+                                <form method="post" asp-action="ChangeGoalStatusBucketList" style="display:inline; margin-left:10px;">
                                     <input type="hidden" name="Id" value="@sub.Id" />
                                     <label>
                                         <input type="checkbox"
@@ -171,10 +192,17 @@
                                         Done
                                     </label>
                                 </form>
-                                <form method="post" asp-action="DeleteGoalBucketList" style="display:inline; margin-left:10px;">
-                                    <input type="hidden" name="Id" value="@sub.Id" />
-                                    <button type="submit">Delete</button>
+                                <form method="post" asp-action="DeleteGoalBucketList" style="display:inline; margin-left:10px;"
+                                      onsubmit="return confirm('Are you sure you want to delete this goal?');">
+                                    <input type="hidden" name="Id" value="@goal.Id" />
+                                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
                                 </form>
+                                @if (sub.IsDone && sub.CompletedAt.HasValue)
+                                {
+                                    <span class="ml-2 text-muted">
+                                        Completed on @goal.CompletedAt.Value.ToString("MMMM dd, yyyy")
+                                    </span>
+                                }
                             </div>
                         }
                     </div>
@@ -200,19 +228,46 @@
             {
                 <div class="goal-item mb-3 p-2 border">
 
-                    <form method="post" asp-action="ChangeGoalStatusBucketList" style="display:inline;">
+                    <form method="post" asp-action="ChangeGoalStatusBucketList" class="d-inline">
                         <input type="hidden" name="Id" value="@goal.Id" />
-                        <label>
-                            <input type="checkbox"
-                                   name="isDone"
-                                   value="true"
-                            @(goal.IsDone ? "checked" : "")
-                                   onchange="this.form.submit()" />
-                            Done
-                        </label>
+                        <input type="checkbox" name="isDone" value="true" class="form-check-input" @(goal.IsDone ? "checked" : "") onchange="this.form.submit()" />
+                        Done
                     </form>
 
-                    <span class="mx-2">@goal.Description</span>
+
+
+                    @if (goal.OwnerId == ViewBag.CurrentUserId)
+                    {
+
+
+                        <form method="post" asp-action="EditBucketListGoal" class="d-inline ms-2">
+                            <input type="hidden" name="Id" value="@goal.Id" />
+                            <input type="text" name="Description" value="@goal.Description" required />
+                            <button type="submit" class="btn btn-sm btn-outline-secondary">Edit</button>
+                        </form>
+
+                        <form method="post" asp-action="DeleteGoalBucketList" style="display:inline; margin-left:10px;"
+                              onsubmit="return confirm('Are you sure you want to delete this goal?');">
+                            <input type="hidden" name="Id" value="@goal.Id" />
+                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                        </form>
+
+                        <form method="post" asp-action="BreakDownGoalBucketList" class="d-inline ms-2">
+                            <input type="hidden" name="id" value="@goal.Id" />
+                            <button type="submit" class="btn btn-sm btn-outline-warning">Break Down</button>
+                        </form>
+                    }
+                    else
+                    {
+                        <span class="mx-2">@goal.Description</span>
+                    }
+
+                    @if (goal.IsDone && goal.CompletedAt.HasValue)
+                    {
+                        <span class="ml-2 text-muted">
+                            Completed on @goal.CompletedAt.Value.ToString("MMMM dd, yyyy")
+                        </span>
+                    }
 
                     <div class="mt-2">
                         <strong>Also shared with:</strong>
@@ -225,16 +280,12 @@
                             <ul class="list-inline mb-0">
                                 @foreach (var u in goal.Recipients)
                                 {
-
                                     var imgSrc = u.Picture != null
                                     ? $"data:image/jpeg;base64,{Convert.ToBase64String(u.Picture)}"
                                     : Url.Content("~/images/default-avatar.png");
 
                                     <li class="list-inline-item text-center me-2">
-                                        <img src="@imgSrc"
-                                             alt="@u.Username"
-                                             class="rounded-circle mb-1"
-                                             style="width:32px; height:32px;" />
+                                        <img src="@imgSrc" alt="@u.Username" class="rounded-circle mb-1" style="width:32px; height:32px;" />
                                         <br />
                                         <small>@u.Username</small>
                                     </li>
@@ -243,9 +294,126 @@
                         }
                     </div>
 
+
+                    @if (goal.OwnerId == ViewBag.CurrentUserId)
+                    {
+                        @if (subGoalForId == goal.Id.ToString() && brokenDownGoals.Any())
+                        {
+                            <div class="mt-2 p-2 bg-light">
+                                @foreach (var sub in brokenDownGoals)
+                                {
+                                    <div class="d-flex align-items-center mb-1">
+                                        <form method="post" asp-action="CreateBucketListGoal" class="d-flex me-2">
+                                            <input type="text" name="Description" value="@sub.Description" required />
+                                            <input type="hidden" name="OriginalDescription" value="@sub.Description" />
+                                            <input type="hidden" name="Category" value="Week" />
+                                            <input type="hidden" name="Type" value="@goal.Type" />
+                                            <input type="hidden" name="ParentGoalId" value="@goal.Id" />
+                                            @if (goal.Recipients != null)
+                                            {
+                                                @foreach (var friend in goal.Recipients)
+                                                {
+                                                    <input type="hidden" name="friendIds[]" value="@friend.Id" />
+                                                }
+                                            }
+                                            <button type="submit">Add</button>
+                                        </form>
+                                        <form method="post" asp-action="RemoveSubGoalFromBreakdownBucketList">
+                                            <input type="hidden" name="description" value="@sub.Description" />
+                                            <button type="submit">Remove</button>
+                                        </form>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    }
+
+                    @if (goal.Children?.Any() == true)
+                    {
+                        <div class="ms-4 mt-2 border-start ps-3">
+                            @foreach (var sub in goal.Children)
+                            {
+                                <div class="mb-1">
+                                    <form method="post" asp-action="ChangeGoalStatusBucketList" class="d-inline">
+                                        <input type="hidden" name="Id" value="@sub.Id" />
+                                        <input type="checkbox" name="isDone" value="true" class="form-check-input" @(sub.IsDone ? "checked" : "") onchange="this.form.submit()" />
+                                    </form>
+
+                                    @if (sub.OwnerId == ViewBag.CurrentUserId)
+                                    {
+                                        <form method="post" asp-action="EditBucketListGoal" class="d-inline ms-2">
+                                            <input type="hidden" name="Id" value="@sub.Id" />
+                                            <input type="text" name="Description" value="@sub.Description" required class="form-control form-control-sm d-inline-block w-auto" />
+                                            <button class="btn btn-sm btn-outline-secondary">Save</button>
+                                        </form>
+                                        <form method="post" asp-action="DeleteGoalBucketList" style="display:inline; margin-left:10px;"
+                                              onsubmit="return confirm('Are you sure you want to delete this goal?');">
+                                            <input type="hidden" name="Id" value="@goal.Id" />
+                                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        <span class="ms-2">@sub.Description</span>
+                                    }
+                                </div>
+
+                                @if (sub.IsDone && sub.CompletedAt.HasValue)
+                                {
+                                    <span class="ml-2 text-muted">
+                                        Completed on @sub.CompletedAt.Value.ToString("MMMM dd, yyyy")
+                                    </span>
+                                }
+                            }
+                        </div>
+                    }
+
+
                 </div>
             }
 
+
+        }
+        <hr />
+        <br />
+        <h5>Invitations You’ve Sent</h5>
+        @if (!Model.SentInvitations.Any())
+        {
+            <p class="text-muted">No sent invitations.</p>
+        }
+        else
+        {
+            <ul class="list-group">
+                @foreach (var inv in Model.SentInvitations)
+                {
+                    <li class="list-group-item mb-2 position-relative" id="invite-@inv.InvitationId">
+
+                        <form asp-action="DismissNotificationBucketList" method="post" class="position-absolute top-0 end-0 m-2">
+
+                            <input type="hidden" name="goalId" value="@inv.GoalId" />
+                            <input type="hidden" name="notificationType" value="Invite" />
+                            <input type="hidden" name="triggeredByUserId" value="@inv.TriggeredByUserId" />
+                            <button type="submit" class="btn-close" aria-label="Dismiss invitation notification"></button>
+                        </form>
+
+                        <div class="me-4">
+                            <em>@inv.GoalDescription</em><br />
+                            <small>sent @inv.CreatedAt.ToShortDateString()</small>
+                            <small class="ms-3">@inv.Status</small>
+                            <small class="ms-3">@inv.InvitedUsername</small>
+                            @if (!string.IsNullOrEmpty(inv.ParentGoalDescription))
+                            {
+                                <div>
+                                    <small class="text-muted">
+                                        Parent goal: @inv.ParentGoalDescription
+                                    </small>
+                                </div>
+                            }
+                        </div>
+                    </li>
+                }
+
+            </ul>
         }
     </div>
     <div class="tab-pane fade" id="invites" role="tabpanel">
@@ -266,6 +434,15 @@
                         <div>
                             <strong>@inv.InviterUsername</strong> invited you to:<br />
                             <em>@inv.GoalDescription</em>
+                            @if (!string.IsNullOrEmpty(inv.ParentGoalDescription))
+                            {
+                                <div>
+                                    <small class="text-muted">
+                                        Parent goal: @inv.ParentGoalDescription
+                                    </small>
+                                </div>
+                            }
+
                         </div>
                         <div class="d-flex">
                             <form method="post" asp-action="RespondInvitationBucketList" class="me-1">
@@ -283,6 +460,9 @@
                 }
             </ul>
         }
+
+
     </div>
 
 </div>
+

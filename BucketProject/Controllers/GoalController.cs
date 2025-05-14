@@ -554,8 +554,8 @@ namespace BucketProject.UI.BucketProject.Controllers
         public IActionResult BucketList()
         {
 
-            List<Goal> personalDomains = _goalService.LoadPersonalGoalsByCategory("BucketList");
-            List<Goal> sharedDomains = _goalService.LoadSharedGoalsByCategory("BucketList");
+            List<Goal> personalDomains = _goalService.LoadPersonalGoalsByCategory("Bucket_list");
+            List<Goal> sharedDomains = _goalService.LoadSharedGoalsByCategory("Bucket_list");
 
             List<GoalViewModel> personalVMs = _mapper.Map<List<GoalViewModel>>(personalDomains);
             List<GoalViewModel> sharedVMs = _mapper.Map<List<GoalViewModel>>(sharedDomains);
@@ -581,7 +581,7 @@ namespace BucketProject.UI.BucketProject.Controllers
             }
 
 
-            List<GoalInviteDTO> pendingInvitations = _goalService.GetPendingInvitations(CurrentUserId, "BucketList");
+            List<GoalInviteDTO> pendingInvitations = _goalService.GetPendingInvitations(CurrentUserId, "Bucket_list");
 
             List<GoalInviteViewModel> pendingInvitationVMs = pendingInvitations
                 .Select(inv => new GoalInviteViewModel
@@ -596,7 +596,7 @@ namespace BucketProject.UI.BucketProject.Controllers
 
 
 
-            List<GoalInviteDTO> sentInvitationsOfUser = _goalService.GetInvitationsOf(CurrentUserId, "BucketList");
+            List<GoalInviteDTO> sentInvitationsOfUser = _goalService.GetInvitationsOf(CurrentUserId, "Bucket_list");
             List<GoalInviteViewModel> sentInvitationsOFVMs = sentInvitationsOfUser
   .Select(inv => new GoalInviteViewModel
   {
