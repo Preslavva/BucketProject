@@ -13,11 +13,12 @@ namespace BucketProject.BLL.Business_Logic.Controllers
 {
     public class NotificationController : Controller
     {
-        private readonly NotificationService _notificationService;
+        
         private readonly GoalService _goalService;
         private readonly IMapper _mapper;
+        private readonly INotificationService _notificationService;
 
-        public NotificationController(NotificationService notificationService, GoalService goalService, IMapper mapper)
+        public NotificationController(INotificationService notificationService, GoalService goalService, IMapper mapper)
         {
             _notificationService = notificationService;
             _goalService = goalService;
@@ -100,6 +101,8 @@ namespace BucketProject.BLL.Business_Logic.Controllers
                 vm.Message = $"The goal “{goal.Description}” was postponed.";
                 notifications.Add(vm);
             }
+
+            TempData["NotificationCount"] = notifications.Count;
 
             return View(notifications);
         }

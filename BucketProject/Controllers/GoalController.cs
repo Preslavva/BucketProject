@@ -20,12 +20,9 @@ namespace BucketProject.UI.BucketProject.Controllers
         private readonly IConfiguration _configuration;
         private readonly ISocialService _socialService;
         private readonly IUserService _userService;
-        private readonly NotificationService _notificationService;
+        private readonly INotificationService _notificationService;
 
-
-
-
-        public GoalController(IGoalService goalService, IMapper mapper, IConfiguration configuration, ISocialService socialService, IUserService userService, NotificationService notificationService)
+        public GoalController(IGoalService goalService, IMapper mapper, IConfiguration configuration, ISocialService socialService, IUserService userService, INotificationService notificationService)
         {
             _goalService = goalService;
             _mapper = mapper;

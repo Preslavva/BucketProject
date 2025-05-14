@@ -26,7 +26,7 @@ builder.Services.AddScoped<ISocialService, SocialService>();
 
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 
-builder.Services.AddScoped<NotificationService>();
+builder.Services.AddScoped<INotificationService,NotificationService>();
 builder.Services.AddScoped<GoalService>();
 
 builder.Services.AddScoped<IUserRepo, UserRepo>();

@@ -83,7 +83,21 @@
                                     <a class="nav-link dropdown-toggle" href="#" id="accountMenu" role="button" data-bs-toggle="dropdown" aria-expanded="false">Account</a>
                                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="accountMenu">
                                         <li><a class="dropdown-item" asp-controller="User" asp-action="Account">Profile</a></li>
-                                        <li><a class="dropdown-item" asp-controller="Notification" asp-action="Notification">Notifications</a></li>
+                                        <li>
+                                            <a class="dropdown-item d-flex justify-content-between align-items-center" asp-controller="Notification" asp-action="Notification">
+                                                Notifications
+                                                @if (TempData.Peek("NotificationCount") != null &&
+                                               int.TryParse(TempData.Peek("NotificationCount").ToString(), out int notificationCount) &&
+                                               notificationCount > 0)
+                                                {
+                                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                                        @notificationCount
+                                                    </span>
+                                                }
+
+                                            </a>
+                                        </li>
+
                                         <li><hr class="dropdown-divider" /></li>
                                         <li><a class="dropdown-item text-danger" asp-controller="User" asp-action="LogOut">Log out</a></li>
                                     </ul>

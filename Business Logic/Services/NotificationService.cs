@@ -7,10 +7,11 @@ using BucketProject.DAL.Data.InterfacesRepo;
 using BucketProject.DAL.Models.Entities;
 using Microsoft.AspNetCore.Http;
 using AutoMapper;
+using BucketProject.BLL.Business_Logic.InterfacesService;
 
 namespace BucketProject.BLL.Business_Logic.Services
 {
-    public class NotificationService
+    public class NotificationService: INotificationService
     {
 
         private readonly IHttpContextAccessor _contextAccessor;
