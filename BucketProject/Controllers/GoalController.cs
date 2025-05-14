@@ -249,8 +249,6 @@ namespace BucketProject.UI.BucketProject.Controllers
         }
 
 
-
-
         [HttpPost]
         public IActionResult EditWeekGoal(GoalViewModel viewModel)
         {
@@ -349,9 +347,6 @@ namespace BucketProject.UI.BucketProject.Controllers
             _goalService.DeleteGoal(id);
             return RedirectToAction("BucketList");
         }
-
-
-
 
     
         [HttpGet]
@@ -480,7 +475,6 @@ namespace BucketProject.UI.BucketProject.Controllers
             List<GoalViewModel> personalVMs = _mapper.Map<List<GoalViewModel>>(personalDomains);
             List<GoalViewModel> sharedVMs = _mapper.Map<List<GoalViewModel>>(sharedDomains);
 
-   
             List<GoalViewModel> personalParents = personalVMs
                 .Where(g => g.ParentGoalId == null)
                 .ToList();
@@ -500,6 +494,7 @@ namespace BucketProject.UI.BucketProject.Controllers
                     .Where(c => c.ParentGoalId == p.Id)
                     .ToList();
             }
+
 
             List<GoalInvitation> pendingInvitations = _goalService.GetPendingInvitations(CurrentUserId, "Year");
 
@@ -508,21 +503,48 @@ namespace BucketProject.UI.BucketProject.Controllers
                 {
                     InvitationId = inv.Id,
                     GoalDescription = _goalService.GetGoalDescription(inv.GoalId),
-                    InviterUsername = _socialService.GetUsername(inv.InviterId)
+                    InviterUsername = _socialService.GetUsername(inv.InviterId),
+                    ParentGoalDescription = _goalService.GetParentGoalDescription(inv.GoalId)
                 })
                 .ToList();
 
-            
+
+
+
+            List<GoalInvitation> sentInvitationsOfUser = _goalService.GetInvitationsOf(CurrentUserId, "Year");
+            List<GoalInviteViewModel> sentInvitationsOFVMs = sentInvitationsOfUser
+  .Select(inv => new GoalInviteViewModel
+  {
+      InvitationId = inv.Id,
+      GoalDescription = _goalService.GetGoalDescription(inv.GoalId),
+      CreatedAt = _goalService.GetCreatedAt(inv.GoalId),
+      InvitedUsername = _socialService.GetUsername(inv.InvitedId),
+      Status = _goalService.GetInvitationStatus(inv.GoalId, inv.InvitedId),
+      ParentGoalDescription = _goalService.GetParentGoalDescription(inv.GoalId),
+      GoalId = inv.GoalId,
+      TriggeredByUserId = inv.InvitedId
+  })
+  .ToList();
+
+
             GoalsPageViewModel pageModel = new GoalsPageViewModel
             {
                 Goals = personalParents,
                 SharedGoals = sharedParents,
-                PendingInvitations = pendingInvitationVMs
+                PendingInvitations = pendingInvitationVMs,
+                SentInvitations = sentInvitationsOFVMs
+
             };
 
-           
             ViewBag.AvailableTypes = GetAvailableTypes();
             ViewBag.Friends = _socialService.GetFriends(CurrentUserId);
+            ViewBag.CurrentUserId = _goalService.GetCurrentUserId();
+
+            if (TempData.TryGetValue("ErrorMessage", out var obj)
+       && obj is string msg && !string.IsNullOrEmpty(msg))
+            {
+                ViewBag.ErrorMessage = msg;
+            }
 
             return View(pageModel);
         }
@@ -531,13 +553,12 @@ namespace BucketProject.UI.BucketProject.Controllers
         public IActionResult BucketList()
         {
 
-            List<Goal> personalDomains = _goalService.LoadPersonalGoalsByCategory("Bucket_list");
-            List<Goal> sharedDomains = _goalService.LoadSharedGoalsByCategory("Bucket_list");
+            List<Goal> personalDomains = _goalService.LoadPersonalGoalsByCategory("BucketList");
+            List<Goal> sharedDomains = _goalService.LoadSharedGoalsByCategory("BucketList");
 
             List<GoalViewModel> personalVMs = _mapper.Map<List<GoalViewModel>>(personalDomains);
             List<GoalViewModel> sharedVMs = _mapper.Map<List<GoalViewModel>>(sharedDomains);
 
-         
             List<GoalViewModel> personalParents = personalVMs
                 .Where(g => g.ParentGoalId == null)
                 .ToList();
@@ -548,7 +569,6 @@ namespace BucketProject.UI.BucketProject.Controllers
                     .ToList();
             }
 
-          
             List<GoalViewModel> sharedParents = sharedVMs
                 .Where(g => g.ParentGoalId == null)
                 .ToList();
@@ -560,31 +580,59 @@ namespace BucketProject.UI.BucketProject.Controllers
             }
 
 
-            List<GoalInvitation> pendingInvitations = _goalService.GetPendingInvitations(CurrentUserId, "Bucket_list");
-
+            List<GoalInvitation> pendingInvitations = _goalService.GetPendingInvitations(CurrentUserId, "BucketList");
 
             List<GoalInviteViewModel> pendingInvitationVMs = pendingInvitations
                 .Select(inv => new GoalInviteViewModel
                 {
                     InvitationId = inv.Id,
                     GoalDescription = _goalService.GetGoalDescription(inv.GoalId),
-                    InviterUsername = _socialService.GetUsername(inv.InviterId)
+                    InviterUsername = _socialService.GetUsername(inv.InviterId),
+                    ParentGoalDescription = _goalService.GetParentGoalDescription(inv.GoalId)
                 })
                 .ToList();
 
-        
+
+
+
+            List<GoalInvitation> sentInvitationsOfUser = _goalService.GetInvitationsOf(CurrentUserId, "BucketList");
+            List<GoalInviteViewModel> sentInvitationsOFVMs = sentInvitationsOfUser
+  .Select(inv => new GoalInviteViewModel
+  {
+      InvitationId = inv.Id,
+      GoalDescription = _goalService.GetGoalDescription(inv.GoalId),
+      CreatedAt = _goalService.GetCreatedAt(inv.GoalId),
+      InvitedUsername = _socialService.GetUsername(inv.InvitedId),
+      Status = _goalService.GetInvitationStatus(inv.GoalId, inv.InvitedId),
+      ParentGoalDescription = _goalService.GetParentGoalDescription(inv.GoalId),
+      GoalId = inv.GoalId,
+      TriggeredByUserId = inv.InvitedId
+  })
+  .ToList();
+
+
             GoalsPageViewModel pageModel = new GoalsPageViewModel
             {
                 Goals = personalParents,
                 SharedGoals = sharedParents,
-                PendingInvitations = pendingInvitationVMs
+                PendingInvitations = pendingInvitationVMs,
+                SentInvitations = sentInvitationsOFVMs
+
             };
 
             ViewBag.AvailableTypes = GetAvailableTypes();
             ViewBag.Friends = _socialService.GetFriends(CurrentUserId);
+            ViewBag.CurrentUserId = _goalService.GetCurrentUserId();
+
+            if (TempData.TryGetValue("ErrorMessage", out var obj)
+       && obj is string msg && !string.IsNullOrEmpty(msg))
+            {
+                ViewBag.ErrorMessage = msg;
+            }
 
             return View(pageModel);
         }
+
         [HttpGet]
         public IActionResult MonthGoals()
         {
@@ -614,6 +662,7 @@ namespace BucketProject.UI.BucketProject.Controllers
                     .ToList();
             }
 
+
             List<GoalInvitation> pendingInvitations = _goalService.GetPendingInvitations(CurrentUserId, "Month");
 
             List<GoalInviteViewModel> pendingInvitationVMs = pendingInvitations
@@ -621,21 +670,46 @@ namespace BucketProject.UI.BucketProject.Controllers
                 {
                     InvitationId = inv.Id,
                     GoalDescription = _goalService.GetGoalDescription(inv.GoalId),
-                    InviterUsername = _socialService.GetUsername(inv.InviterId)
+                    InviterUsername = _socialService.GetUsername(inv.InviterId),
+                    ParentGoalDescription = _goalService.GetParentGoalDescription(inv.GoalId)
                 })
                 .ToList();
+
+
+            List<GoalInvitation> sentInvitationsOfUser = _goalService.GetInvitationsOf(CurrentUserId, "Month");
+            List<GoalInviteViewModel> sentInvitationsOFVMs = sentInvitationsOfUser
+  .Select(inv => new GoalInviteViewModel
+  {
+      InvitationId = inv.Id,
+      GoalDescription = _goalService.GetGoalDescription(inv.GoalId),
+      CreatedAt = _goalService.GetCreatedAt(inv.GoalId),
+      InvitedUsername = _socialService.GetUsername(inv.InvitedId),
+      Status = _goalService.GetInvitationStatus(inv.GoalId, inv.InvitedId),
+      ParentGoalDescription = _goalService.GetParentGoalDescription(inv.GoalId),
+      GoalId = inv.GoalId,
+      TriggeredByUserId = inv.InvitedId
+  })
+  .ToList();
+
 
             GoalsPageViewModel pageModel = new GoalsPageViewModel
             {
                 Goals = personalParents,
                 SharedGoals = sharedParents,
-                PendingInvitations = pendingInvitationVMs
-            };
+                PendingInvitations = pendingInvitationVMs,
+                SentInvitations = sentInvitationsOFVMs
 
+            };
 
             ViewBag.AvailableTypes = GetAvailableTypes();
             ViewBag.Friends = _socialService.GetFriends(CurrentUserId);
             ViewBag.CurrentUserId = _goalService.GetCurrentUserId();
+
+            if (TempData.TryGetValue("ErrorMessage", out var obj)
+       && obj is string msg && !string.IsNullOrEmpty(msg))
+            {
+                ViewBag.ErrorMessage = msg;
+            }
 
             return View(pageModel);
         }
@@ -987,18 +1061,35 @@ namespace BucketProject.UI.BucketProject.Controllers
         }
 
         [HttpPost]
-        public IActionResult DismissNotification(int goalId, string notificationType, int triggeredByUserId)
+        public IActionResult DismissNotificationWeek(int goalId, string notificationType, int triggeredByUserId)
         {
             int userId = _goalService.GetCurrentUserId();
             _notificationService.DismissNotification(userId, goalId, notificationType, triggeredByUserId);
             return RedirectToAction("WeekGoals");
         }
 
+        [HttpPost]
+        public IActionResult DismissNotificationMonth(int goalId, string notificationType, int triggeredByUserId)
+        {
+            int userId = _goalService.GetCurrentUserId();
+            _notificationService.DismissNotification(userId, goalId, notificationType, triggeredByUserId);
+            return RedirectToAction("MonthGoals");
+        }
 
+        [HttpPost]
+        public IActionResult DismissNotificationYear(int goalId, string notificationType, int triggeredByUserId)
+        {
+            int userId = _goalService.GetCurrentUserId();
+            _notificationService.DismissNotification(userId, goalId, notificationType, triggeredByUserId);
+            return RedirectToAction("YearGoals");
+        }
+
+        [HttpPost]
+        public IActionResult DismissNotificationBucketList(int goalId, string notificationType, int triggeredByUserId)
+        {
+            int userId = _goalService.GetCurrentUserId();
+            _notificationService.DismissNotification(userId, goalId, notificationType, triggeredByUserId);
+            return RedirectToAction("BucketList");
+        }
     }
 }
-
-
-
-
-
