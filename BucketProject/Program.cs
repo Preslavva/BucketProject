@@ -23,6 +23,8 @@ builder.Services.AddScoped<ISocialRepo, SocialRepo>();
 builder.Services.AddScoped<IGoalService, GoalService>();
 builder.Services.AddScoped<IUserService,UserService>();
 builder.Services.AddScoped<ISocialService, SocialService>();
+builder.Services.AddScoped<IStatsService, StatsService>();
+
 
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 

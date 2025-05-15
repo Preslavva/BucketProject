@@ -1,0 +1,48 @@
+﻿<canvas id="goalTypeChart" width="400" height="400"></canvas>
+<script>
+    const ctx1 = document.getElementById('goalTypeChart').getContext('2d');
+    const typeData = {
+        labels: @Html.Raw(Json.Serialize(ViewBag.TypeLabels)),
+        datasets: [{
+            data: @Html.Raw(Json.Serialize(ViewBag.TypeData)),
+            backgroundColor: ['rgba(255, 99, 132, 0.6)', 'rgba(54, 162, 235, 0.6)', 'rgba(255, 206, 86, 0.6)', 'rgba(75, 192, 192, 0.6)'],
+            borderWidth: 1
+        }]
+    };
+    new Chart(ctx1, {
+        type: 'pie',
+        data: typeData,
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'bottom' },
+                title: { display: true, text: 'Most Popular Goal Types' }
+            }
+        }
+    });
+</script>
+
+
+<canvas id="goalCategoryChart" width="400" height="400"></canvas>
+<script>
+    const ctx2 = document.getElementById('goalCategoryChart').getContext('2d');
+    const categoryData = {
+        labels: @Html.Raw(Json.Serialize(ViewBag.CategoryLabels)),
+        datasets: [{
+            data: @Html.Raw(Json.Serialize(ViewBag.CategoryData)),
+            backgroundColor: ['rgba(153, 102, 255, 0.6)', 'rgba(255, 159, 64, 0.6)', 'rgba(255, 205, 86, 0.6)', 'rgba(75, 192, 192, 0.6)'],
+            borderWidth: 1
+        }]
+    };
+    new Chart(ctx2, {
+        type: 'pie',
+        data: categoryData,
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'bottom' },
+                title: { display: true, text: 'Goals by Category' }
+            }
+        }
+    });
+</script>
