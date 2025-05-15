@@ -34,59 +34,66 @@ namespace BucketProject.Controllers
                 return currentUser.Id;
             }
         }
-
-
         [HttpGet]
-        [HttpGet]
-        public IActionResult Social(string searchTerm)
+        public IActionResult Social()
         {
             int uid = CurrentUserId;
 
-   
             List<UserSummaryDTO> friends = _socialService.GetFriends(uid);
             List<UserSummaryDTO> incoming = _socialService.GetIncomingFriendRequests(uid);
-            List<UserSummaryDTO> outgoingUsers = _socialService.GetOutgoingFriendRequests(uid);
-            List<UserSummaryDTO> potential = new List<UserSummaryDTO>();
-
-            if (!string.IsNullOrWhiteSpace(searchTerm))
-            {
-                friends = friends
-                    .Where(u => u.Username.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
-                    .ToList();
-
-                incoming = incoming
-                    .Where(u => u.Username.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
-                    .ToList();
-
-                outgoingUsers = outgoingUsers
-                    .Where(u => u.Username.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
-                    .ToList();
-
-                var nonFriends = _socialService.GetNonFriends(uid)
-                    .Where(u => u.Username.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
-                    .ToList();
-
-                potential = nonFriends
-                    .Concat(outgoingUsers)
-                    .GroupBy(u => u.Id)
-                    .Select(g => g.First())
-                    .ToList();
-            }
+            List<UserSummaryDTO> outgoing = _socialService.GetOutgoingFriendRequests(uid);
 
             SocialViewModel vm = new SocialViewModel
             {
                 Friends = friends,
                 IncomingRequests = incoming,
-                OutgoingRequests = outgoingUsers,
-                PotentialFriends = potential,
-                OutgoingRequestIds = outgoingUsers.Select(u => u.Id).ToList()
+                OutgoingRequests = outgoing,
+                OutgoingRequestIds = outgoing.Select(x => x.Id).ToList()
             };
 
-            ViewBag.SearchTerm = searchTerm ?? "";
             return View(vm);
         }
 
 
+
+        [HttpGet]
+        public IActionResult Search(string searchTerm)
+        {
+            int uid = CurrentUserId;
+            searchTerm ??= "";
+
+            List<UserSummaryDTO> friends = _socialService.GetFriends(uid)
+                .Where(u => u.Username.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+            List<UserSummaryDTO> incoming = _socialService.GetIncomingFriendRequests(uid)
+                .Where(u => u.Username.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+            List<UserSummaryDTO> outgoing = _socialService.GetOutgoingFriendRequests(uid)
+                .Where(u => u.Username.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+            List<UserSummaryDTO> nonFriends = _socialService.GetNonFriends(uid)
+                .Where(u => u.Username.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+            var potential = nonFriends
+                .Concat(outgoing)
+                .GroupBy(u => u.Id)
+                .Select(g => g.First())
+                .ToList();
+
+            SocialViewModel vm = new SocialViewModel
+            {
+                Friends = friends,
+                IncomingRequests = incoming,
+                PotentialFriends = potential,
+                OutgoingRequestIds = outgoing.Select(x => x.Id).ToList()
+            };
+
+            return PartialView("_SearchResults", vm);
+        }
 
 
         [HttpPost]

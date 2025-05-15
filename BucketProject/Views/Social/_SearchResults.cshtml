@@ -1,0 +1,91 @@
+﻿@model SocialViewModel
+
+@if (Model.Friends.Any())
+{
+    <h4>Matching Friends</h4>
+    <ul class="list-group mb-3">
+        @foreach (var f in Model.Friends)
+        {
+            var imgSrc = f.Picture != null
+            ? $"data:image/jpeg;base64,{Convert.ToBase64String(f.Picture)}"
+            : Url.Content("~/images/default-avatar.png");
+
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center">
+                    <img src="@imgSrc" class="rounded-circle me-2" style="width:32px; height:32px;" />
+                    <span>@f.Username</span>
+                </div>
+                <form asp-action="RemoveFriend" method="post">
+                    <input type="hidden" name="friendId" value="@f.Id" />
+                    <button class="btn btn-sm btn-danger">Remove</button>
+                </form>
+            </li>
+        }
+    </ul>
+}
+
+@if (Model.IncomingRequests.Any())
+{
+    <h4>Matching Incoming Requests</h4>
+    <ul class="list-group mb-3">
+        @foreach (var r in Model.IncomingRequests)
+        {
+            var imgSrc = r.Picture != null
+            ? $"data:image/jpeg;base64,{Convert.ToBase64String(r.Picture)}"
+            : Url.Content("~/images/default-avatar.png");
+
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center">
+                    <img src="@imgSrc" class="rounded-circle me-2" style="width:32px; height:32px;" />
+                    <span>@r.Username</span>
+                </div>
+                <div class="btn-group">
+                    <form asp-action="AcceptFriendRequest" method="post">
+                        <input type="hidden" name="requesterId" value="@r.Id" />
+                        <button class="btn btn-sm btn-success">Accept</button>
+                    </form>
+                    <form asp-action="DeclineFriendRequest" method="post" class="ms-2">
+                        <input type="hidden" name="requesterId" value="@r.Id" />
+                        <button class="btn btn-sm btn-danger">Decline</button>
+                    </form>
+                </div>
+            </li>
+        }
+    </ul>
+}
+
+@if (Model.PotentialFriends.Any())
+{
+    <h4>People You May Know</h4>
+    <ul class="list-group mb-3">
+        @foreach (var p in Model.PotentialFriends)
+        {
+            var imgSrc = p.Picture != null
+            ? $"data:image/jpeg;base64,{Convert.ToBase64String(p.Picture)}"
+            : Url.Content("~/images/default-avatar.png");
+
+            bool isPending = Model.OutgoingRequestIds.Contains(p.Id);
+
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center">
+                    <img src="@imgSrc" class="rounded-circle me-2" style="width:32px; height:32px;" />
+                    <span>@p.Username</span>
+                </div>
+                @if (!isPending)
+                {
+                    <form asp-action="SendFriendRequest" method="post">
+                        <input type="hidden" name="friendId" value="@p.Id" />
+                        <button class="btn btn-sm btn-primary">Add Friend</button>
+                    </form>
+                }
+                else
+                {
+                    <form asp-action="RemoveFriend" method="post">
+                        <input type="hidden" name="friendId" value="@p.Id" />
+                        <button class="btn btn-sm btn-warning">Cancel Request</button>
+                    </form>
+                }
+            </li>
+        }
+    </ul>
+}
