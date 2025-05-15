@@ -1104,7 +1104,190 @@ WHERE
     }
 
 
+    public List<GoalEntity>LoadSharedGoalsOfUser(int userId) 
+    {
+        var goals = new List<GoalEntity>();
 
+        const string queryGetGoals = @"
+SELECT
+  g.Id,
+  g.Category,
+  g.[Description],
+  ug.IsDone,
+  g.IsDeleted,
+  g.CreatedAt,
+  g.Deadline,
+  g.Type,
+  ug.CompletedAt,
+  g.IsPostponed,
+  g.ParentGoalId,
+  g.OwnerId
+FROM dbo.Goal AS g
+INNER JOIN (
+  SELECT DISTINCT GoalId, IsDone, CompletedAt
+  FROM dbo.User_Goal
+  WHERE UserId = @UserId
+) AS ug
+  ON g.Id = ug.GoalId
+WHERE
+  g.IsDeleted = 0
+  AND (
+    SELECT COUNT(*) 
+    FROM dbo.User_Goal AS x
+    WHERE x.GoalId = g.Id
+  ) > 1;
+                     
+;                  
+";
+
+        try
+        {
+            using var conn = GetSqlConnection();
+            conn.Open();
+            using var cmd = new SqlCommand(queryGetGoals, conn);
+            cmd.Parameters.AddWithValue("@UserId", userId);
+
+            using var reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                var goal = new GoalEntity(
+                    id: reader.GetInt32(0),
+                    category: Enum.Parse<Category>(reader.GetString(1)),
+                    type: Enum.Parse<GoalType>(reader.GetString(7)),
+                    description: reader.GetString(2),
+                    createdAt: reader.GetDateTime(5),
+                    deadline: reader.IsDBNull(6) ? null : reader.GetDateTime(6),
+                    completedAt: reader.IsDBNull(8) ? null : reader.GetDateTime(8),
+                    isDone: reader.GetBoolean(3),
+                    isDeleted: reader.GetBoolean(4),
+                    isPostponed: reader.GetBoolean(9),
+                    parentGoalId: reader.IsDBNull(10) ? null : reader.GetInt32(10),
+                    ownerId: reader.GetInt32(11)
+                );
+                goals.Add(goal);
+            }
+        }
+        catch (SqlException sqlEx)
+        {
+            _logger.LogError(sqlEx,
+                "SQL error in LoadSharedGoalsOfUser UserId={UserId})",
+                 userId);
+
+            throw new Exception("A database error occurred while loading shared goals.", sqlEx);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex,
+                  "SQL error in LoadSharedGoalsOfUserUserId={UserId})",
+                   userId);
+
+            throw;
+        }
+
+        return goals;
+    }
+
+    public List<GoalEntity> LoadPersonalGoalsOfUser(int userId)
+    {
+        List<GoalEntity> goals = new List<GoalEntity>();
+
+        try
+        {
+            using (SqlConnection conn = GetSqlConnection())
+            {
+                conn.Open();
+
+                string queryGetGoals = @"SELECT
+    g.Id,              
+    g.Category,         
+    g.[Description],    
+    ug.IsDone,          
+    g.IsDeleted,        
+    g.CreatedAt,        
+    g.Deadline,         
+    g.Type,             
+    ug.CompletedAt,     
+    g.IsPostponed,      
+    g.ParentGoalId,    
+    g.OwnerId           
+FROM dbo.Goal      AS g
+JOIN dbo.User_Goal AS ug  
+  ON ug.GoalId = g.Id
+WHERE ug.UserId   = @UserId
+  AND g.IsDeleted = 0
+  AND NOT EXISTS (
+        SELECT 1
+        FROM dbo.User_Goal AS x
+        WHERE x.GoalId = g.Id
+          AND x.UserId <> @UserId
+      );
+
+;";
+
+                using (SqlCommand loadGoals = new SqlCommand(queryGetGoals, conn))
+                {
+                    loadGoals.Parameters.AddWithValue("@UserId", userId);
+                    loadGoals.Parameters.AddWithValue("@IsDeleted", false);
+
+                    using (SqlDataReader reader = loadGoals.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            int id = reader.GetInt32(0);
+                            Category cat = Enum.Parse<Category>(reader.GetString(1));
+                            string desc = reader.GetString(2);
+                            bool isDone = reader.GetBoolean(3);
+                            bool isDeleted = reader.GetBoolean(4);
+                            DateTime createdAt = reader.GetDateTime(5);
+                            DateTime? deadline = reader.IsDBNull(6) ? null : reader.GetDateTime(6);
+                            GoalType type = Enum.Parse<GoalType>(reader.GetString(7));
+                            DateTime? completedAt = reader.IsDBNull(8) ? null : reader.GetDateTime(8);
+                            bool isPostponed = reader.GetBoolean(9);
+                            int? parentId = reader.IsDBNull(10) ? (int?)null : reader.GetInt32(10);
+                            int ownerId = reader.GetInt32(11);
+
+
+
+                            GoalEntity goal = new GoalEntity(
+                                id,
+                                cat,
+                                type,
+                                desc,
+                                createdAt,
+                                deadline,
+                                completedAt,
+                                isDone,
+                                isDeleted,
+                                isPostponed,
+                                parentId,
+                                ownerId
+                            );
+
+                            goals.Add(goal);
+                        }
+                    }
+                }
+            }
+        }
+        catch (SqlException sqlEx)
+        {
+            _logger.LogError(sqlEx,
+                "SQL error in LoadPersonalGoalsOfUser UserId={UserId})",
+                userId);
+
+            throw new Exception("A database error occurred while loading perosnal goals.", sqlEx);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex,
+                  "SQL error in LoadPersonalGoalsOfuser UserId={UserId})",
+                   userId);
+
+            throw;
+        }
+
+        return goals;
+    }
 }
 
 

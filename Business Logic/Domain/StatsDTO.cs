@@ -13,5 +13,10 @@ namespace BucketProject.BLLBusiness_Logic.Domain
         public string Category { get; set; }
 
         public int Count { get; set; }
+
+        public string Ownership { get; set; }
+        public int Completed { get; set; }
+        public int Incomplete { get; set; }
+
     }
 }

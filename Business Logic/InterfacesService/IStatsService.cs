@@ -11,4 +11,5 @@ public interface IStatsService
 {
     List<StatsDTO> GetGoalTypeStatistics();
     List<StatsDTO> GetGoalCategoryStatistics();
+    List<StatsDTO> GetGoalAmountStatistics();
 }

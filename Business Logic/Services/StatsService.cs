@@ -67,6 +67,34 @@ namespace BucketProject.BLL.Business_Logic.Services
                 .ToList();
         }
 
+        public List<StatsDTO> GetGoalAmountStatistics()
+        {
+            int id = GetCurrentUserId();
+             List<GoalEntity> entitiesPersonal =_goalRepo.LoadPersonalGoalsOfUser(id);
+            List<Goal> goalsPersonal = _mapper.Map<List<Goal>>(entitiesPersonal);
+
+            List<GoalEntity> entitiesShared = _goalRepo.LoadSharedGoalsOfUser(id);
+            List<Goal> goalsShared = _mapper.Map<List<Goal>>(entitiesShared);
+
+            return new List<StatsDTO>
+    {
+        new StatsDTO
+        {
+            Ownership = "Personal",
+            Completed = goalsPersonal.Count(g => g.IsDone),
+            Incomplete = goalsPersonal.Count(g => !g.IsDone)
+        },
+        new StatsDTO
+        {
+            Ownership = "Shared",
+            Completed = goalsShared.Count(g => g.IsDone),
+            Incomplete = goalsShared.Count(g => !g.IsDone)
+        }
+    };
+
+        }
+
+
 
     }
 }

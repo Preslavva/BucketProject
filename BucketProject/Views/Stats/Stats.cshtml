@@ -46,3 +46,50 @@
         }
     });
 </script>
+
+<h3>Completed vs Incomplete (Personal vs Shared)</h3>
+<canvas id="stackedGoalChart" width="600" height="400"></canvas>
+
+<script>
+    const ctxStacked = document.getElementById('stackedGoalChart').getContext('2d');
+
+    const stackedData = {
+        labels: @Html.Raw(Json.Serialize(ViewBag.StackedLabels)), // ["Personal", "Shared"]
+        datasets: [
+            {
+                label: 'Completed',
+                data: @Html.Raw(Json.Serialize(ViewBag.CompletedData)),
+                backgroundColor: 'rgba(75, 192, 192, 0.7)'
+            },
+            {
+                label: 'Incomplete',
+                data: @Html.Raw(Json.Serialize(ViewBag.IncompleteData)),
+                backgroundColor: 'rgba(255, 99, 132, 0.7)'
+            }
+        ]
+    };
+
+    const stackedConfig = {
+        type: 'bar',
+        data: stackedData,
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'bottom' },
+                title: {
+                    display: true,
+                    text: 'Completed vs Incomplete Goals by Type'
+                }
+            },
+            scales: {
+                x: { stacked: true },
+                y: { stacked: true, beginAtZero: true, ticks: {
+            stepSize: 1,
+            precision: 0
+        } }
+            }
+        }
+    };
+
+    new Chart(ctxStacked, stackedConfig);
+</script>
