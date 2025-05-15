@@ -12,142 +12,150 @@
                class="form-control"
                placeholder="Type a username…"
                value="@searchTerm" />
-        <button type="submit" class="btn btn-outline-secondary">
-            Search
-        </button>
+        <button type="submit" class="btn btn-outline-secondary">Search</button>
     </div>
 </form>
 
-@if (Model.IncomingRequests.Any())
+@if (string.IsNullOrWhiteSpace(searchTerm) || Model.IncomingRequests.Any())
 {
     <h2>Incoming Friend Requests (@Model.IncomingRequests.Count)</h2>
+    @if (!Model.IncomingRequests.Any())
+    {
+        <p>No incoming friend requests.</p>
+    }
+    else
+    {
+        <ul class="list-group mb-4">
+            @foreach (var r in Model.IncomingRequests)
+            {
+                var imgSrc = r.Picture != null
+                ? $"data:image/jpeg;base64,{Convert.ToBase64String(r.Picture)}"
+                : Url.Content("~/images/default-avatar.png");
+
+                <li class="list-group-item d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center">
+                        <img src="@imgSrc" alt="@r.Username" class="rounded-circle me-2" style="width:32px; height:32px;" />
+                        <span>@r.Username</span>
+                    </div>
+                    <div class="btn-group">
+                        <form asp-action="AcceptFriendRequest" method="post">
+                            <input type="hidden" name="requesterId" value="@r.Id" />
+                            <button type="submit" class="btn btn-sm btn-success">Accept</button>
+                        </form>
+                        <form asp-action="DeclineFriendRequest" method="post" class="ms-1">
+                            <input type="hidden" name="requesterId" value="@r.Id" />
+                            <button type="submit" class="btn btn-sm btn-danger">Decline</button>
+                        </form>
+                    </div>
+                </li>
+            }
+        </ul>
+    }
+}
+
+@if (string.IsNullOrWhiteSpace(searchTerm) && Model.OutgoingRequests.Any())
+{
+    <h2>Pending Friend Requests (@Model.OutgoingRequests.Count)</h2>
     <ul class="list-group mb-4">
-        @foreach (var r in Model.IncomingRequests)
+        @foreach (var o in Model.OutgoingRequests)
         {
+            var imgSrc = o.Picture != null
+            ? $"data:image/jpeg;base64,{Convert.ToBase64String(o.Picture)}"
+            : Url.Content("~/images/default-avatar.png");
+
             <li class="list-group-item d-flex align-items-center justify-content-between">
                 <div class="d-flex align-items-center">
-                    @{
-                        var imgSrc = r.Picture != null
-                        ? $"data:image/jpeg;base64,{Convert.ToBase64String(r.Picture)}"
-                        : Url.Content("~/images/default-avatar.png");
-                    }
-                    <img src="@imgSrc"
-                         alt="@r.Username"
-                         class="rounded-circle me-2"
-                         style="width:32px; height:32px;" />
-                    <span>@r.Username</span>
-                </div>
-                <div class="btn-group">
-                    <form asp-action="AcceptFriendRequest" method="post">
-                        @Html.AntiForgeryToken()
-                        <input type="hidden" name="requesterId" value="@r.Id" />
-                        <button type="submit" class="btn btn-sm btn-success">Accept</button>
-                    </form>
-                    <form asp-action="DeclineFriendRequest" method="post" class="ms-1">
-                        @Html.AntiForgeryToken()
-                        <input type="hidden" name="requesterId" value="@r.Id" />
-                        <button type="submit" class="btn btn-sm btn-danger">Decline</button>
-                    </form>
-                </div>
-            </li>
-        }
-    </ul>
-}
-
-<h2>People You May Know</h2>
-@if (!Model.PotentialFriends.Any())
-{
-    <p>
-        @if (string.IsNullOrWhiteSpace(searchTerm))
-        {
-            <text>Looks like you’re already friends with everyone!</text>
-        }
-        else
-        {
-            <text>No matches for “@searchTerm”.</text>
-        }
-    </p>
-}
-else
-{
-    <ul class="list-group mb-4">
-        @foreach (var u in Model.PotentialFriends)
-        {
-            bool isPending = Model.OutgoingRequestIds.Contains(u.Id);
-            <li class="list-group-item d-flex align-items-center justify-content-between">
-                <div class="d-flex align-items-center">
-                    @{
-                        var imgSrc = u.Picture != null
-                        ? $"data:image/jpeg;base64,{Convert.ToBase64String(u.Picture)}"
-                        : Url.Content("~/images/default-avatar.png");
-                    }
-                    <img src="@imgSrc"
-                         alt="@u.Username"
-                         class="rounded-circle me-2"
-                         style="width:32px; height:32px;" />
-                    <span>@u.Username</span>
-                </div>
-                @if (!isPending)
-                {
-                    <form asp-action="SendFriendRequest" method="post" class="m-0">
-                        @Html.AntiForgeryToken()
-                        <input type="hidden" name="friendId" value="@u.Id" />
-                        <button type="submit" class="btn btn-sm btn-primary">Add Friend</button>
-                    </form>
-                }
-                else
-                {
-                    <form asp-action="RemoveFriend" method="post" class="m-0">
-                        @Html.AntiForgeryToken()
-                        <input type="hidden" name="friendId" value="@u.Id" />
-                        <button type="submit" class="btn btn-sm btn-warning">Cancel Request</button>
-                    </form>
-                }
-            </li>
-        }
-    </ul>
-}
-
-
-
-<h2>Your Friends</h2>
-@if (!Model.Friends.Any())
-{
-    <p>
-        @if (string.IsNullOrWhiteSpace(searchTerm))
-        {
-            <text>You don’t have any friends yet.</text>
-        }
-        else
-        {
-            <text>No friends match “@searchTerm”.</text>
-        }
-    </p>
-}
-else
-{
-    <ul class="list-group">
-        @foreach (var f in Model.Friends)
-        {
-            <li class="list-group-item d-flex align-items-center justify-content-between">
-                <div class="d-flex align-items-center">
-                    @{
-                        var imgSrc = f.Picture != null
-                        ? $"data:image/jpeg;base64,{Convert.ToBase64String(f.Picture)}"
-                        : Url.Content("~/images/default-avatar.png");
-                    }
-                    <img src="@imgSrc"
-                         alt="@f.Username"
-                         class="rounded-circle me-2"
-                         style="width:32px; height:32px;" />
-                    <span>@f.Username</span>
+                    <img src="@imgSrc" alt="@o.Username" class="rounded-circle me-2" style="width:32px; height:32px;" />
+                    <span>@o.Username</span>
                 </div>
                 <form asp-action="RemoveFriend" method="post" class="m-0">
-                    @Html.AntiForgeryToken()
-                    <input type="hidden" name="friendId" value="@f.Id" />
-                    <button type="submit" class="btn btn-sm btn-danger">Remove Friend</button>
+                    <input type="hidden" name="friendId" value="@o.Id" />
+                    <button type="submit" class="btn btn-sm btn-warning">Cancel Request</button>
                 </form>
             </li>
         }
     </ul>
+}
+
+@if (!string.IsNullOrWhiteSpace(searchTerm))
+{
+    <h2>People You May Know</h2>
+    @if (!Model.PotentialFriends.Any())
+    {
+        <p>No matches for “@searchTerm”.</p>
+    }
+    else
+    {
+        <ul class="list-group mb-4">
+            @foreach (var u in Model.PotentialFriends)
+            {
+                bool isPending = Model.OutgoingRequestIds.Contains(u.Id);
+                var imgSrc = u.Picture != null
+                ? $"data:image/jpeg;base64,{Convert.ToBase64String(u.Picture)}"
+                : Url.Content("~/images/default-avatar.png");
+
+                <li class="list-group-item d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center">
+                        <img src="@imgSrc" alt="@u.Username" class="rounded-circle me-2" style="width:32px; height:32px;" />
+                        <span>@u.Username</span>
+                    </div>
+                    @if (!isPending)
+                    {
+                        <form asp-action="SendFriendRequest" method="post" class="m-0">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="friendId" value="@u.Id" />
+                            <button type="submit" class="btn btn-sm btn-primary">Add Friend</button>
+                        </form>
+                    }
+                    else
+                    {
+                        <form asp-action="RemoveFriend" method="post" class="m-0">
+                            <input type="hidden" name="friendId" value="@u.Id" />
+                            <button type="submit" class="btn btn-sm btn-warning">Cancel Request</button>
+                        </form>
+                    }
+                </li>
+            }
+        </ul>
+    }
+}
+
+@if (Model.Friends.Any() || !string.IsNullOrWhiteSpace(searchTerm))
+{
+    <h2>Your Friends</h2>
+    @if (!Model.Friends.Any())
+    {
+        <p>
+            @if (string.IsNullOrWhiteSpace(searchTerm))
+            {
+                <text>You don’t have any friends yet.</text>
+            }
+            else
+            {
+                <text>No friends match “@searchTerm”.</text>
+            }
+        </p>
+    }
+    else
+    {
+        <ul class="list-group">
+            @foreach (var f in Model.Friends)
+            {
+                var imgSrc = f.Picture != null
+                ? $"data:image/jpeg;base64,{Convert.ToBase64String(f.Picture)}"
+                : Url.Content("~/images/default-avatar.png");
+
+                <li class="list-group-item d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center">
+                        <img src="@imgSrc" alt="@f.Username" class="rounded-circle me-2" style="width:32px; height:32px;" />
+                        <span>@f.Username</span>
+                    </div>
+                    <form asp-action="RemoveFriend" method="post" class="m-0">
+                        <input type="hidden" name="friendId" value="@f.Id" />
+                        <button type="submit" class="btn btn-sm btn-danger">Remove Friend</button>
+                    </form>
+                </li>
+            }
+        </ul>
+    }
 }

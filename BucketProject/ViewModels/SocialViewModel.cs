@@ -8,6 +8,7 @@ namespace BucketProject.UI.ViewModels.ViewModels
         public List<UserSummaryDTO> Friends { get; set; } = new();
 
         public List<UserSummaryDTO> PotentialFriends { get; set; } = new();
+        public List<UserSummaryDTO> OutgoingRequests { get; set; } = new();
 
         public List<int> OutgoingRequestIds { get; set; } = new();
 

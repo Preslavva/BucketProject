@@ -37,42 +37,55 @@ namespace BucketProject.Controllers
 
 
         [HttpGet]
+        [HttpGet]
         public IActionResult Social(string searchTerm)
         {
             int uid = CurrentUserId;
 
-            List<UserSummaryDTO> incoming = _socialService.GetIncomingFriendRequests(uid);
+   
             List<UserSummaryDTO> friends = _socialService.GetFriends(uid);
-            List<UserSummaryDTO> nonFriends = _socialService.GetNonFriends(uid);
+            List<UserSummaryDTO> incoming = _socialService.GetIncomingFriendRequests(uid);
             List<UserSummaryDTO> outgoingUsers = _socialService.GetOutgoingFriendRequests(uid);
+            List<UserSummaryDTO> potential = new List<UserSummaryDTO>();
 
             if (!string.IsNullOrWhiteSpace(searchTerm))
             {
-                incoming = incoming.Where(u => u.Username.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)).ToList();
-                friends = friends.Where(u => u.Username.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)).ToList();
-                nonFriends = nonFriends.Where(u => u.Username.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)).ToList();
-                outgoingUsers = outgoingUsers
-                                .Where(u => u.Username.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
-                                .ToList();
-            }
+                friends = friends
+                    .Where(u => u.Username.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
 
-            var potential = nonFriends
-                .Concat(outgoingUsers)
-                .GroupBy(u => u.Id)
-                .Select(g => g.First())
-                .ToList();
+                incoming = incoming
+                    .Where(u => u.Username.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+
+                outgoingUsers = outgoingUsers
+                    .Where(u => u.Username.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+
+                var nonFriends = _socialService.GetNonFriends(uid)
+                    .Where(u => u.Username.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+
+                potential = nonFriends
+                    .Concat(outgoingUsers)
+                    .GroupBy(u => u.Id)
+                    .Select(g => g.First())
+                    .ToList();
+            }
 
             SocialViewModel vm = new SocialViewModel
             {
-                IncomingRequests = incoming,
                 Friends = friends,
+                IncomingRequests = incoming,
+                OutgoingRequests = outgoingUsers,
                 PotentialFriends = potential,
                 OutgoingRequestIds = outgoingUsers.Select(u => u.Id).ToList()
             };
-            ViewBag.SearchTerm = searchTerm ?? "";
 
+            ViewBag.SearchTerm = searchTerm ?? "";
             return View(vm);
         }
+
 
 
 
