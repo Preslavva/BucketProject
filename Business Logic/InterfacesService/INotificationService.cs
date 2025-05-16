@@ -14,6 +14,7 @@ namespace BucketProject.BLL.Business_Logic.InterfacesService
         List<Goal> GetSharedDeletedGoals();
         List<Goal> GetSharedPostponedGoals();
         void DismissNotification(int userId, int goalId, string type, int triggeredByUserId);
+        int GetTotalNotificationGoalCount(DateTime today);
 
     }
 }

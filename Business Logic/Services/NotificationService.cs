@@ -161,6 +161,23 @@ namespace BucketProject.BLL.Business_Logic.Services
             _goalRepo.DismissNotification(userId, goalId, type, triggeredByUserId);
         }
 
+        public int GetTotalNotificationGoalCount(DateTime today)
+        {
+            var completedGoals = GetSharedCompletionGoals();
+            var deletedGoals = GetSharedDeletedGoals();
+            var postponedGoals = GetSharedPostponedGoals();
+            var notifyGoals = CheckAndNotify(today);
+
+            int totalCount = completedGoals.Count
+                           + deletedGoals.Count
+                           + postponedGoals.Count
+                           + notifyGoals.Count;
+
+            return totalCount;
+        }
+
+
+
     }
 }
 

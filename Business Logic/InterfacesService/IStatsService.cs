@@ -11,5 +11,9 @@ public interface IStatsService
 {
     List<StatsDTO> GetGoalTypeStatistics();
     List<StatsDTO> GetGoalCategoryStatistics();
-    List<StatsDTO> GetGoalAmountStatistics();
+    List<StatsDTO> GetGoalAmountStatisticsWeekly();
+    List<StatsDTO> GetGoalAmountStatisticsMonthly();
+    List<StatsDTO> GetGoalAmountStatisticsYearly();
+    double GetAverageCompletionTimeInDays();
+    StatsDTO GetGoalSummaryStats();
 }

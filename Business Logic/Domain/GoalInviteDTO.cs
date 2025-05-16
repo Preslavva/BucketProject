@@ -14,5 +14,6 @@ namespace BucketProject.BLLBusiness_Logic.Domain
         public int InvitedId { get;  set; }
         public string Status { get;  set; }
         public DateTime CreatedAt { get; set; }
+        public DateTime? CompletedAt { get; set; }
     }
 }

@@ -1,4 +1,31 @@
-﻿<canvas id="goalTypeChart" width="400" height="400"></canvas>
+﻿
+<div class="circle-stats-container">
+    <div class="circle-wrapper">
+        <div class="circle-stat total">@ViewBag.TotalGoals</div>
+        <div class="circle-label">Total Goals</div>
+    </div>
+
+    <div class="circle-wrapper">
+        <div class="circle-stat completed">@ViewBag.CompletedGoals</div>
+        <div class="circle-label">Completed</div>
+    </div>
+
+    <div class="circle-wrapper">
+        <div class="circle-stat incomplete">@ViewBag.IncompleteGoals</div>
+        <div class="circle-label">Incomplete</div>
+    </div>
+</div>
+
+<div class="circle-wrapper">
+    <div class="circle-stat">
+        @ViewBag.AverageCompletionDays
+    </div>
+    <div class="circle-label">
+        Avg Days to Complete Goal
+    </div>
+</div>
+
+<canvas id="goalTypeChart" width="300" height="300"></canvas>
 <script>
     const ctx1 = document.getElementById('goalTypeChart').getContext('2d');
     const typeData = {
@@ -13,7 +40,7 @@
         type: 'pie',
         data: typeData,
         options: {
-            responsive: true,
+            responsive: false,
             plugins: {
                 legend: { position: 'bottom' },
                 title: { display: true, text: 'Most Popular Goal Types' }
@@ -23,7 +50,7 @@
 </script>
 
 
-<canvas id="goalCategoryChart" width="400" height="400"></canvas>
+<canvas id="goalCategoryChart" width="300" height="300"></canvas>
 <script>
     const ctx2 = document.getElementById('goalCategoryChart').getContext('2d');
     const categoryData = {
@@ -38,7 +65,7 @@
         type: 'pie',
         data: categoryData,
         options: {
-            responsive: true,
+            responsive: false,
             plugins: {
                 legend: { position: 'bottom' },
                 title: { display: true, text: 'Goals by Category' }
@@ -47,49 +74,167 @@
     });
 </script>
 
-<h3>Completed vs Incomplete (Personal vs Shared)</h3>
-<canvas id="stackedGoalChart" width="600" height="400"></canvas>
-
+<canvas id="goalWeeklyOwnershipChart" width="400" height="200"></canvas>
 <script>
-    const ctxStacked = document.getElementById('stackedGoalChart').getContext('2d');
-
-    const stackedData = {
-        labels: @Html.Raw(Json.Serialize(ViewBag.StackedLabels)), // ["Personal", "Shared"]
-        datasets: [
-            {
-                label: 'Completed',
-                data: @Html.Raw(Json.Serialize(ViewBag.CompletedData)),
-                backgroundColor: 'rgba(75, 192, 192, 0.7)'
-            },
-            {
-                label: 'Incomplete',
-                data: @Html.Raw(Json.Serialize(ViewBag.IncompleteData)),
-                backgroundColor: 'rgba(255, 99, 132, 0.7)'
-            }
-        ]
-    };
-
-    const stackedConfig = {
+    const ctx = document.getElementById('goalWeeklyOwnershipChart').getContext('2d');
+    new Chart(ctx, {
         type: 'bar',
-        data: stackedData,
+        data: {
+            labels: @Html.Raw(Json.Serialize(ViewBag.WeeklyPeriods)), 
+            datasets: [
+                {
+                    label: 'Personal - Completed',
+                    data: @Html.Raw(Json.Serialize(ViewBag.WeeklyPersonalCompleted)),
+                    backgroundColor: 'rgba(75, 192, 192, 0.7)'
+                },
+                {
+                    label: 'Personal - Incomplete',
+                    data: @Html.Raw(Json.Serialize(ViewBag.WeeklyPersonalIncomplete)),
+                    backgroundColor: 'rgba(255, 159, 64, 0.7)'
+                },
+                {
+                    label: 'Shared - Completed',
+                    data: @Html.Raw(Json.Serialize(ViewBag.WeeklySharedCompleted)),
+                    backgroundColor: 'rgba(153, 102, 255, 0.7)'
+                },
+                {
+                    label: 'Shared - Incomplete',
+                    data: @Html.Raw(Json.Serialize(ViewBag.WeeklySharedIncomplete)),
+                    backgroundColor: 'rgba(255, 99, 132, 0.7)'
+                }
+            ]
+        },
         options: {
-            responsive: true,
+            responsive: false,
+            scales: {
+                x: { stacked: true },
+                y: {
+                    stacked: true,
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1,
+                        precision: 0
+                    }
+                }
+            },
             plugins: {
                 legend: { position: 'bottom' },
                 title: {
                     display: true,
-                    text: 'Completed vs Incomplete Goals by Type'
+                    text: 'Personal vs Shared Goals by Week'
                 }
-            },
-            scales: {
-                x: { stacked: true },
-                y: { stacked: true, beginAtZero: true, ticks: {
-            stepSize: 1,
-            precision: 0
-        } }
             }
         }
-    };
-
-    new Chart(ctxStacked, stackedConfig);
+    });
 </script>
+
+
+<canvas id="goalMonthlyOwnershipChart" width="400" height="200"></canvas>
+<script>
+    const ctxMonthly = document.getElementById('goalMonthlyOwnershipChart').getContext('2d');
+    new Chart(ctxMonthly, {
+        type: 'bar',
+        data: {
+            labels: @Html.Raw(Json.Serialize(ViewBag.MonthlyPeriods)),
+            datasets: [
+                {
+                    label: 'Personal - Completed',
+                    data: @Html.Raw(Json.Serialize(ViewBag.MonthlyPersonalCompleted)),
+                    backgroundColor: 'rgba(75, 192, 192, 0.7)'
+                },
+                {
+                    label: 'Personal - Incomplete',
+                    data: @Html.Raw(Json.Serialize(ViewBag.MonthlyPersonalIncomplete)),
+                    backgroundColor: 'rgba(255, 159, 64, 0.7)'
+                },
+                {
+                    label: 'Shared - Completed',
+                    data: @Html.Raw(Json.Serialize(ViewBag.MonthlySharedCompleted)),
+                    backgroundColor: 'rgba(153, 102, 255, 0.7)'
+                },
+                {
+                    label: 'Shared - Incomplete',
+                    data: @Html.Raw(Json.Serialize(ViewBag.MonthlySharedIncomplete)),
+                    backgroundColor: 'rgba(255, 99, 132, 0.7)'
+                }
+            ]
+        },
+        options: {
+            responsive: false,
+            scales: {
+                x: { stacked: true },
+                y: {
+                    stacked: true,
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1,
+                        precision: 0
+                    }
+                }
+            },
+            plugins: {
+                legend: { position: 'bottom' },
+                title: {
+                    display: true,
+                    text: 'Personal vs Shared Goals by Month'
+                }
+            }
+        }
+    });
+</script>
+
+
+<canvas id="goalYearlyOwnershipChart" width="400" height="200"></canvas>
+<script>
+    const ctxYearly = document.getElementById('goalYearlyOwnershipChart').getContext('2d');
+    new Chart(ctxYearly, {
+        type: 'bar',
+        data: {
+            labels: @Html.Raw(Json.Serialize(ViewBag.YearlyPeriods)),
+            datasets: [
+                {
+                    label: 'Personal - Completed',
+                    data: @Html.Raw(Json.Serialize(ViewBag.YearlyPersonalCompleted)),
+                    backgroundColor: 'rgba(75, 192, 192, 0.7)'
+                },
+                {
+                    label: 'Personal - Incomplete',
+                    data: @Html.Raw(Json.Serialize(ViewBag.YearlyPersonalIncomplete)),
+                    backgroundColor: 'rgba(255, 159, 64, 0.7)'
+                },
+                {
+                    label: 'Shared - Completed',
+                    data: @Html.Raw(Json.Serialize(ViewBag.YearlySharedCompleted)),
+                    backgroundColor: 'rgba(153, 102, 255, 0.7)'
+                },
+                {
+                    label: 'Shared - Incomplete',
+                    data: @Html.Raw(Json.Serialize(ViewBag.YearlySharedIncomplete)),
+                    backgroundColor: 'rgba(255, 99, 132, 0.7)'
+                }
+            ]
+        },
+        options: {
+            responsive: false,
+            scales: {
+                x: { stacked: true },
+                y: {
+                    stacked: true,
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 5, 
+                        precision: 0
+                    }
+                }
+            },
+            plugins: {
+                legend: { position: 'bottom' },
+                title: {
+                    display: true,
+                    text: 'Personal vs Shared Goals by Year'
+                }
+            }
+        }
+    });
+</script>
+

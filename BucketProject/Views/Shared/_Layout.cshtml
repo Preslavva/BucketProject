@@ -3,6 +3,8 @@
     var role = Context.Session.GetString("Role");
     var hideHeaderFooter = ViewBag.HideHeaderFooter ?? false;
     var pageTitle = ViewData["Title"] ?? "BucketProject";
+    TempData.Keep("NotificationCount");
+    // var counter = Context.Session.GetInt32("NotCount");
 }
 
 <!DOCTYPE html>
@@ -93,12 +95,10 @@
                                         <li>
                                             <a class="dropdown-item d-flex justify-content-between align-items-center" asp-controller="Notification" asp-action="Notification">
                                                 Notifications
-                                                @if (TempData.Peek("NotificationCount") != null &&
-                                               int.TryParse(TempData.Peek("NotificationCount").ToString(), out int notificationCount) &&
-                                               notificationCount > 0)
+                                                @if (TempData["NotificationCount"] != null && (int)TempData["NotificationCount"] > 0)
                                                 {
-                                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                                        @notificationCount
+                                                    <span class="badge rounded-pill bg-danger text-white">
+                                                        @TempData["NotificationCount"]
                                                     </span>
                                                 }
 

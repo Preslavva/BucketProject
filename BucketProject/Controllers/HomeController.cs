@@ -1,20 +1,24 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using BucketProject.UI.ViewModels.ViewModels;
+using BucketProject.BLL.Business_Logic.InterfacesService;
 
 namespace BucketProject.UI.BucketProject.Controllers
 {
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
+        private readonly INotificationService _notificationService;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(ILogger<HomeController> logger, INotificationService notificationService)
         {
             _logger = logger;
+            _notificationService = notificationService;
         }
 
         public IActionResult Index()
         {
+            TempData["NotificationCount"] = _notificationService.GetTotalNotificationGoalCount(DateTime.Today);
             return View();
         }
 

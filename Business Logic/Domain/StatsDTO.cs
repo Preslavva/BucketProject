@@ -17,6 +17,9 @@ namespace BucketProject.BLLBusiness_Logic.Domain
         public string Ownership { get; set; }
         public int Completed { get; set; }
         public int Incomplete { get; set; }
-
+        public string Period { get; set; }
+        public int TotalGoals { get; set; }
+        public int CompletedGoals { get; set; }
+        public int IncompleteGoals { get; set; }
     }
 }
