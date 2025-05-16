@@ -32,8 +32,9 @@ namespace BucketProject.DAL.Data.Repositories
                     sqlConn.Open();
 
                     string query = @"
-                SELECT UserId, [Username], Email, [Password], Picture, Salt, Nationality, DateOfBirth, Gender, CreatedAt, Role
-                FROM [User]";
+                SELECT UserId, [Username], Email, [Password], Picture, Salt, Nationality, DateOfBirth, Gender, CreatedAt, [Role]
+                FROM [User]
+                WHERE [Role] <> 'Manager'";
 
                     using (SqlCommand cmd = new SqlCommand(query, sqlConn))
                     {
@@ -197,8 +198,6 @@ WHERE
     WHERE x.GoalId = g.Id
   ) > 1
   AND ug.UserId = g.OwnerId
-
-
 ";
 
             try
@@ -239,6 +238,79 @@ WHERE
             }
 
             return goals;
+        }
+
+        public List<GoalEntity> GetAllGoals()
+        {
+            const string query = @"
+SELECT 
+    Id, 
+    Category, 
+    [Description], 
+    IsDeleted, 
+    CreatedAt, 
+    Deadline, 
+    Type, 
+    IsPostponed, 
+    ParentGoalId, 
+    OwnerId
+FROM dbo.Goal;
+";
+
+            var goals = new List<GoalEntity>();
+
+            try
+            {
+                using var conn = GetSqlConnection();
+                conn.Open();
+
+                using var cmd = new SqlCommand(query, conn);
+                using var reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    int id = reader.GetInt32(0);
+                    Category category = Enum.Parse<Category>(reader.GetString(1));
+                    string description = reader.GetString(2);
+                    bool isDeleted = reader.GetBoolean(3);
+                    DateTime createdAt = reader.GetDateTime(4);
+                    DateTime? deadline = reader.IsDBNull(5) ? null : reader.GetDateTime(5);
+                    GoalType type = Enum.Parse<GoalType>(reader.GetString(6));
+                    bool isPostponed = reader.GetBoolean(7);
+                    int? parentId = reader.IsDBNull(8) ? null : reader.GetInt32(8);
+                    int ownerId = reader.GetInt32(9);
+
+                    bool isDone = false;
+                    DateTime? completedAt = null;
+
+                    goals.Add(new GoalEntity(
+                        id,
+                        category,
+                        type,
+                        description,
+                        createdAt,
+                        deadline,
+                        completedAt,
+                        isDone,
+                        isDeleted,
+                        isPostponed,
+                        parentId,
+                        ownerId
+                    ));
+                }
+
+                return goals;
+            }
+            catch (SqlException ex)
+            {
+                _logger.LogError(ex, "SQL error while loading all goals.");
+                throw new Exception("Database error while loading goals.", ex);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unexpected error while loading all goals.");
+                throw;
+            }
         }
 
     }

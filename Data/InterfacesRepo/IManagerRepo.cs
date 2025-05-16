@@ -10,6 +10,7 @@ namespace BucketProject.DAL.Data.InterfacesRepo
     public interface IManagerRepo
     {
         List<UserEntity> GetAllUsers();
+        List<GoalEntity> GetAllGoals();
 
     }
 }

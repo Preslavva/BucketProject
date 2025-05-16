@@ -18,6 +18,8 @@ namespace BucketProject.BLL.Business_Logic.Mapping
             CreateMap<GoalInvitation, GoalInviteDTO>();
 
 
+
+
         }
     }
 }

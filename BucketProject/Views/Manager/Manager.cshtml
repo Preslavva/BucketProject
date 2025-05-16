@@ -2,4 +2,94 @@
     ViewData["Title"] = "Manager";
 }
 
-<text>Hello Manager</text>
+<h2>Manager Dashboard</h2>
+
+<div style="max-width: 600px; margin-bottom: 40px;">
+    <canvas id="userLineChart"></canvas>
+</div>
+
+
+<div style="max-width: 600px;">
+    <canvas id="goalsLineChart"></canvas>
+</div>
+
+
+<script>
+    const userCtx = document.getElementById('userLineChart').getContext('2d');
+    new Chart(userCtx, {
+        type: 'line',
+        data: {
+            labels: @Html.Raw(Json.Serialize(ViewBag.UserLabels)),
+            datasets: [{
+                label: 'User Registrations',
+                data: @Html.Raw(Json.Serialize(ViewBag.UserData)),
+                borderColor: 'rgba(75, 192, 192, 1)',
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                tension: 0.3,
+                fill: true,
+                pointRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Monthly User Registrations'
+                },
+                legend: {
+                    position: 'bottom'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1,
+                        precision: 0
+                    }
+                }
+            }
+        }
+    });
+
+    const goalCtx = document.getElementById('goalsLineChart').getContext('2d');
+    new Chart(goalCtx, {
+        type: 'line',
+        data: {
+            labels: @Html.Raw(Json.Serialize(ViewBag.GoalLabels)),
+            datasets: [{
+                label: 'Goals Created',
+                data: @Html.Raw(Json.Serialize(ViewBag.GoalData)),
+                borderColor: 'rgba(153, 102, 255, 1)',
+                backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                tension: 0.3,
+                fill: true,
+                pointRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Monthly Goal Creation'
+                },
+                legend: {
+                    position: 'bottom'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1,
+                        precision: 0
+                    }
+                }
+            }
+        }
+    });
+</script>

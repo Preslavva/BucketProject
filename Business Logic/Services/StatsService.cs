@@ -9,20 +9,24 @@ using BucketProject.BLLBusiness_Logic.Domain;
 using BucketProject.BLL.Business_Logic.Domain;
 using AutoMapper;
 using BucketProject.BLL.Business_Logic.InterfacesService;
+using BucketProject.DAL.Data.Repositories;
+using System.Globalization;
 
 namespace BucketProject.BLL.Business_Logic.Services
 {
     public class StatsService: IStatsService
     {
         private readonly IGoalRepo _goalRepo;
+        private readonly IManagerRepo _managerRepo;
         private readonly IHttpContextAccessor _contextAccessor;
         private readonly IMapper _mapper;
 
-        public StatsService(IGoalRepo goalRepo, IHttpContextAccessor contextAccessor, IMapper mapper)
+        public StatsService(IGoalRepo goalRepo, IHttpContextAccessor contextAccessor, IMapper mapper, IManagerRepo managerRepo)
         {
             _goalRepo = goalRepo;
             _contextAccessor = contextAccessor;
             _mapper = mapper;
+            _managerRepo = managerRepo;
         }
         public int GetCurrentUserId()
         {
@@ -214,6 +218,38 @@ namespace BucketProject.BLL.Business_Logic.Services
             };
         }
 
+        public List<StatsDTO> GetUserRegistrationsPerMonth()
+        {
+            List<UserEntity> entities = _managerRepo.GetAllUsers();
+            List<User> users = _mapper.Map<List<User>>(entities);
+
+            return users
+                .GroupBy(u => u.CreatedAt.ToString("yyyy MMM", CultureInfo.InvariantCulture))
+                .Select(g => new StatsDTO
+                {
+                    Period = g.Key,
+                    Count = g.Count()
+                })
+                .OrderBy(s => DateTime.ParseExact(s.Period, "yyyy MMM", CultureInfo.InvariantCulture))
+                .ToList();
+        }
+
+        public List<StatsDTO> GetGoalsPerMonth()
+        {
+            List<GoalEntity> entities = _managerRepo.GetAllGoals();
+            List<Goal> goals = _mapper.Map<List<Goal>>(entities);
+
+
+            return goals
+                .GroupBy(u => u.CreatedAt.ToString("yyyy MMM", CultureInfo.InvariantCulture))
+                .Select(g => new StatsDTO
+                {
+                    Period = g.Key,
+                    Count = g.Count()
+                })
+                .OrderBy(s => DateTime.ParseExact(s.Period, "yyyy MMM", CultureInfo.InvariantCulture))
+                .ToList();
+        }
     }
 
 }

@@ -100,6 +100,10 @@ namespace BucketProject.UI.BucketProject.Controllers
             ViewBag.CompletedGoals = summary.CompletedGoals;
             ViewBag.IncompleteGoals = summary.IncompleteGoals;
 
+            var stats = _statsService.GetUserRegistrationsPerMonth();
+            ViewBag.Labels = stats.Select(s => s.Period).ToList();
+            ViewBag.Data = stats.Select(s => s.Count).ToList();
+
             return View();
         }
 

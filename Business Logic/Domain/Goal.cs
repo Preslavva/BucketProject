@@ -118,25 +118,6 @@ public Goal(int id, Category category, GoalType type, DateTime createdAt, DateTi
         IsPostponed = true;
     }
 
-    public void Delete()
-    {
-        IsDeleted = true;
-    }
-
- 
-    public void SetDeadline(DateTime deadline)
-    {
-        Deadline = deadline;
-    }
-
-    public void AddUser(UserEntity user)
-    {
-        if (!Users.Contains(user))
-        {
-            Users.Add(user);
-        }
-    }
-
     public void UpdateDescription(string newDescription)
     {
         Description = newDescription;
