@@ -1,4 +1,5 @@
-﻿
+﻿<h2>Your Statistics</h2>
+
 <div class="circle-stats-container">
     <div class="circle-wrapper">
         <div class="circle-stat total">@ViewBag.TotalGoals</div>
@@ -15,7 +16,7 @@
         <div class="circle-label">Incomplete</div>
     </div>
     <div class="circle-wrapper">
-        <div class="circle-stat persona;">@ViewBag.PersonalGoals</div>
+        <div class="circle-stat personal">@ViewBag.PersonalGoals</div>
         <div class="circle-label">Personal Goals</div>
     </div>
 
@@ -30,16 +31,15 @@
     <div class="circle-wrapper">
         <div class="circle-stat ai">@ViewBag.AIGoals</div>
         <div class="circle-label">AI generated Goals</div>
+    </div>
+
+    <div class="circle-wrapper">
+        <div class="circle-stat average">@ViewBag.AverageCompletionDays</div>
+        <div class="circle-label">Avg Days to Complete Goal</div>
+    </div>
 </div>
 
-<div class="circle-wrapper">
-    <div class="circle-stat">
-        @ViewBag.AverageCompletionDays
-    </div>
-    <div class="circle-label">
-        Avg Days to Complete Goal
-    </div>
-</div>
+
 
 <canvas id="goalTypeChart" width="300" height="300"></canvas>
 <script>
