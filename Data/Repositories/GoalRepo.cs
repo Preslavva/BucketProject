@@ -1066,11 +1066,11 @@ WHERE
 
             goal.Recipients = new List<UserEntity> {
             new UserEntity(
-                id:   rdr.GetInt32   (rdr.GetOrdinal("DeleterId")),
-                username: rdr.GetString  (rdr.GetOrdinal("DeleterUsername")),
-                picture:  rdr.IsDBNull(rdr.GetOrdinal("DeleterPicture"))
+                id:   rdr.GetInt32   (rdr.GetOrdinal("PostponerId")),
+                username: rdr.GetString  (rdr.GetOrdinal("PostponerUsername")),
+                picture:  rdr.IsDBNull(rdr.GetOrdinal("PostponerPicture"))
                              ? null
-                             : (byte[])rdr["DeleterPicture"]
+                             : (byte[])rdr["PostponerPicture"]
             )
         };
 
@@ -1137,7 +1137,7 @@ WHERE
     WHERE x.GoalId = g.Id
   ) > 1;
                      
-;                  
+;       
 ";
 
         try

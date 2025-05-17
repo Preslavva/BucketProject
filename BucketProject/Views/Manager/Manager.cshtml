@@ -4,6 +4,37 @@
 
 <h2>Manager Dashboard</h2>
 
+
+<div class="circle-stats-container">
+    <div class="circle-wrapper">
+        <div class="circle-stat total">@ViewBag.TotalGoals</div>
+        <div class="circle-label">Total Goals</div>
+    </div>
+
+    <div class="circle-wrapper">
+        <div class="circle-stat completed">@ViewBag.PersonalGoals</div>
+        <div class="circle-label">Personal Goals</div>
+    </div>
+
+    <div class="circle-wrapper">
+        <div class="circle-stat shared">@ViewBag.SharedGoals</div>
+        <div class="circle-label">Shared Goals</div>
+    </div>
+    <div class="circle-wrapper">
+        <div class="circle-stat postponed">@ViewBag.PostponedGoals</div>
+        <div class="circle-label">Postponed Goals</div>
+    </div>
+    <div class="circle-wrapper">
+        <div class="circle-stat ai">@ViewBag.AIGoals</div>
+        <div class="circle-label">AI generated Goals</div>
+    </div>
+    <div class="circle-wrapper">
+        <div class="circle-stat active">@ViewBag.ActiveUsersCount</div>
+        <div class="circle-label">Active Users</div>
+    </div>
+</div>
+
+
 <div style="max-width: 600px; margin-bottom: 40px;">
     <canvas id="userLineChart"></canvas>
 </div>
@@ -89,6 +120,55 @@
                         precision: 0
                     }
                 }
+            }
+        }
+    });
+</script>
+
+<canvas id="goalTypeChart" width="300" height="300"></canvas>
+<script>
+    const ctx1 = document.getElementById('goalTypeChart').getContext('2d');
+    const typeData = {
+        labels: @Html.Raw(Json.Serialize(ViewBag.TypeLabels)),
+        datasets: [{
+            data: @Html.Raw(Json.Serialize(ViewBag.TypeData)),
+            backgroundColor: ['rgba(255, 99, 132, 0.6)', 'rgba(54, 162, 235, 0.6)', 'rgba(255, 206, 86, 0.6)', 'rgba(75, 192, 192, 0.6)'],
+            borderWidth: 1
+        }]
+    };
+    new Chart(ctx1, {
+        type: 'pie',
+        data: typeData,
+        options: {
+            responsive: false,
+            plugins: {
+                legend: { position: 'bottom' },
+                title: { display: true, text: 'Most Popular Goal Types' }
+            }
+        }
+    });
+</script>
+
+
+<canvas id="goalCategoryChart" width="300" height="300"></canvas>
+<script>
+    const ctx2 = document.getElementById('goalCategoryChart').getContext('2d');
+    const categoryData = {
+        labels: @Html.Raw(Json.Serialize(ViewBag.CategoryLabels)),
+        datasets: [{
+            data: @Html.Raw(Json.Serialize(ViewBag.CategoryData)),
+            backgroundColor: ['rgba(153, 102, 255, 0.6)', 'rgba(255, 159, 64, 0.6)', 'rgba(255, 205, 86, 0.6)', 'rgba(75, 192, 192, 0.6)'],
+            borderWidth: 1
+        }]
+    };
+    new Chart(ctx2, {
+        type: 'pie',
+        data: categoryData,
+        options: {
+            responsive: false,
+            plugins: {
+                legend: { position: 'bottom' },
+                title: { display: true, text: 'Goals by Category' }
             }
         }
     });

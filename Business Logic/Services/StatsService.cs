@@ -11,6 +11,7 @@ using AutoMapper;
 using BucketProject.BLL.Business_Logic.InterfacesService;
 using BucketProject.DAL.Data.Repositories;
 using System.Globalization;
+using Org.BouncyCastle.Asn1.X509.SigI;
 
 namespace BucketProject.BLL.Business_Logic.Services
 {
@@ -210,11 +211,18 @@ namespace BucketProject.BLL.Business_Logic.Services
 
             var allGoals = personalGoals.Concat(sharedGoals).ToList();
 
+            List<Goal> aiGoals = allGoals.Where(g => g.ParentGoalId != null).ToList();
+            List<Goal> postponedGoals = allGoals.Where(g => g.IsPostponed == true).ToList();
+
             return new StatsDTO
             {
                 TotalGoals = allGoals.Count,
                 CompletedGoals = allGoals.Count(g => g.IsDone),
-                IncompleteGoals = allGoals.Count(g => !g.IsDone)
+                IncompleteGoals = allGoals.Count(g => !g.IsDone),
+                PersonalGoals = personalGoals.Count,
+                SharedGoals = sharedGoals.Count, 
+                PostponedGoals = postponedGoals.Count,
+                AIGoals = aiGoals.Count
             };
         }
 
@@ -248,6 +256,64 @@ namespace BucketProject.BLL.Business_Logic.Services
                     Count = g.Count()
                 })
                 .OrderBy(s => DateTime.ParseExact(s.Period, "yyyy MMM", CultureInfo.InvariantCulture))
+                .ToList();
+        }
+
+        public StatsDTO GetGoalSummaryStatsManager()
+        {
+            List<GoalEntity> entitiesGoals = _managerRepo.GetAllGoals();
+            List<Goal> allGoals = _mapper.Map<List<Goal>>(entitiesGoals);
+
+            List<GoalEntity> entitiesPersonal = _managerRepo.LoadAllPersonalGoals();
+            List<Goal> allPersonal = _mapper.Map<List<Goal>>(entitiesPersonal);
+
+            List<GoalEntity> entitiesShared = _managerRepo.LoadAllSharedGoals();
+            List<Goal> allShared = _mapper.Map<List<Goal>>(entitiesShared);
+
+            List<Goal> aiGoals = allGoals.Where(g => g.ParentGoalId != null).ToList();
+            List<Goal> postponedGoals = allGoals.Where(g => g.IsPostponed == true).ToList();
+
+            int countActive = _managerRepo.GetActiveUsersCount();
+
+            return new StatsDTO
+            {
+                TotalGoals = allGoals.Count,
+                PersonalGoals = allPersonal.Count,
+                SharedGoals = allShared.Count,
+                AIGoals = aiGoals.Count,
+                PostponedGoals = postponedGoals.Count,
+                ActiveUsersCount = countActive
+            };
+
+        }
+
+        public List<StatsDTO> GetGoalTypeStatisticsManager()
+        {
+            List<GoalEntity> entities = _managerRepo.GetAllGoals();
+            List<Goal> goals = _mapper.Map<List<Goal>>(entities);
+
+            return goals
+                .GroupBy(g => g.Type)
+                .Select(g => new StatsDTO
+                {
+                    Type = g.Key.ToString(),
+                    Count = g.Count()
+                })
+                .ToList();
+        }
+
+        public List<StatsDTO> GetGoalCategoryStatisticsManager()
+        {
+            List<GoalEntity> entities = _managerRepo.GetAllGoals();
+            List<Goal> goals = _mapper.Map<List<Goal>>(entities);
+
+            return goals
+                .GroupBy(g => g.Category)
+                .Select(g => new StatsDTO
+                {
+                    Category = g.Key.ToString(),
+                    Count = g.Count()
+                })
                 .ToList();
         }
     }

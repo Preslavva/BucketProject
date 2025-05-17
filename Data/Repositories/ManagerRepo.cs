@@ -84,29 +84,30 @@ namespace BucketProject.DAL.Data.Repositories
                 {
                     conn.Open();
 
-                    string queryGetGoals = @"SELECT
-    g.Id,              
-    g.Category,         
-    g.[Description],    
-    ug.IsDone,          
-    g.IsDeleted,        
-    g.CreatedAt,        
-    g.Deadline,         
-    g.Type,             
-    ug.CompletedAt,     
-    g.IsPostponed,      
-    g.ParentGoalId,    
-    g.OwnerId           
-FROM dbo.Goal      AS g
-JOIN dbo.User_Goal AS ug  
-  ON ug.GoalId = g.Id
+                    string queryGetGoals = @"
+ SELECT 
+    g.Id,
+    g.Category,
+    g.[Description],
+    ug.IsDone,
+    g.IsDeleted,
+    g.CreatedAt,
+    g.Deadline,
+    g.Type,
+    ug.CompletedAt,
+    g.IsPostponed,
+    g.ParentGoalId,
+    g.OwnerId
+FROM dbo.Goal AS g
+JOIN dbo.User_Goal AS ug
+  ON g.Id = ug.GoalId
 WHERE g.IsDeleted = 0
-  AND NOT EXISTS (
-        SELECT 1
-        FROM dbo.User_Goal AS x
-        WHERE x.GoalId = g.Id
-          AND x.UserId <> @UserId
-      );
+  AND (
+    SELECT COUNT(*) 
+    FROM dbo.User_Goal AS x 
+    WHERE x.GoalId = g.Id
+  ) = 1
+
 
 ;";
 
@@ -254,7 +255,8 @@ SELECT
     IsPostponed, 
     ParentGoalId, 
     OwnerId
-FROM dbo.Goal;
+FROM dbo.Goal
+WHERE IsDeleted = 0;
 ";
 
             var goals = new List<GoalEntity>();
@@ -311,6 +313,43 @@ FROM dbo.Goal;
                 _logger.LogError(ex, "Unexpected error while loading all goals.");
                 throw;
             }
+        }
+
+        public int GetActiveUsersCount()
+        {
+            int count = 0;
+
+            try
+            {
+                using (SqlConnection sqlConn = GetSqlConnection())
+                {
+                    sqlConn.Open();
+
+                    string query = @"
+                 SELECT COUNT(DISTINCT ug.UserId)
+                FROM [User_Goal] ug
+                INNER JOIN [Goal] g ON ug.GoalId = g.Id
+                WHERE g.CreatedAt >= DATEADD(DAY, -14, GETDATE())
+            ";
+
+                    using (SqlCommand cmd = new SqlCommand(query, sqlConn))
+                    {
+                        count = (int)cmd.ExecuteScalar();
+                    }
+                }
+            }
+            catch (SqlException sqlEx)
+            {
+                _logger.LogError(sqlEx, "SQL error in GetActiveUsersCount");
+                throw new Exception("A database error occurred while retrieving the active user count.", sqlEx);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in GetActiveUsersCount");
+                throw;
+            }
+
+            return count;
         }
 
     }

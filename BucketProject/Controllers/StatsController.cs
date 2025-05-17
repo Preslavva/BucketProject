@@ -99,6 +99,11 @@ namespace BucketProject.UI.BucketProject.Controllers
             ViewBag.TotalGoals = summary.TotalGoals;
             ViewBag.CompletedGoals = summary.CompletedGoals;
             ViewBag.IncompleteGoals = summary.IncompleteGoals;
+            ViewBag.PersonalGoals = summary.PersonalGoals;
+            ViewBag.SharedGoals = summary.SharedGoals;
+            ViewBag.PostponedGoals = summary.PostponedGoals;
+            ViewBag.AIGoals = summary.AIGoals;
+
 
             var stats = _statsService.GetUserRegistrationsPerMonth();
             ViewBag.Labels = stats.Select(s => s.Period).ToList();

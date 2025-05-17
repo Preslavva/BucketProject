@@ -11,6 +11,9 @@ namespace BucketProject.DAL.Data.InterfacesRepo
     {
         List<UserEntity> GetAllUsers();
         List<GoalEntity> GetAllGoals();
+        List<GoalEntity> LoadAllPersonalGoals();
+        List<GoalEntity> LoadAllSharedGoals();
+        int GetActiveUsersCount();
 
     }
 }

@@ -52,7 +52,7 @@ namespace BucketProject.BLL.Business_Logic.Controllers
                 NotificationViewModel vm = _mapper.Map<NotificationViewModel>(goal);
                 vm.TypeOfNotification = "Deadline";
                 vm.Message = ns.GetNotificationMessage(goal.Description, dl.Value);
-                vm.TriggeredByUserId = goal.Recipients.First().Id; 
+              //  vm.TriggeredByUserId = goal.Recipients.First().Id; 
 
 
                 notifications.Add(vm);

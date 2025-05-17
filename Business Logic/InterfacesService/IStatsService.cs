@@ -18,4 +18,7 @@ public interface IStatsService
     StatsDTO GetGoalSummaryStats();
     List<StatsDTO> GetUserRegistrationsPerMonth();
     List<StatsDTO> GetGoalsPerMonth();
+    StatsDTO GetGoalSummaryStatsManager();
+    List<StatsDTO> GetGoalTypeStatisticsManager();
+     List<StatsDTO> GetGoalCategoryStatisticsManager();
 }
