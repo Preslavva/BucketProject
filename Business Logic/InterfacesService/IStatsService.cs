@@ -21,4 +21,11 @@ public interface IStatsService
     StatsDTO GetGoalSummaryStatsManager();
     List<StatsDTO> GetGoalTypeStatisticsManager();
      List<StatsDTO> GetGoalCategoryStatisticsManager();
+  
+    List<StatsDTO> GetUserAgeGroupStatistics();
+    List<StatsDTO> GetUsersGenderStatistics();
+    List<StatsDTO> GetUsersNationalityStatistics();
+    List<User> SearchUsers(string query, string gender, string nationality, int? minAge, int? maxAge, DateTime? createdAfter);
+
+
 }

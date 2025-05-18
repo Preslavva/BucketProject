@@ -26,6 +26,11 @@ namespace BucketProject.BLLBusiness_Logic.Domain
         public int PostponedGoals { get; set; }
         public int AIGoals { get; set; }
         public int ActiveUsersCount { get; set; }
+        public string Nationality { get; set; }
+        public string Gender { get; set; }
+
+        public int Age { get; set; }
+        public string Label { get; set; }
 
 
 

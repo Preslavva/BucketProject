@@ -15,7 +15,7 @@ using Org.BouncyCastle.Asn1.X509.SigI;
 
 namespace BucketProject.BLL.Business_Logic.Services
 {
-    public class StatsService: IStatsService
+    public class StatsService : IStatsService
     {
         private readonly IGoalRepo _goalRepo;
         private readonly IManagerRepo _managerRepo;
@@ -75,7 +75,7 @@ namespace BucketProject.BLL.Business_Logic.Services
         public List<StatsDTO> GetGoalAmountStatisticsWeekly()
         {
             int id = GetCurrentUserId();
-            
+
             List<Goal> goalsPersonal = _mapper.Map<List<Goal>>(_goalRepo.LoadPersonalGoalsOfUser(id));
             List<Goal> goalsShared = _mapper.Map<List<Goal>>(_goalRepo.LoadSharedGoalsOfUser(id));
 
@@ -126,7 +126,7 @@ namespace BucketProject.BLL.Business_Logic.Services
                 .GroupBy(g => GetMonthLabel(g.CreatedAt))
                 .Select(g => new StatsDTO
                 {
-                    Period = g.Key, 
+                    Period = g.Key,
                     Ownership = "Personal",
                     Completed = g.Count(x => x.IsDone),
                     Incomplete = g.Count(x => !x.IsDone)
@@ -136,7 +136,7 @@ namespace BucketProject.BLL.Business_Logic.Services
                 .GroupBy(g => GetMonthLabel(g.CreatedAt))
                 .Select(g => new StatsDTO
                 {
-                    Period = g.Key, 
+                    Period = g.Key,
                     Ownership = "Shared",
                     Completed = g.Count(x => x.IsDone),
                     Incomplete = g.Count(x => !x.IsDone)
@@ -220,7 +220,7 @@ namespace BucketProject.BLL.Business_Logic.Services
                 CompletedGoals = allGoals.Count(g => g.IsDone),
                 IncompleteGoals = allGoals.Count(g => !g.IsDone),
                 PersonalGoals = personalGoals.Count,
-                SharedGoals = sharedGoals.Count, 
+                SharedGoals = sharedGoals.Count,
                 PostponedGoals = postponedGoals.Count,
                 AIGoals = aiGoals.Count
             };
@@ -316,6 +316,95 @@ namespace BucketProject.BLL.Business_Logic.Services
                 })
                 .ToList();
         }
-    }
 
+        public List<StatsDTO> GetUsersNationalityStatistics()
+        {
+            List<UserEntity> entities = _managerRepo.GetAllUsers();
+            List<User> users = _mapper.Map<List<User>>(entities);
+
+            return users
+                .GroupBy(g => g.Nationality)
+                .Select(g => new StatsDTO
+                {
+                    Nationality = g.Key,
+                    Count = g.Count()
+                })
+                .ToList();
+
+
+
+        }
+        public List<StatsDTO> GetUsersGenderStatistics()
+        {
+            List<UserEntity> entities = _managerRepo.GetAllUsers();
+            List<User> users = _mapper.Map<List<User>>(entities);
+
+            return users
+                .GroupBy(g => g.Gender)
+                .Select(g => new StatsDTO
+                {
+                    Gender = g.Key,
+                    Count = g.Count()
+                })
+                .ToList();
+        }
+
+        public List<StatsDTO> GetUserAgeGroupStatistics()
+        {
+            List<UserEntity> entities = _managerRepo.GetAllUsers();
+            List<User> users = _mapper.Map<List<User>>(entities);
+
+            DateTime now = DateTime.Today;
+
+            return users
+                .Select(u => new
+                {
+                    Age = now.Year - u.DateOfBirth.Year - (u.DateOfBirth.Date > now.AddYears(-(now.Year - u.DateOfBirth.Year)) ? 1 : 0)
+                })
+                .GroupBy(u => GetAgeGroup(u.Age))
+                .Select(g => new StatsDTO
+                {
+                    Label = g.Key, 
+                    Count = g.Count()
+                })
+                .ToList();
+        }
+
+        private string GetAgeGroup(int age)
+        {
+            if (age < 18) return "Under 18";
+            if (age <= 25) return "18–25";
+            if (age <= 35) return "26–35";
+            if (age <= 45) return "36–45";
+            if (age <= 60) return "46–60";
+            return "60+";
+        }
+        public List<User> SearchUsers(string query, string gender, string nationality, int? minAge, int? maxAge, DateTime? createdAfter)
+        {
+            List<UserEntity> entities = _managerRepo.GetAllUsers(); 
+            List<User> users = _mapper.Map<List<User>>(entities);
+            DateTime today = DateTime.Today;
+
+            return users
+                .Where(u =>
+                    (string.IsNullOrEmpty(query) || u.Username.Contains(query, StringComparison.OrdinalIgnoreCase) || u.Email.Contains(query, StringComparison.OrdinalIgnoreCase)) &&
+                    (string.IsNullOrEmpty(gender) || u.Gender == gender) &&
+                    (string.IsNullOrEmpty(nationality) || u.Nationality == nationality) &&
+                    (!minAge.HasValue || CalculateAge(u.DateOfBirth) >= minAge.Value) &&
+                    (!maxAge.HasValue || CalculateAge(u.DateOfBirth) <= maxAge.Value) &&
+                    (!createdAfter.HasValue || u.CreatedAt >= DateOnly.FromDateTime(createdAfter.Value))
+                )
+                .ToList();
+        }
+
+        private int CalculateAge(DateTime dob)
+        {
+            var today = DateTime.Today;
+            var age = today.Year - dob.Year;
+            if (dob > today.AddYears(-age)) age--;
+            return age;
+        }
+
+
+    }
 }

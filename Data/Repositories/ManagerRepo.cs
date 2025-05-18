@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,7 +13,7 @@ using Microsoft.Extensions.Logging;
 
 namespace BucketProject.DAL.Data.Repositories
 {
-    public class ManagerRepo:Repository,IManagerRepo
+    public class ManagerRepo : Repository, IManagerRepo
     {
         private readonly ILogger<ManagerRepo> _logger;
 
@@ -32,12 +33,15 @@ namespace BucketProject.DAL.Data.Repositories
                     sqlConn.Open();
 
                     string query = @"
-                SELECT UserId, [Username], Email, [Password], Picture, Salt, Nationality, DateOfBirth, Gender, CreatedAt, [Role]
+                SELECT UserId, [Username], Email, [Password], Picture, Salt, Nationality, DateOfBirth, Gender, CreatedAt,[Role]
                 FROM [User]
-                WHERE [Role] <> 'Manager'";
+                WHERE [Role] <> @Role";
+
 
                     using (SqlCommand cmd = new SqlCommand(query, sqlConn))
                     {
+                        cmd.Parameters.AddWithValue("@Role", "Manager");
+
                         using (SqlDataReader reader = cmd.ExecuteReader())
                         {
                             while (reader.Read())
@@ -354,3 +358,4 @@ WHERE IsDeleted = 0;
 
     }
 }
+
