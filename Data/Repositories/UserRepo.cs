@@ -2,6 +2,7 @@
 using System.Reflection;
 using BucketProject.DAL.Data.InterfacesRepo;
 using BucketProject.DAL.Models.Entities;
+using Data.Exceptions;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -34,7 +35,7 @@ namespace BucketProject.DAL.Data.Repositories
                 int count = (int)checkCommand.ExecuteScalar();
                 if (count > 0)
                 {
-                    throw new ApplicationException("Username or Email is already taken.");
+                    throw new DuplicateUserException("Username or Email is already taken.");
                 }
 
                 string insertSql = @"

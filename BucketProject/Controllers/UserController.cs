@@ -6,6 +6,7 @@ using AutoMapper;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Text.Json;
 using System.ComponentModel.DataAnnotations;
+using Data.Exceptions;
 
 
 namespace BucketProject.UI.BucketProject.Controllers
@@ -74,9 +75,9 @@ namespace BucketProject.UI.BucketProject.Controllers
                 ModelState.AddModelError(string.Empty, vex.Message);
                 return View(vm);
             }
-            catch (ApplicationException ex)
+            catch (DuplicateUserException dex)
             {
-                ModelState.AddModelError(string.Empty, ex.Message);
+                ModelState.AddModelError(string.Empty, dex.Message);
                 return View(vm);
             }
         }
@@ -93,7 +94,7 @@ namespace BucketProject.UI.BucketProject.Controllers
         {
             try
             {
-                User? loggedUser = _userService.LogIn(vm.Username, vm.Password);
+                var loggedUser = _userService.LogIn(vm.Username, vm.Password);
 
                 HttpContext.Session.SetString("Username", loggedUser.Username);
                 HttpContext.Session.SetString("Role", loggedUser.Role);
@@ -105,9 +106,15 @@ namespace BucketProject.UI.BucketProject.Controllers
             catch (ValidationException ex)
             {
                 ModelState.AddModelError(string.Empty, ex.Message);
-                return View(vm);
             }
+            catch (InvalidLoginException ex)
+            {
+                ModelState.AddModelError(string.Empty, ex.Message);
+            }
+
+            return View(vm);
         }
+
 
 
         [HttpGet]

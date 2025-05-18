@@ -5,7 +5,7 @@ using BucketProject.BLLBusiness_Logic.Domain;
 using BucketProject.DAL.Data.InterfacesRepo;
 using BucketProject.DAL.Models.Entities;
 using Microsoft.AspNetCore.Http;
-using MimeKit.Encodings;
+using Data.Exceptions;
 
 
 namespace BucketProject.BLL.Business_Logic.Services
@@ -28,19 +28,22 @@ namespace BucketProject.BLL.Business_Logic.Services
 
         public User? LogIn(string username, string password)
         {
-            if (string.IsNullOrWhiteSpace(password))
-            {
-                throw new ValidationException("Enter your password");
-            }
-            if (string.IsNullOrWhiteSpace(username))
-            {
-                throw new ValidationException("Enter your username");
-            }
+            var errors = new List<string>();
 
-            UserEntity? entity = _userRepo.GetUserByUsername(username) ?? throw new ValidationException("Wrong username or password");
+            if (string.IsNullOrWhiteSpace(username))
+                errors.Add("Enter your username");
+
+            if (string.IsNullOrWhiteSpace(password))
+                errors.Add("Enter your password");
+
+            if (errors.Any())
+                throw new ValidationException(string.Join(" | ", errors));
+
+            var entity = _userRepo.GetUserByUsername(username)
+                ?? throw new InvalidLoginException("Wrong username or password");
 
             if (!_hasher.VerifyPassword(password, entity.Password, entity.Salt))
-                throw new ValidationException("Wrong username or password");
+                throw new InvalidLoginException("Wrong username or password");
 
             return _mapper.Map<User>(entity);
         }
