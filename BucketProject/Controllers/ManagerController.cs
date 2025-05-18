@@ -23,6 +23,10 @@ namespace BucketProject.Controllers
         [HttpGet]
         public IActionResult ManagerSearch(string query, string gender, string nationality, int? minAge, int? maxAge, DateTime? createdAfter, int page = 1)
         {
+            var role = HttpContext.Session.GetString("Role");
+            if (role != "Manager")
+                return RedirectToAction("LogIn", "User");
+
             const int pageSize = 4;
 
             ViewBag.Genders = _statsService.GetAllGenders();
@@ -46,6 +50,10 @@ namespace BucketProject.Controllers
         [HttpGet]
         public IActionResult ManagerStats()
         {
+            var role = HttpContext.Session.GetString("Role");
+            if (role != "Manager")
+                return RedirectToAction("LogIn", "User");
+
             var userStats = _statsService.GetUserRegistrationsPerMonth();
             ViewBag.UserLabels = userStats.Select(s => s.Period).ToList();
             ViewBag.UserData = userStats.Select(s => s.Count).ToList();
