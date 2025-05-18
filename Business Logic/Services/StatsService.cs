@@ -381,30 +381,22 @@ namespace BucketProject.BLL.Business_Logic.Services
         }
         public List<User> SearchUsers(string query, string gender, string nationality, int? minAge, int? maxAge, DateTime? createdAfter)
         {
-            List<UserEntity> entities = _managerRepo.GetAllUsers(); 
-            List<User> users = _mapper.Map<List<User>>(entities);
-            DateTime today = DateTime.Today;
-
-            return users
-                .Where(u =>
-                    (string.IsNullOrEmpty(query) || u.Username.Contains(query, StringComparison.OrdinalIgnoreCase) || u.Email.Contains(query, StringComparison.OrdinalIgnoreCase)) &&
-                    (string.IsNullOrEmpty(gender) || u.Gender == gender) &&
-                    (string.IsNullOrEmpty(nationality) || u.Nationality == nationality) &&
-                    (!minAge.HasValue || CalculateAge(u.DateOfBirth) >= minAge.Value) &&
-                    (!maxAge.HasValue || CalculateAge(u.DateOfBirth) <= maxAge.Value) &&
-                    (!createdAfter.HasValue || u.CreatedAt >= DateOnly.FromDateTime(createdAfter.Value))
-                )
-                .ToList();
+            var userEntities = _managerRepo.SearchUsers(query, gender, nationality, minAge, maxAge, createdAfter);
+            return _mapper.Map<List<User>>(userEntities);
         }
-
-        private int CalculateAge(DateTime dob)
+        public List<string> GetAllGenders()
         {
-            var today = DateTime.Today;
-            var age = today.Year - dob.Year;
-            if (dob > today.AddYears(-age)) age--;
-            return age;
+            return _managerRepo.GetAllDistinctGenders();
         }
 
+        public List<string> GetAllNationalities()
+        {
+            return _managerRepo.GetAllDistinctNationalities();
+        }
 
     }
+
+
 }
+
+

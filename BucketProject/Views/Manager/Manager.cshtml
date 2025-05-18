@@ -1,26 +1,23 @@
 ﻿@{
     ViewData["Title"] = "Manager";
 }
-
 @model List<User>
 
 <h2>Manager Dashboard</h2>
 
-<form asp-action="Manager" method="get">
-    <input type="text" name="query" placeholder="Search by username or email " value="@Context.Request.Query["query"]" />
+<form id="userFilterForm" method="get">
+    <input type="text" name="query" placeholder="Search by username or email" value="@Context.Request.Query["query"]" />
 
     <select name="gender">
         <option value="">All Genders</option>
         @{
-            var genderQuery = Context.Request.Query["nationality"].ToString();
+            var genderQuery = Context.Request.Query["gender"].ToString();
         }
         @foreach (var gen in (ViewBag.Genders as List<string> ?? new List<string>()))
         {
             <option value="@gen" selected="@(gen == genderQuery)">@gen</option>
         }
-
     </select>
-
 
     <select name="nationality">
         <option value="">All Nationalities</option>
@@ -31,47 +28,44 @@
         {
             <option value="@nat" selected="@(nat == nationalityQuery)">@nat</option>
         }
-
     </select>
-
 
     <input type="number" name="minAge" placeholder="Min Age" value="@Context.Request.Query["minAge"]" />
     <input type="number" name="maxAge" placeholder="Max Age" value="@Context.Request.Query["maxAge"]" />
     <input type="date" name="createdAfter" value="@Context.Request.Query["createdAfter"]" />
-
-    <button type="submit">Search</button>
 </form>
 
-<hr />
+<!-- ✅ User Table Container -->
+<div id="userTableContainer">
+    @await Html.PartialAsync("_UserTablePartial", Model)
+</div>
 
-<table>
-    <thead>
-        <tr>
-            <th>Username</th>
-            <th>Email</th>
-            <th>Gender</th>
-            <th>Nationality</th>
-            <th>Age</th>
-            <th>Created At</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var user in Model)
-        {
-            var age = DateTime.Today.Year - user.DateOfBirth.Year;
-            if (user.DateOfBirth.Date > DateTime.Today.AddYears(-age)) age--;
+<!-- ✅ AJAX Script -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    function loadUsers() {
+        $.ajax({
+            url: '@Url.Action("FilterUsersAjax", "Manager")',
+            type: 'GET',
+            data: $('#userFilterForm').serialize(),
+            success: function (result) {
+                $('#userTableContainer').html(result);
+            },
+            error: function () {
+                alert("Failed to load users. Please try again.");
+            }
+        });
+    }
 
-            <tr>
-                <td>@user.Username</td>
-                <td>@user.Email</td>
-                <td>@user.Gender</td>
-                <td>@user.Nationality</td>
-                <td>@age</td>
-                <td>@user.CreatedAt.ToString("yyyy-MM-dd")</td>
-            </tr>
-        }
-    </tbody>
-</table>
+    // Automatically trigger when filters change or input
+    $('#userFilterForm input, #userFilterForm select').on('change input', function () {
+        loadUsers();
+    });
+</script>
+
+       
+
+
 
 
 <div class="circle-stats-container">

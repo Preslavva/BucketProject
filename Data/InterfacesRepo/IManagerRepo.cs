@@ -14,6 +14,8 @@ namespace BucketProject.DAL.Data.InterfacesRepo
         List<GoalEntity> LoadAllPersonalGoals();
         List<GoalEntity> LoadAllSharedGoals();
         int GetActiveUsersCount();
-
+        List<UserEntity> SearchUsers(string query, string gender, string nationality, int? minAge, int? maxAge, DateTime? createdAfter);
+        List<string> GetAllDistinctNationalities();
+        List<string> GetAllDistinctGenders();
     }
 }

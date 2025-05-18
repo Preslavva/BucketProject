@@ -12,33 +12,34 @@ namespace BucketProject.Controllers
     {
 
         private readonly IStatsService _statsService;
-        private readonly IManagerRepo _managerRepo;
         private readonly IMapper _mapper;
 
 
 
-        public ManagerController(IStatsService statsService, IManagerRepo managerRepo, IMapper mapper)
+        public ManagerController(IStatsService statsService, IMapper mapper)
         {
             _statsService = statsService;
-            _managerRepo = managerRepo;
             _mapper = mapper;
         }
         public IActionResult Manager(string query, string gender, string nationality, int? minAge, int? maxAge, DateTime? createdAfter)
         {
-            // Load and map users (filtered or all)
-            var users = _statsService.SearchUsers(query, gender, nationality, minAge, maxAge, createdAfter);
-            users ??= new List<User>();
+            ViewBag.Genders = _statsService.GetAllGenders();
+            ViewBag.Nationalities = _statsService.GetAllNationalities();
 
-            // Charts
-            var userStats = _statsService.GetUserRegistrationsPerMonth();
+            List<User> users = HasActiveFilters(query, gender, nationality, minAge, maxAge, createdAfter)
+                ? _statsService.SearchUsers(query, gender, nationality, minAge, maxAge, createdAfter)
+                : new List<User>();
+
+           
+            List<StatsDTO> userStats = _statsService.GetUserRegistrationsPerMonth();
             ViewBag.UserLabels = userStats.Select(s => s.Period).ToList();
             ViewBag.UserData = userStats.Select(s => s.Count).ToList();
 
-            var goalStats = _statsService.GetGoalsPerMonth();
+            List<StatsDTO> goalStats = _statsService.GetGoalsPerMonth();
             ViewBag.GoalLabels = goalStats.Select(s => s.Period).ToList();
             ViewBag.GoalData = goalStats.Select(s => s.Count).ToList();
 
-            var summary = _statsService.GetGoalSummaryStatsManager();
+           StatsDTO summary = _statsService.GetGoalSummaryStatsManager();
             ViewBag.TotalGoals = summary.TotalGoals;
             ViewBag.PersonalGoals = summary.PersonalGoals;
             ViewBag.SharedGoals = summary.SharedGoals;
@@ -46,38 +47,50 @@ namespace BucketProject.Controllers
             ViewBag.AIGoals = summary.AIGoals;
             ViewBag.ActiveUsersCount = summary.ActiveUsersCount;
 
-            var typeStats = _statsService.GetGoalTypeStatisticsManager();
-            var categoryStats = _statsService.GetGoalCategoryStatisticsManager();
+            List<StatsDTO> typeStats = _statsService.GetGoalTypeStatisticsManager();
             ViewBag.TypeLabels = typeStats.Select(s => s.Type).ToList();
             ViewBag.TypeData = typeStats.Select(s => s.Count).ToList();
+
+            List<StatsDTO> categoryStats = _statsService.GetGoalCategoryStatisticsManager();
             ViewBag.CategoryLabels = categoryStats.Select(s => s.Category).ToList();
             ViewBag.CategoryData = categoryStats.Select(s => s.Count).ToList();
 
-            var nationalityStats = _statsService.GetUsersNationalityStatistics();
-            var genderStats = _statsService.GetUsersGenderStatistics();
-            var ageStats = _statsService.GetUserAgeGroupStatistics();
+            List<StatsDTO> nationalityStats = _statsService.GetUsersNationalityStatistics();
             ViewBag.NationalityLabels = nationalityStats.Select(s => s.Nationality).ToList();
             ViewBag.NationalityData = nationalityStats.Select(s => s.Count).ToList();
+
+            List<StatsDTO> genderStats = _statsService.GetUsersGenderStatistics();
             ViewBag.GenderLabels = genderStats.Select(s => s.Gender).ToList();
             ViewBag.GenderData = genderStats.Select(s => s.Count).ToList();
+
+            List<StatsDTO> ageStats = _statsService.GetUserAgeGroupStatistics();
             ViewBag.AgeLabels = ageStats.Select(s => s.Label).ToList();
             ViewBag.AgeData = ageStats.Select(s => s.Count).ToList();
 
-            ViewBag.Nationalities = _managerRepo.GetAllUsers()
-                .Select(u => u.Nationality)
-                .Distinct()
-                .OrderBy(n => n)
-                .ToList();
-
-            ViewBag.Genders = _managerRepo.GetAllUsers()
-               .Select(u => u.Gender)
-               .Distinct()
-               .OrderBy(n => n)
-               .ToList();
-
-            return View(users); 
+            return View(users);
         }
 
+
+
+        private bool HasActiveFilters(string query, string gender, string nationality, int? minAge, int? maxAge, DateTime? createdAfter)
+        {
+            return !string.IsNullOrWhiteSpace(query)
+                || !string.IsNullOrWhiteSpace(gender)
+                || !string.IsNullOrWhiteSpace(nationality)
+                || minAge.HasValue
+                || maxAge.HasValue
+                || createdAfter.HasValue;
+        }
+
+        [HttpGet]
+        public IActionResult FilterUsersAjax(string query, string gender, string nationality, int? minAge, int? maxAge, DateTime? createdAfter)
+        {
+            List<User> users = HasActiveFilters(query, gender, nationality, minAge, maxAge, createdAfter)
+                ? _statsService.SearchUsers(query, gender, nationality, minAge, maxAge, createdAfter)
+                : new List<User>();
+
+            return PartialView("_UserTablePartial", users);
+        }
 
 
     }

@@ -1,0 +1,37 @@
+﻿@model List<User>
+
+@if (!Model.Any())
+{
+    <p>No users found.</p>
+}
+else
+{
+    <table>
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Gender</th>
+                <th>Nationality</th>
+                <th>Age</th>
+                <th>Created At</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in Model)
+            {
+                var age = DateTime.Today.Year - user.DateOfBirth.Year;
+                if (user.DateOfBirth > DateTime.Today.AddYears(-age)) age--;
+
+                <tr>
+                    <td>@user.Username</td>
+                    <td>@user.Email</td>
+                    <td>@user.Gender</td>
+                    <td>@user.Nationality</td>
+                    <td>@age</td>
+                    <td>@user.CreatedAt.ToString("yyyy-MM-dd")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
