@@ -35,7 +35,6 @@ else
                         {
                             <span style="color: #888; font-style: italic;">No picture</span>
                         }
-
                     </td>
                     <td>@user.Username</td>
                     <td>@user.Email</td>
@@ -47,4 +46,16 @@ else
             }
         </tbody>
     </table>
+
+    @if (ViewBag.TotalPages > 1)
+    {
+        <div class="pagination mt-3">
+            @for (int i = 1; i <= (int)ViewBag.TotalPages; i++)
+            {
+                var activeClass = i == (int)ViewBag.CurrentPage ? "active-page" : "";
+                <a href="javascript:void(0);" class="page-link @activeClass" data-page="@i">@i</a>
+            }
+        </div>
+    }
 }
+

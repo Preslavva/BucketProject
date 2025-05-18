@@ -355,15 +355,145 @@ WHERE IsDeleted = 0;
 
             return count;
         }
-        public List<UserEntity> SearchUsers(string query, string gender, string nationality, int? minAge, int? maxAge, DateTime? createdAfter)
+        public List<UserEntity> SearchUsers(string query, string gender, string nationality, int? minAge, int? maxAge, DateTime? createdAfter, int page, int pageSize)
         {
             List<UserEntity> users = new List<UserEntity>();
             DateTime today = DateTime.Today;
 
-            using (var connection = GetSqlConnection())
+            try
             {
+                using (var connection = GetSqlConnection())
+                {
+                    var command = new SqlCommand(@"
+SELECT * FROM [User]
+WHERE (@query IS NULL OR Username LIKE '%' + @query + '%' OR Email LIKE '%' + @query + '%')
+  AND (@gender IS NULL OR Gender = @gender)
+  AND (@nationality IS NULL OR Nationality = @nationality)
+  AND (@minAge IS NULL OR DATEDIFF(YEAR, DateOfBirth, @today) >= @minAge)
+  AND (@maxAge IS NULL OR DATEDIFF(YEAR, DateOfBirth, @today) <= @maxAge)
+  AND (@createdAfter IS NULL OR CreatedAt >= @createdAfter)
+ORDER BY UserId
+OFFSET @Offset ROWS
+FETCH NEXT @PageSize ROWS ONLY;
+", connection);
+
+                    int offset = (page - 1) * pageSize;
+
+                    command.Parameters.AddWithValue("@query", string.IsNullOrWhiteSpace(query) ? DBNull.Value : query);
+                    command.Parameters.AddWithValue("@gender", string.IsNullOrWhiteSpace(gender) ? DBNull.Value : gender);
+                    command.Parameters.AddWithValue("@nationality", string.IsNullOrWhiteSpace(nationality) ? DBNull.Value : nationality);
+                    command.Parameters.AddWithValue("@minAge", minAge.HasValue ? (object)minAge.Value : DBNull.Value);
+                    command.Parameters.AddWithValue("@maxAge", maxAge.HasValue ? (object)maxAge.Value : DBNull.Value);
+                    command.Parameters.AddWithValue("@createdAfter", createdAfter.HasValue ? (object)createdAfter.Value : DBNull.Value);
+                    command.Parameters.AddWithValue("@today", today);
+                    command.Parameters.AddWithValue("@Offset", offset);
+                    command.Parameters.AddWithValue("@PageSize", pageSize);
+
+                    connection.Open();
+                    using var reader = command.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        var user = new UserEntity(
+                            id: reader.GetInt32(reader.GetOrdinal("UserId")),
+                            username: reader.GetString(reader.GetOrdinal("Username")),
+                            email: reader.GetString(reader.GetOrdinal("Email")),
+                            password: reader.GetString(reader.GetOrdinal("Password")),
+                            picture: reader["Picture"] as byte[],
+                            salt: reader.GetString(reader.GetOrdinal("Salt")),
+                            nationality: reader.GetString(reader.GetOrdinal("Nationality")),
+                            dateOfBirth: reader.GetDateTime(reader.GetOrdinal("DateOfBirth")),
+                            gender: reader.GetString(reader.GetOrdinal("Gender")),
+                            createdAt: DateOnly.FromDateTime(reader.GetDateTime(reader.GetOrdinal("CreatedAt"))),
+                            role: reader.GetString(reader.GetOrdinal("Role"))
+                        );
+
+                        users.Add(user);
+                    }
+                }
+            }
+            catch (SqlException sqlEx)
+            {
+                _logger.LogError(sqlEx, "SQL error in SearchUsers");
+                throw new Exception("A database error occurred while searching for users.", sqlEx);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unexpected error in SearchUsers");
+                throw;
+            }
+
+            return users;
+        }
+
+
+        public List<string> GetAllDistinctNationalities()
+        {
+            var result = new List<string>();
+
+            try
+            {
+                using var conn = GetSqlConnection();
+                var cmd = new SqlCommand("SELECT DISTINCT Nationality FROM [User] ORDER BY Nationality", conn);
+
+                conn.Open();
+                using var reader = cmd.ExecuteReader();
+                while (reader.Read())
+                    result.Add(reader.GetString(0));
+            }
+            catch (SqlException sqlEx)
+            {
+                _logger.LogError(sqlEx, "SQL error in GetAllDistinctNationalities");
+                throw new Exception("A database error occurred while retrieving nationalities.", sqlEx);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unexpected error in GetAllDistinctNationalities");
+                throw;
+            }
+
+            return result;
+        }
+
+
+        public List<string> GetAllDistinctGenders()
+        {
+            var result = new List<string>();
+
+            try
+            {
+                using var conn = GetSqlConnection();
+                var cmd = new SqlCommand("SELECT DISTINCT Gender FROM [User] ORDER BY Gender", conn);
+
+                conn.Open();
+                using var reader = cmd.ExecuteReader();
+                while (reader.Read())
+                    result.Add(reader.GetString(0));
+            }
+            catch (SqlException sqlEx)
+            {
+                _logger.LogError(sqlEx, "SQL error in GetAllDistinctGenders");
+                throw new Exception("A database error occurred while retrieving genders.", sqlEx);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unexpected error in GetAllDistinctGenders");
+                throw;
+            }
+
+            return result;
+        }
+        public int CountFilteredUsers(string query, string gender, string nationality, int? minAge, int? maxAge, DateTime? createdAfter)
+        {
+            int count = 0;
+            DateTime today = DateTime.Today;
+
+            try
+            {
+                using var connection = GetSqlConnection();
                 var command = new SqlCommand(@"
-            SELECT * FROM [User]
+            SELECT COUNT(*)
+            FROM [User]
             WHERE (@query IS NULL OR Username LIKE '%' + @query + '%' OR Email LIKE '%' + @query + '%')
               AND (@gender IS NULL OR Gender = @gender)
               AND (@nationality IS NULL OR Nationality = @nationality)
@@ -372,7 +502,6 @@ WHERE IsDeleted = 0;
               AND (@createdAfter IS NULL OR CreatedAt >= @createdAfter)
         ", connection);
 
-    
                 command.Parameters.AddWithValue("@query", string.IsNullOrWhiteSpace(query) ? DBNull.Value : query);
                 command.Parameters.AddWithValue("@gender", string.IsNullOrWhiteSpace(gender) ? DBNull.Value : gender);
                 command.Parameters.AddWithValue("@nationality", string.IsNullOrWhiteSpace(nationality) ? DBNull.Value : nationality);
@@ -382,60 +511,19 @@ WHERE IsDeleted = 0;
                 command.Parameters.AddWithValue("@today", today);
 
                 connection.Open();
-                using var reader = command.ExecuteReader();
-
-                while (reader.Read())
-                {
-                    var user = new UserEntity(
-                        id: reader.GetInt32(reader.GetOrdinal("UserId")),
-                        username: reader.GetString(reader.GetOrdinal("Username")),
-                        email: reader.GetString(reader.GetOrdinal("Email")),
-                        password: reader.GetString(reader.GetOrdinal("Password")),
-                        picture: reader["Picture"] as byte[],
-                        salt: reader.GetString(reader.GetOrdinal("Salt")),
-                        nationality: reader.GetString(reader.GetOrdinal("Nationality")),
-                        dateOfBirth: reader.GetDateTime(reader.GetOrdinal("DateOfBirth")),
-                        gender: reader.GetString(reader.GetOrdinal("Gender")),
-                        createdAt: DateOnly.FromDateTime(reader.GetDateTime(reader.GetOrdinal("CreatedAt"))),
-                        role: reader.GetString(reader.GetOrdinal("Role"))
-                    );
-
-                    users.Add(user);
-                }
+                count = (int)command.ExecuteScalar();
+            }
+            catch (SqlException ex)
+            {
+                _logger.LogError(ex, "SQL error in CountFilteredUsers");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unexpected error in CountFilteredUsers");
             }
 
-            return users;
+            return count;
         }
-        public List<string> GetAllDistinctNationalities()
-        {
-            var result = new List<string>();
-
-            using var conn = GetSqlConnection();
-            var cmd = new SqlCommand("SELECT DISTINCT Nationality FROM [User] ORDER BY Nationality", conn);
-
-            conn.Open();
-            using var reader = cmd.ExecuteReader();
-            while (reader.Read())
-                result.Add(reader.GetString(0));
-
-            return result;
-        }
-
-        public List<string> GetAllDistinctGenders()
-        {
-            var result = new List<string>();
-
-            using var conn = GetSqlConnection();
-            var cmd = new SqlCommand("SELECT DISTINCT Gender FROM [User] ORDER BY Gender", conn);
-
-            conn.Open();
-            using var reader = cmd.ExecuteReader();
-            while (reader.Read())
-                result.Add(reader.GetString(0));
-
-            return result;
-        }
-
     }
-}
+    }
 

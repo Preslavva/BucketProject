@@ -44,7 +44,7 @@
                     }
                     else if (role?.Equals("Manager", StringComparison.OrdinalIgnoreCase) == true)
                     {
-                        <a class="navbar-brand d-flex align-items-center" asp-controller="Manager" asp-action="Manager">
+                        <a class="navbar-brand d-flex align-items-center" asp-controller="Manager" asp-action="ManagerSearch">
                             <img src="~/images/logo.png"
                                  alt="Logo"
                                  height="80"
@@ -114,7 +114,10 @@
                             else if (role?.Equals("Manager", StringComparison.OrdinalIgnoreCase) == true)
                             {
                                 <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Manager" asp-action="Manager">Manager Panel</a>
+                                    <a class="nav-link" asp-controller="Manager" asp-action="ManagerSearch">Manager Search</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="Manager" asp-action="ManagerStats">Manager Stats</a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link text-danger" asp-controller="User" asp-action="LogOut">Log out</a>

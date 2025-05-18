@@ -99,7 +99,7 @@ namespace BucketProject.UI.BucketProject.Controllers
                 HttpContext.Session.SetString("Role", loggedUser.Role);
 
                 return loggedUser.Role == "Manager"
-                    ? RedirectToAction("Manager", "Manager")
+                    ? RedirectToAction("ManagerSearch", "Manager")
                     : RedirectToAction("Index", "Home");
             }
             catch (ValidationException ex)

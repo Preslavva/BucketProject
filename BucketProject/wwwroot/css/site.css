@@ -306,4 +306,24 @@ input[type="file"] {
 
 .incomplete {
     border: 10px solid rgba(255, 99, 132, 0.8);
-} 
+}
+pagination {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.page-link {
+    padding: 6px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    cursor: pointer;
+    text-decoration: none;
+    color: #007bff;
+}
+
+    .page-link.active-page {
+        background-color: #007bff;
+        color: white;
+        pointer-events: none;
+    }

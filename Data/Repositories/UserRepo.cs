@@ -21,25 +21,28 @@ namespace BucketProject.DAL.Data.Repositories
 
         public bool Register(UserEntity user)
         {
-               using SqlConnection connection = GetSqlConnection();
+            try
+            {
+                using SqlConnection connection = GetSqlConnection();
                 connection.Open();
 
-                string checkSql = @"SELECT COUNT(*) FROM [User] WHERE [Username] = @Username or Email = @Email";
+                string checkSql = @"SELECT COUNT(*) FROM [User] WHERE [Username] = @Username OR Email = @Email";
                 using SqlCommand checkCommand = new SqlCommand(checkSql, connection);
                 checkCommand.Parameters.AddWithValue("@Username", user.Username);
                 checkCommand.Parameters.AddWithValue("@Email", user.Email);
 
-
                 int count = (int)checkCommand.ExecuteScalar();
-
                 if (count > 0)
                 {
                     throw new ApplicationException("Username or Email is already taken.");
                 }
 
+                string insertSql = @"
+            INSERT INTO [User] 
+                ([Username], Email, [Password], Salt, Nationality, DateOfBirth, Gender, CreatedAt, Role) 
+            VALUES 
+                (@Username, @Email, @Password, @Salt, @Nationality, @DateOfBirth, @Gender, @CreatedAt, @Role)";
 
-                string insertSql = @"INSERT INTO [User] ([Username], Email, [Password], Salt, Nationality, DateOfBirth, Gender, CreatedAt, Role) 
-                             VALUES (@Username, @Email, @Password, @Salt, @Nationality, @DateOfBirth, @Gender, @CreatedAt, @Role)";
                 using SqlCommand insertCommand = new SqlCommand(insertSql, connection);
                 insertCommand.Parameters.AddWithValue("@Username", user.Username);
                 insertCommand.Parameters.AddWithValue("@Email", user.Email);
@@ -51,11 +54,24 @@ namespace BucketProject.DAL.Data.Repositories
                 insertCommand.Parameters.AddWithValue("@CreatedAt", user.CreatedAt);
                 insertCommand.Parameters.AddWithValue("@Role", "User");
 
-
-
                 insertCommand.ExecuteNonQuery();
                 return true;
-            
+            }
+            catch (SqlException sqlEx)
+            {
+                _logger.LogError(sqlEx, "SQL error in Register. Username: {Username}, Email: {Email}", user.Username, user.Email);
+                throw new Exception("A database error occurred during registration.", sqlEx);
+            }
+            catch (ApplicationException appEx)
+            {
+                _logger.LogWarning(appEx, "Validation error in Register. Username: {Username}, Email: {Email}", user.Username, user.Email);
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unexpected error in Register. Username: {Username}, Email: {Email}", user.Username, user.Email);
+                throw;
+            }
         }
 
 

@@ -379,11 +379,12 @@ namespace BucketProject.BLL.Business_Logic.Services
             if (age <= 60) return "46–60";
             return "60+";
         }
-        public List<User> SearchUsers(string query, string gender, string nationality, int? minAge, int? maxAge, DateTime? createdAfter)
+        public List<User> SearchUsers(string query, string gender, string nationality, int? minAge, int? maxAge, DateTime? createdAfter, int page, int pageSize)
         {
-            var userEntities = _managerRepo.SearchUsers(query, gender, nationality, minAge, maxAge, createdAfter);
+            List<UserEntity> userEntities = _managerRepo.SearchUsers(query, gender, nationality, minAge, maxAge, createdAfter, page, pageSize);
             return _mapper.Map<List<User>>(userEntities);
         }
+
         public List<string> GetAllGenders()
         {
             return _managerRepo.GetAllDistinctGenders();
@@ -392,6 +393,10 @@ namespace BucketProject.BLL.Business_Logic.Services
         public List<string> GetAllNationalities()
         {
             return _managerRepo.GetAllDistinctNationalities();
+        }
+        public int GetFilteredUserCount(string query, string gender, string nationality, int? minAge, int? maxAge, DateTime? createdAfter)
+        {
+            return _managerRepo.CountFilteredUsers(query, gender, nationality, minAge, maxAge, createdAfter);
         }
 
     }

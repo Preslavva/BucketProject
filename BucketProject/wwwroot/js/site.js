@@ -21,11 +21,13 @@
     });
 })();
 
-function loadUsers() {
+function loadUsers(page = 1) {
+    const queryString = $('#userFilterForm').serialize() + '&page=' + page;
+
     $.ajax({
         url: '/Manager/FilterUsersAjax',
         type: 'GET',
-        data: $('#userFilterForm').serialize(),
+        data: queryString,
         success: function (result) {
             $('#userTableContainer').html(result);
         },
@@ -35,10 +37,16 @@ function loadUsers() {
     });
 }
 
-$(document).ready(function () {
-    $('#userFilterForm input, #userFilterForm select').on('change input', function () {
-        loadUsers();
-    });
+$(document).on('click', '.page-link', function (e) {
+    e.preventDefault();
+    const selectedPage = $(this).data('page');
+    if (selectedPage) {
+        loadUsers(selectedPage);
+    }
+});
+
+$('#userFilterForm input, #userFilterForm select').on('change input', function () {
+    loadUsers(1);
 });
 
 $(document).ready(function () {

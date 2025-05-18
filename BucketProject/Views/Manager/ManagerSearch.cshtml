@@ -1,0 +1,71 @@
+﻿@{
+    ViewData["Title"] = "Manager Search";
+}
+@model List<User>
+
+<h2>Manager Search</h2>
+
+<div style="display: flex; flex-direction: column; max-width: 1000px; margin-bottom: 40px;">
+    <div style="flex: 1 1 60%; min-width: 300px; max-height: 100%; overflow-y: auto; padding-right: 20px;">
+
+        <form id="userFilterForm" method="get">
+            <input type="text" name="query" placeholder="Search by username or email" value="@Context.Request.Query["query"]" />
+
+            <select name="gender">
+                <option value="">All Genders</option>
+                @{
+                    var genderQuery = Context.Request.Query["gender"].ToString();
+                }
+                @foreach (var gen in (ViewBag.Genders as List<string> ?? new List<string>()))
+                {
+                    <option value="@gen" selected="@(gen == genderQuery)">@gen</option>
+                }
+            </select>
+
+            <select name="nationality">
+                <option value="">All Nationalities</option>
+                @{
+                    var nationalityQuery = Context.Request.Query["nationality"].ToString();
+                }
+                @foreach (var nat in (ViewBag.Nationalities as List<string> ?? new List<string>()))
+                {
+                    <option value="@nat" selected="@(nat == nationalityQuery)">@nat</option>
+                }
+            </select>
+
+            <input type="number" name="minAge" placeholder="Min Age" value="@Context.Request.Query["minAge"]" />
+            <input type="number" name="maxAge" placeholder="Max Age" value="@Context.Request.Query["maxAge"]" />
+            <input type="date" name="createdAfter" value="@Context.Request.Query["createdAfter"]" />
+        </form>
+
+        <div id="userTableContainer">
+            @await Html.PartialAsync("_UserTablePartial", Model)
+        </div>
+
+   
+        <noscript>
+            @if (ViewBag.TotalPages > 1)
+            {
+                <div class="pagination mt-3">
+                    @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                    {
+                        var isActive = i == ViewBag.CurrentPage ? "active-page" : "";
+                        <a class="page-link @isActive"
+                           href="@Url.Action("ManagerSearch", new {
+                               query = Context.Request.Query["query"],
+                               gender = Context.Request.Query["gender"],
+                               nationality = Context.Request.Query["nationality"],
+                               minAge = Context.Request.Query["minAge"],
+                               maxAge = Context.Request.Query["maxAge"],
+                               createdAfter = Context.Request.Query["createdAfter"],
+                               page = i
+                           })">@i</a>
+                    }
+                </div>
+            }
+        </noscript>
+
+    </div>
+</div>
+
+

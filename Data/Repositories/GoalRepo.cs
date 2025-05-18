@@ -770,36 +770,52 @@ ORDER BY g.Deadline;
     public List<UserEntity> LoadSharedUsersForGoal(int goalId, int currentId)
     {
         var list = new List<UserEntity>();
+
         const string sql = @"
 SELECT DISTINCT
   u.UserId, 
   u.Username, 
   u.Picture
 FROM dbo.User_Goal ug
-JOIN dbo.[User]  u
+JOIN dbo.[User] u
   ON ug.UserId = u.UserId
-WHERE ug.GoalId       = @GoalId
-  AND ug.UserId      <> @CurrentUserId;
-
+WHERE ug.GoalId = @GoalId
+  AND ug.UserId <> @CurrentUserId;
 ";
-        using var conn = GetSqlConnection();
-        conn.Open();
-        using var cmd = new SqlCommand(sql, conn);
-        cmd.Parameters.AddWithValue("@GoalId", goalId);
-        cmd.Parameters.AddWithValue("@CurrentUserId", currentId);
-        using var rdr = cmd.ExecuteReader();
-        while (rdr.Read())
+
+        try
         {
-            list.Add(new UserEntity(
-              rdr.GetInt32(rdr.GetOrdinal("UserId")),
-              rdr.GetString(rdr.GetOrdinal("Username")),
-              rdr.IsDBNull(rdr.GetOrdinal("Picture"))
-                ? null
-                : (byte[])rdr["Picture"]
-            ));
+            using var conn = GetSqlConnection();
+            conn.Open();
+
+            using var cmd = new SqlCommand(sql, conn);
+            cmd.Parameters.AddWithValue("@GoalId", goalId);
+            cmd.Parameters.AddWithValue("@CurrentUserId", currentId);
+
+            using var rdr = cmd.ExecuteReader();
+            while (rdr.Read())
+            {
+                list.Add(new UserEntity(
+                    rdr.GetInt32(rdr.GetOrdinal("UserId")),
+                    rdr.GetString(rdr.GetOrdinal("Username")),
+                    rdr.IsDBNull(rdr.GetOrdinal("Picture")) ? null : (byte[])rdr["Picture"]
+                ));
+            }
         }
+        catch (SqlException sqlEx)
+        {
+            _logger.LogError(sqlEx, "SQL error in LoadSharedUsersForGoal. GoalId: {GoalId}, CurrentUserId: {CurrentUserId}", goalId, currentId);
+            throw new Exception("A database error occurred while loading shared users for the goal.", sqlEx);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Unexpected error in LoadSharedUsersForGoal. GoalId: {GoalId}, CurrentUserId: {CurrentUserId}", goalId, currentId);
+            throw;
+        }
+
         return list;
     }
+
 
     public List<GoalEntity> LoadSharedGoalsCompletedByOthers(int currentUserId)
     {
@@ -840,67 +856,78 @@ WHERE
             ug2.UserId = @CurrentUserId
             AND ug2.GoalId = ug.GoalId
     )
-   AND NOT EXISTS (
-    SELECT 1
-    FROM DismissedNotifications dn
-    WHERE 
-        dn.UserId = @CurrentUserId
-        AND dn.GoalId = ug.GoalId
-        AND dn.NotificationType = 'Completion'
-        AND dn.TriggeredByUserId = ug.UserId
-)
-
-
-
+    AND NOT EXISTS (
+        SELECT 1
+        FROM DismissedNotifications dn
+        WHERE 
+            dn.UserId = @CurrentUserId
+            AND dn.GoalId = ug.GoalId
+            AND dn.NotificationType = 'Completion'
+            AND dn.TriggeredByUserId = ug.UserId
+    );
 ";
 
-        using var conn = GetSqlConnection();
-        conn.Open();
-        using var cmd = new SqlCommand(sql, conn);
-        cmd.Parameters.AddWithValue("@CurrentUserId", currentUserId);
-
-        using var rdr = cmd.ExecuteReader();
-        while (rdr.Read())
+        try
         {
-           
-            var goal = new GoalEntity(
-     id: rdr.GetInt32(rdr.GetOrdinal("Id")),
-     category: Enum.Parse<Category>(rdr.GetString(rdr.GetOrdinal("Category"))),
-     type: Enum.Parse<GoalType>(rdr.GetString(rdr.GetOrdinal("Type"))),
-     description: rdr.GetString(rdr.GetOrdinal("Description")),
-     createdAt: rdr.GetDateTime(rdr.GetOrdinal("CreatedAt")),
-     deadline: rdr.IsDBNull(rdr.GetOrdinal("Deadline"))
-                       ? (DateTime?)null
-                       : rdr.GetDateTime(rdr.GetOrdinal("Deadline")),
-     completedAt: rdr.IsDBNull(rdr.GetOrdinal("CompletedAt"))
-                       ? (DateTime?)null
-                       : rdr.GetDateTime(rdr.GetOrdinal("CompletedAt")),
-     isDone: rdr.GetBoolean(rdr.GetOrdinal("IsDone")),
-     isDeleted: rdr.GetBoolean(rdr.GetOrdinal("IsDeleted")),
-     isPostponed: rdr.GetBoolean(rdr.GetOrdinal("IsPostponed")),
-     parentGoalId: rdr.IsDBNull(rdr.GetOrdinal("ParentGoalId"))
-                       ? (int?)null
-                       : rdr.GetInt32(rdr.GetOrdinal("ParentGoalId")),
-     ownerId: rdr.GetInt32(rdr.GetOrdinal("OwnerId"))
- );
+            using var conn = GetSqlConnection();
+            conn.Open();
 
-            goal.Recipients = new List<UserEntity>();
+            using var cmd = new SqlCommand(sql, conn);
+            cmd.Parameters.AddWithValue("@CurrentUserId", currentUserId);
 
-            var completer = new UserEntity(
-                id: rdr.GetInt32(rdr.GetOrdinal("CompleterId")),
-                username: rdr.GetString(rdr.GetOrdinal("CompleterUsername")),
-                picture: rdr.IsDBNull(rdr.GetOrdinal("CompleterPicture"))
-                              ? null
-                              : (byte[])rdr["CompleterPicture"]
-            );
+            using var rdr = cmd.ExecuteReader();
+            while (rdr.Read())
+            {
+                var goal = new GoalEntity(
+                    id: rdr.GetInt32(rdr.GetOrdinal("Id")),
+                    category: Enum.Parse<Category>(rdr.GetString(rdr.GetOrdinal("Category"))),
+                    type: Enum.Parse<GoalType>(rdr.GetString(rdr.GetOrdinal("Type"))),
+                    description: rdr.GetString(rdr.GetOrdinal("Description")),
+                    createdAt: rdr.GetDateTime(rdr.GetOrdinal("CreatedAt")),
+                    deadline: rdr.IsDBNull(rdr.GetOrdinal("Deadline"))
+                              ? (DateTime?)null
+                              : rdr.GetDateTime(rdr.GetOrdinal("Deadline")),
+                    completedAt: rdr.IsDBNull(rdr.GetOrdinal("CompletedAt"))
+                                 ? (DateTime?)null
+                                 : rdr.GetDateTime(rdr.GetOrdinal("CompletedAt")),
+                    isDone: rdr.GetBoolean(rdr.GetOrdinal("IsDone")),
+                    isDeleted: rdr.GetBoolean(rdr.GetOrdinal("IsDeleted")),
+                    isPostponed: rdr.GetBoolean(rdr.GetOrdinal("IsPostponed")),
+                    parentGoalId: rdr.IsDBNull(rdr.GetOrdinal("ParentGoalId"))
+                                  ? (int?)null
+                                  : rdr.GetInt32(rdr.GetOrdinal("ParentGoalId")),
+                    ownerId: rdr.GetInt32(rdr.GetOrdinal("OwnerId"))
+                );
 
-            goal.Recipients.Add(completer);
+                goal.Recipients = new List<UserEntity>();
 
-            list.Add(goal);
+                var completer = new UserEntity(
+                    id: rdr.GetInt32(rdr.GetOrdinal("CompleterId")),
+                    username: rdr.GetString(rdr.GetOrdinal("CompleterUsername")),
+                    picture: rdr.IsDBNull(rdr.GetOrdinal("CompleterPicture"))
+                             ? null
+                             : (byte[])rdr["CompleterPicture"]
+                );
+
+                goal.Recipients.Add(completer);
+
+                list.Add(goal);
+            }
+        }
+        catch (SqlException sqlEx)
+        {
+            _logger.LogError(sqlEx, "SQL error in LoadSharedGoalsCompletedByOthers. CurrentUserId: {CurrentUserId}", currentUserId);
+            throw new Exception("A database error occurred while loading completed shared goals.", sqlEx);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Unexpected error in LoadSharedGoalsCompletedByOthers. CurrentUserId: {CurrentUserId}", currentUserId);
+            throw;
         }
 
         return list;
     }
+
 
     public List<GoalEntity> LoadSharedDeletedGoals(int currentUserId)
     {
@@ -942,54 +969,68 @@ WHERE
             AND dn.NotificationType = 'Deleted'
             AND dn.TriggeredByUserId = g.OwnerId
     );
-
 ";
 
-
-        using var conn = GetSqlConnection();
-        conn.Open();
-        using var cmd = new SqlCommand(sql, conn);
-        cmd.Parameters.AddWithValue("@CurrentUserId", currentUserId);
-
-        using var rdr = cmd.ExecuteReader();
-        while (rdr.Read())
+        try
         {
-            var goal = new GoalEntity(
-                id: rdr.GetInt32(rdr.GetOrdinal("Id")),
-     category: Enum.Parse<Category>(rdr.GetString(rdr.GetOrdinal("Category"))),
-     type: Enum.Parse<GoalType>(rdr.GetString(rdr.GetOrdinal("Type"))),
-     description: rdr.GetString(rdr.GetOrdinal("Description")),
-     createdAt: rdr.GetDateTime(rdr.GetOrdinal("CreatedAt")),
-     deadline: rdr.IsDBNull(rdr.GetOrdinal("Deadline"))
-                       ? (DateTime?)null
-                       : rdr.GetDateTime(rdr.GetOrdinal("Deadline")),
-     completedAt: rdr.IsDBNull(rdr.GetOrdinal("CompletedAt"))
-                       ? (DateTime?)null
-                       : rdr.GetDateTime(rdr.GetOrdinal("CompletedAt")),
-     isDone: rdr.GetBoolean(rdr.GetOrdinal("IsDone")),
-     isDeleted: rdr.GetBoolean(rdr.GetOrdinal("IsDeleted")),
-     isPostponed: rdr.GetBoolean(rdr.GetOrdinal("IsPostponed")),
-     parentGoalId: rdr.IsDBNull(rdr.GetOrdinal("ParentGoalId"))
-                       ? (int?)null
-                       : rdr.GetInt32(rdr.GetOrdinal("ParentGoalId")),
-     ownerId: rdr.GetInt32(rdr.GetOrdinal("OwnerId"))
-            );
+            using var conn = GetSqlConnection();
+            conn.Open();
 
-            goal.Recipients = new List<UserEntity> {
-            new UserEntity(
-                id:   rdr.GetInt32   (rdr.GetOrdinal("DeleterId")),
-                username: rdr.GetString  (rdr.GetOrdinal("DeleterUsername")),
-                picture:  rdr.IsDBNull(rdr.GetOrdinal("DeleterPicture"))
+            using var cmd = new SqlCommand(sql, conn);
+            cmd.Parameters.AddWithValue("@CurrentUserId", currentUserId);
+
+            using var rdr = cmd.ExecuteReader();
+            while (rdr.Read())
+            {
+                var goal = new GoalEntity(
+                    id: rdr.GetInt32(rdr.GetOrdinal("Id")),
+                    category: Enum.Parse<Category>(rdr.GetString(rdr.GetOrdinal("Category"))),
+                    type: Enum.Parse<GoalType>(rdr.GetString(rdr.GetOrdinal("Type"))),
+                    description: rdr.GetString(rdr.GetOrdinal("Description")),
+                    createdAt: rdr.GetDateTime(rdr.GetOrdinal("CreatedAt")),
+                    deadline: rdr.IsDBNull(rdr.GetOrdinal("Deadline"))
+                              ? (DateTime?)null
+                              : rdr.GetDateTime(rdr.GetOrdinal("Deadline")),
+                    completedAt: rdr.IsDBNull(rdr.GetOrdinal("CompletedAt"))
+                                 ? (DateTime?)null
+                                 : rdr.GetDateTime(rdr.GetOrdinal("CompletedAt")),
+                    isDone: rdr.GetBoolean(rdr.GetOrdinal("IsDone")),
+                    isDeleted: rdr.GetBoolean(rdr.GetOrdinal("IsDeleted")),
+                    isPostponed: rdr.GetBoolean(rdr.GetOrdinal("IsPostponed")),
+                    parentGoalId: rdr.IsDBNull(rdr.GetOrdinal("ParentGoalId"))
+                                  ? (int?)null
+                                  : rdr.GetInt32(rdr.GetOrdinal("ParentGoalId")),
+                    ownerId: rdr.GetInt32(rdr.GetOrdinal("OwnerId"))
+                );
+
+                goal.Recipients = new List<UserEntity>
+            {
+                new UserEntity(
+                    id: rdr.GetInt32(rdr.GetOrdinal("DeleterId")),
+                    username: rdr.GetString(rdr.GetOrdinal("DeleterUsername")),
+                    picture: rdr.IsDBNull(rdr.GetOrdinal("DeleterPicture"))
                              ? null
                              : (byte[])rdr["DeleterPicture"]
-            )
-        };
+                )
+            };
 
-            list.Add(goal);
+                list.Add(goal);
+            }
+        }
+        catch (SqlException sqlEx)
+        {
+            _logger.LogError(sqlEx, "SQL error in LoadSharedDeletedGoals. CurrentUserId: {CurrentUserId}", currentUserId);
+            throw new Exception("A database error occurred while loading shared deleted goals.", sqlEx);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Unexpected error in LoadSharedDeletedGoals. CurrentUserId: {CurrentUserId}", currentUserId);
+            throw;
         }
 
         return list;
     }
+
 
     public List<GoalEntity> LoadSharedPostponedGoals(int currentUserId)
     {
@@ -1030,78 +1071,100 @@ WHERE
             AND dn.GoalId = g.Id
             AND dn.NotificationType = 'Postponed'
             AND dn.TriggeredByUserId = g.OwnerId
-   
+    );
+";
 
-    );";
-
-
-        using var conn = GetSqlConnection();
-        conn.Open();
-        using var cmd = new SqlCommand(sql, conn);
-        cmd.Parameters.AddWithValue("@CurrentUserId", currentUserId);
-
-        using var rdr = cmd.ExecuteReader();
-        while (rdr.Read())
+        try
         {
-            var goal = new GoalEntity(
-                id: rdr.GetInt32(rdr.GetOrdinal("Id")),
-     category: Enum.Parse<Category>(rdr.GetString(rdr.GetOrdinal("Category"))),
-     type: Enum.Parse<GoalType>(rdr.GetString(rdr.GetOrdinal("Type"))),
-     description: rdr.GetString(rdr.GetOrdinal("Description")),
-     createdAt: rdr.GetDateTime(rdr.GetOrdinal("CreatedAt")),
-     deadline: rdr.IsDBNull(rdr.GetOrdinal("Deadline"))
-                       ? (DateTime?)null
-                       : rdr.GetDateTime(rdr.GetOrdinal("Deadline")),
-     completedAt: rdr.IsDBNull(rdr.GetOrdinal("CompletedAt"))
-                       ? (DateTime?)null
-                       : rdr.GetDateTime(rdr.GetOrdinal("CompletedAt")),
-     isDone: rdr.GetBoolean(rdr.GetOrdinal("IsDone")),
-     isDeleted: rdr.GetBoolean(rdr.GetOrdinal("IsDeleted")),
-     isPostponed: rdr.GetBoolean(rdr.GetOrdinal("IsPostponed")),
-     parentGoalId: rdr.IsDBNull(rdr.GetOrdinal("ParentGoalId"))
-                       ? (int?)null
-                       : rdr.GetInt32(rdr.GetOrdinal("ParentGoalId")),
-     ownerId: rdr.GetInt32(rdr.GetOrdinal("OwnerId"))
-            );
+            using var conn = GetSqlConnection();
+            conn.Open();
 
-            goal.Recipients = new List<UserEntity> {
-            new UserEntity(
-                id:   rdr.GetInt32   (rdr.GetOrdinal("PostponerId")),
-                username: rdr.GetString  (rdr.GetOrdinal("PostponerUsername")),
-                picture:  rdr.IsDBNull(rdr.GetOrdinal("PostponerPicture"))
-                             ? null
-                             : (byte[])rdr["PostponerPicture"]
-            )
-        };
+            using var cmd = new SqlCommand(sql, conn);
+            cmd.Parameters.AddWithValue("@CurrentUserId", currentUserId);
 
-            list.Add(goal);
+            using var rdr = cmd.ExecuteReader();
+            while (rdr.Read())
+            {
+                var goal = new GoalEntity(
+                    id: rdr.GetInt32(rdr.GetOrdinal("Id")),
+                    category: Enum.Parse<Category>(rdr.GetString(rdr.GetOrdinal("Category"))),
+                    type: Enum.Parse<GoalType>(rdr.GetString(rdr.GetOrdinal("Type"))),
+                    description: rdr.GetString(rdr.GetOrdinal("Description")),
+                    createdAt: rdr.GetDateTime(rdr.GetOrdinal("CreatedAt")),
+                    deadline: rdr.IsDBNull(rdr.GetOrdinal("Deadline")) ? (DateTime?)null : rdr.GetDateTime(rdr.GetOrdinal("Deadline")),
+                    completedAt: rdr.IsDBNull(rdr.GetOrdinal("CompletedAt")) ? (DateTime?)null : rdr.GetDateTime(rdr.GetOrdinal("CompletedAt")),
+                    isDone: rdr.GetBoolean(rdr.GetOrdinal("IsDone")),
+                    isDeleted: rdr.GetBoolean(rdr.GetOrdinal("IsDeleted")),
+                    isPostponed: rdr.GetBoolean(rdr.GetOrdinal("IsPostponed")),
+                    parentGoalId: rdr.IsDBNull(rdr.GetOrdinal("ParentGoalId")) ? (int?)null : rdr.GetInt32(rdr.GetOrdinal("ParentGoalId")),
+                    ownerId: rdr.GetInt32(rdr.GetOrdinal("OwnerId"))
+                );
+
+                goal.Recipients = new List<UserEntity>
+            {
+                new UserEntity(
+                    id: rdr.GetInt32(rdr.GetOrdinal("PostponerId")),
+                    username: rdr.GetString(rdr.GetOrdinal("PostponerUsername")),
+                    picture: rdr.IsDBNull(rdr.GetOrdinal("PostponerPicture")) ? null : (byte[])rdr["PostponerPicture"]
+                )
+            };
+
+                list.Add(goal);
+            }
+        }
+        catch (SqlException sqlEx)
+        {
+            _logger.LogError(sqlEx, "SQL error in LoadSharedPostponedGoals. CurrentUserId: {CurrentUserId}", currentUserId);
+            throw new Exception("A database error occurred while loading postponed shared goals.", sqlEx);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Unexpected error in LoadSharedPostponedGoals. CurrentUserId: {CurrentUserId}", currentUserId);
+            throw;
         }
 
         return list;
     }
 
+
     public void DismissNotification(int userId, int goalId, string type, int triggeredByUserId)
     {
         const string sql = @"
-        IF NOT EXISTS (
-            SELECT 1 FROM DismissedNotifications 
-            WHERE UserId = @UserId AND GoalId = @GoalId 
-              AND NotificationType = @Type AND TriggeredByUserId = @TriggeredByUserId
-        )
-        INSERT INTO DismissedNotifications (UserId, GoalId, NotificationType, TriggeredByUserId, DismissedAt)
-        VALUES (@UserId, @GoalId, @Type, @TriggeredByUserId, GETDATE());";
+    IF NOT EXISTS (
+        SELECT 1 FROM DismissedNotifications 
+        WHERE UserId = @UserId AND GoalId = @GoalId 
+          AND NotificationType = @Type AND TriggeredByUserId = @TriggeredByUserId
+    )
+    INSERT INTO DismissedNotifications (UserId, GoalId, NotificationType, TriggeredByUserId, DismissedAt)
+    VALUES (@UserId, @GoalId, @Type, @TriggeredByUserId, GETDATE());";
 
-        using var conn = GetSqlConnection();
-        conn.Open();
+        try
+        {
+            using var conn = GetSqlConnection();
+            conn.Open();
 
-        using var cmd = new SqlCommand(sql, conn);
-        cmd.Parameters.AddWithValue("@UserId", userId);
-        cmd.Parameters.AddWithValue("@GoalId", goalId);
-        cmd.Parameters.AddWithValue("@Type", type);
-        cmd.Parameters.AddWithValue("@TriggeredByUserId", triggeredByUserId);
+            using var cmd = new SqlCommand(sql, conn);
+            cmd.Parameters.AddWithValue("@UserId", userId);
+            cmd.Parameters.AddWithValue("@GoalId", goalId);
+            cmd.Parameters.AddWithValue("@Type", type);
+            cmd.Parameters.AddWithValue("@TriggeredByUserId", triggeredByUserId);
 
-        cmd.ExecuteNonQuery();
+            cmd.ExecuteNonQuery();
+        }
+        catch (SqlException sqlEx)
+        {
+            _logger.LogError(sqlEx, "SQL error in DismissNotification. UserId: {UserId}, GoalId: {GoalId}, Type: {Type}, TriggeredByUserId: {TriggeredByUserId}",
+                userId, goalId, type, triggeredByUserId);
+            throw new Exception("A database error occurred while dismissing the notification.", sqlEx);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Unexpected error in DismissNotification. UserId: {UserId}, GoalId: {GoalId}, Type: {Type}, TriggeredByUserId: {TriggeredByUserId}",
+                userId, goalId, type, triggeredByUserId);
+            throw;
+        }
     }
+
 
 
     public List<GoalEntity>LoadSharedGoalsOfUser(int userId) 
