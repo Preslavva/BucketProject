@@ -911,7 +911,7 @@ namespace BucketProject.UI.BucketProject.Controllers
             "Hobbies",
             "Psychology",
             "Digital",
-            "Order"
+            "Other"
     };
         }
         [HttpPost]

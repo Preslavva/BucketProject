@@ -397,8 +397,8 @@
                         <div class="me-4">
                             <em>@inv.GoalDescription</em><br />
                             <small>sent @inv.CreatedAt.ToShortDateString()</small>
-                            <small class="ms-3">@inv.Status</small>
-                            <small class="ms-3">@inv.InvitedUsername</small>
+                            <small class="ms-3">Status: @inv.Status</small>
+                            <small class="ms-3">Recipient: @inv.InvitedUsername</small>
                             @if (!string.IsNullOrEmpty(inv.ParentGoalDescription))
                             {
                                 <div>
