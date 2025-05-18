@@ -6,9 +6,10 @@
 }
 else
 {
-    <table>
+    <table class="table table-bordered table-striped">
         <thead>
             <tr>
+                <th>Profile</th>
                 <th>Username</th>
                 <th>Email</th>
                 <th>Gender</th>
@@ -24,6 +25,18 @@ else
                 if (user.DateOfBirth > DateTime.Today.AddYears(-age)) age--;
 
                 <tr>
+                    <td>
+                        @if (user.Picture != null && user.Picture.Length > 0)
+                        {
+                            var imgSrc = $"data:image/jpeg;base64,{Convert.ToBase64String(user.Picture)}";
+                            <img src="@imgSrc" alt="User avatar" style="width: 40px; height: 40px; object-fit: cover; border-radius: 50%;" />
+                        }
+                        else
+                        {
+                            <span style="color: #888; font-style: italic;">No picture</span>
+                        }
+
+                    </td>
                     <td>@user.Username</td>
                     <td>@user.Email</td>
                     <td>@user.Gender</td>

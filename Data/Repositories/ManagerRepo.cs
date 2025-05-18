@@ -357,8 +357,8 @@ WHERE IsDeleted = 0;
         }
         public List<UserEntity> SearchUsers(string query, string gender, string nationality, int? minAge, int? maxAge, DateTime? createdAfter)
         {
-            var users = new List<UserEntity>();
-            var today = DateTime.Today;
+            List<UserEntity> users = new List<UserEntity>();
+            DateTime today = DateTime.Today;
 
             using (var connection = GetSqlConnection())
             {
