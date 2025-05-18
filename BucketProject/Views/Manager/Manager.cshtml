@@ -35,35 +35,11 @@
     <input type="date" name="createdAfter" value="@Context.Request.Query["createdAfter"]" />
 </form>
 
-<!-- ✅ User Table Container -->
 <div id="userTableContainer">
     @await Html.PartialAsync("_UserTablePartial", Model)
 </div>
 
-<!-- ✅ AJAX Script -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
-    function loadUsers() {
-        $.ajax({
-            url: '@Url.Action("FilterUsersAjax", "Manager")',
-            type: 'GET',
-            data: $('#userFilterForm').serialize(),
-            success: function (result) {
-                $('#userTableContainer').html(result);
-            },
-            error: function () {
-                alert("Failed to load users. Please try again.");
-            }
-        });
-    }
 
-    // Automatically trigger when filters change or input
-    $('#userFilterForm input, #userFilterForm select').on('change input', function () {
-        loadUsers();
-    });
-</script>
-
-       
 
 
 
@@ -253,3 +229,5 @@
         });
     });
 </script>
+
+

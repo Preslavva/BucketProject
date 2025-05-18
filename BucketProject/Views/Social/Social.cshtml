@@ -96,24 +96,3 @@
 
 <div id="searchResults"></div>
 
-@section Scripts {
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
-        $(document).ready(function () {
-            $('input[name="searchTerm"]').on('input', function () {
-                var term = $(this).val();
-
-                if (term.length === 0) {
-                    $('#searchResults').html('');
-                    $('#staticSections').show();
-                    return;
-                }
-
-                $.get('/Social/Search', { searchTerm: term }, function (data) {
-                    $('#searchResults').html(data);
-                    $('#staticSections').hide();
-                });
-            });
-        });
-    </script>
-}

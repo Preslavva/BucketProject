@@ -372,7 +372,7 @@ WHERE IsDeleted = 0;
               AND (@createdAfter IS NULL OR CreatedAt >= @createdAfter)
         ", connection);
 
-                // Parameters
+    
                 command.Parameters.AddWithValue("@query", string.IsNullOrWhiteSpace(query) ? DBNull.Value : query);
                 command.Parameters.AddWithValue("@gender", string.IsNullOrWhiteSpace(gender) ? DBNull.Value : gender);
                 command.Parameters.AddWithValue("@nationality", string.IsNullOrWhiteSpace(nationality) ? DBNull.Value : nationality);
