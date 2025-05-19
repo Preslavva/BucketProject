@@ -35,12 +35,11 @@ namespace BucketProject.DAL.Data.Repositories
                     string query = @"
                 SELECT UserId, [Username], Email, [Password], Picture, Salt, Nationality, DateOfBirth, Gender, CreatedAt,[Role]
                 FROM [User]
-                WHERE [Role] <> @Role";
+                WHERE [Role] <> 'Manager'";
 
 
                     using (SqlCommand cmd = new SqlCommand(query, sqlConn))
                     {
-                        cmd.Parameters.AddWithValue("@Role", "Manager");
 
                         using (SqlDataReader reader = cmd.ExecuteReader())
                         {
@@ -372,6 +371,7 @@ WHERE (@query IS NULL OR Username LIKE '%' + @query + '%' OR Email LIKE '%' + @q
   AND (@minAge IS NULL OR DATEDIFF(YEAR, DateOfBirth, @today) >= @minAge)
   AND (@maxAge IS NULL OR DATEDIFF(YEAR, DateOfBirth, @today) <= @maxAge)
   AND (@createdAfter IS NULL OR CreatedAt >= @createdAfter)
+  AND Role <> 'Manager'
 ORDER BY UserId
 OFFSET @Offset ROWS
 FETCH NEXT @PageSize ROWS ONLY;

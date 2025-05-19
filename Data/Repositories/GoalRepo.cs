@@ -846,7 +846,7 @@ WHERE
     ug.UserId   <> @CurrentUserId   
     AND ug.IsDone    = 1             
     AND g.IsDeleted  = 0            
-    AND g.Deadline  >= CAST(GETDATE() AS DATE)
+    AND g.Deadline  > CAST(GETDATE() AS DATE)
     AND EXISTS (
         SELECT 1
         FROM dbo.User_Goal ug2
@@ -957,7 +957,7 @@ JOIN dbo.[User] u ON u.UserId = g.OwnerId
 WHERE 
     g.IsDeleted = 1                 
     AND g.OwnerId <> @CurrentUserId
-    AND (g.Deadline IS NULL OR g.Deadline >= CAST(GETDATE() AS DATE))
+    AND (g.Deadline IS NULL OR g.Deadline > CAST(GETDATE() AS DATE))
     AND NOT EXISTS (
         SELECT 1 
         FROM dbo.DismissedNotifications dn
@@ -1060,7 +1060,7 @@ JOIN dbo.[User] u ON u.UserId = g.OwnerId
 WHERE 
     g.IsPostponed = 1
     AND g.OwnerId <> @CurrentUserId
-    AND (g.Deadline IS NULL OR g.Deadline >= CAST(GETDATE() AS DATE))
+    AND (g.Deadline IS NULL OR g.Deadline > CAST(GETDATE() AS DATE))
     AND NOT EXISTS (
         SELECT 1 
         FROM dbo.DismissedNotifications dn
