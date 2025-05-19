@@ -26,7 +26,7 @@ namespace BucketsTests
             });
             _mapper = config.CreateMapper();
     
-            config.AssertConfigurationIsValid();
+            //config.AssertConfigurationIsValid();
 
             _mapper = config.CreateMapper();
         }

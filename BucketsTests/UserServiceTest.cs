@@ -9,6 +9,7 @@ using BucketProject.BLL.Business_Logic.Mapping;
 using BucketProject.DAL.Models.Entities;
 using BucketProject.BLL.Business_Logic.InterfacesService;
 using System.ComponentModel.DataAnnotations;
+using Data.Exceptions;
 
 
 namespace BucketsTests
@@ -73,20 +74,20 @@ namespace BucketsTests
         }
 
         [TestMethod]
-        public void LogIn_WrongUsername_ThrowsValidationException()
+        public void LogIn_WrongUsername_ThrowsInvalidLoginExceptionException()
         {
             string username = "notexisting";
             string password = "password";
 
             _userRepo.Setup(r => r.GetUserByUsername(username)).Returns((UserEntity?)null);
 
-            var ex = Assert.ThrowsException<ValidationException>(() => _userService.LogIn(username, password));
+            var ex = Assert.ThrowsException<InvalidLoginException>(() => _userService.LogIn(username, password));
 
             Assert.AreEqual("Wrong username or password", ex.Message);
         }
 
         [TestMethod]
-        public void LogIn_WrongPassword_ThrowsValidationException()
+        public void LogIn_WrongPassword_ThrowsInvalidLoginExceptionException()
         {
             string username = "john";
             string password = "wrongpass";
@@ -96,7 +97,7 @@ namespace BucketsTests
             _userRepo.Setup(r => r.GetUserByUsername(username)).Returns(userEntity);
             _hasher.Setup(h => h.VerifyPassword(password, userEntity.Password, userEntity.Salt)).Returns(false);
 
-            var ex = Assert.ThrowsException<ValidationException>(() => _userService.LogIn(username, password));
+            var ex = Assert.ThrowsException<InvalidLoginException>(() => _userService.LogIn(username, password));
 
             Assert.AreEqual("Wrong username or password", ex.Message);
         }
