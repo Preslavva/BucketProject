@@ -24,7 +24,7 @@ Take into consideration that this goal is meant to be accomplished within a {cat
 Write each sub-goal as a plain sentence.    
 Do not number them, do not use bullets, dashes, or any formatting.
 Return exactly four plain sentences, each separated by a line break.
-Ensure the sub-goals are unique and tailored to the main goal every time you generate them";
+Ensure the sub-goals are unique and tailored to the main goal every time you generate them. The lenght of the description of the goal must be below 50 characters.";
 
 
         var client = _httpClientFactory.CreateClient();

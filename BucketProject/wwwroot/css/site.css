@@ -343,3 +343,48 @@ pagination {
     flex-wrap: wrap; /* allows stacking on small screens */
     margin: 40px 0;
 }
+.goal-actions {
+    position: absolute;
+    top: 5px;
+    right: 10px;
+}
+
+.dropdown-menu {
+    min-width: 220px;
+}
+.auto-resize-input {
+    background-color: transparent;
+    border: none;
+    padding: 0;
+    box-shadow: none;
+}
+
+    .auto-resize-input:focus {
+        outline: none;
+        border-bottom: 1px solid #aaa;
+    }
+.custom-dropdown-btn {
+    background: none;
+    border: none;
+    padding: 0.5rem;
+    border-radius: 50%;
+    outline: none;
+    box-shadow: none;
+}
+
+    .custom-dropdown-btn:focus,
+    .custom-dropdown-btn:active {
+        outline: none !important;
+        box-shadow: none !important;
+        background-color: transparent !important;
+    }
+
+    .custom-dropdown-btn:hover {
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+
+    /* If you keep dropdown-toggle, hide the arrow */
+    .custom-dropdown-btn::after {
+        display: none !important;
+    }
+
