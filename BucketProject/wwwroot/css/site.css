@@ -13,7 +13,7 @@ html {
   box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
 }
 
-h2,h3,h4,h5 {
+h2,h3,h4,h5,strong {
     font-family: 'Playfair Display', serif;
 }
 
@@ -108,51 +108,54 @@ h3 {
 
 .input-container {
     position: relative;
-    width: 200px;
+    width: 100%; 
+    max-width: 500px; 
+    margin-top: 30px; 
+    margin-bottom: 20px;
 }
 
-    .input-container input[type="text"] {
-        font-size: 20px;
-        width: 100%;
-        border: none;
-        border-bottom: 2px solid #ccc;
-        padding: 5px 0;
-        background-color: transparent;
-        outline: none;
-    }
+.input-container input[type="text"] {
+    font-size: 15px;
+    width: 100%; 
+    border: none;
+    border-bottom: 2px solid #ccc;
+    padding: 5px 0;
+    background-color: transparent;
+    outline: none;
+}
 
-    .input-container .label {
-        margin-top: 10px;
-        position: absolute;
-        top: 0;
-        left: 0;
-        color: #ccc;
-        transition: all 0.3s ease;
-        pointer-events: none;
-    }
+.input-container .label {
+    position: absolute;
+    top: 0;
+    left: 0;
+    color: #ccc;
+    transition: all 0.3s ease;
+    pointer-events: none;
+}
 
-    .input-container input[type="text"]:focus ~ .label,
-    .input-container input[type="text"]:valid ~ .label {
-        top: -20px;
-        font-size: 16px;
-        color: #333;
-    }
+.input-container input[type="text"]:focus ~ .label,
+.input-container input[type="text"]:valid ~ .label {
+    top: -20px;
+    font-size: 16px;
+    color: #333;
+}
 
-    .input-container .underline {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        height: 2px;
-        width: 100%;
-        background-color: #333;
-        transform: scaleX(0);
-        transition: all 0.3s ease;
-    }
+.input-container .underline {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 2px;
+    width: 100%;
+    background-color: #333;
+    transform: scaleX(0);
+    transition: all 0.3s ease;
+}
 
-    .input-container input[type="text"]:focus ~ .underline,
-    .input-container input[type="text"]:valid ~ .underline {
-        transform: scaleX(1);
-    }
+.input-container input[type="text"]:focus ~ .underline,
+.input-container input[type="text"]:valid ~ .underline {
+    transform: scaleX(1);
+}
+
 
 .register-container,
 .login-container {
@@ -255,23 +258,23 @@ input[type="file"] {
     flex-direction: column;
     align-items: center;
     font-family: sans-serif;
-    margin: 5px; /* Reduced from 20px auto */
+    margin: 5px; 
 }
 
 
 .circle-stat {
-    width: 120px;        /* reduced from 200px */
-    height: 120px;       /* reduced from 200px */
+    width: 120px;    
+    height: 120px;       
     border-radius: 50%;
-    border: 6px solid #2D2D2D; /* scaled border thickness */
+    border: 6px solid #2D2D2D; 
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.4rem;   /* reduced from 2.2rem */
+    font-size: 1.4rem;   
     font-weight: bold;
     color: #333;
     background: rgba(230, 240, 255, 0.3);
-    box-shadow: 0 0 6px rgba(0,0,0,0.1); /* softer shadow */
+    box-shadow: 0 0 6px rgba(0,0,0,0.1); 
 }
 
 
@@ -338,9 +341,9 @@ pagination {
 
 .chart-container {
     display: flex;
-    justify-content: center; /* or space-between */
-    gap: 40px; /* adjust spacing between the charts */
-    flex-wrap: wrap; /* allows stacking on small screens */
+    justify-content: center; 
+    gap: 40px; 
+    flex-wrap: wrap; 
     margin: 40px 0;
 }
 .goal-actions {
@@ -439,7 +442,7 @@ pagination {
     bottom: 0;
 }
 
-/* Smaller version for sub-goals */
+
 .menu-lines.small {
     width: 18px;
     height: 12px;
@@ -458,3 +461,69 @@ pagination {
     }
 
 
+.custom-dropdown {
+    width: 200px;
+    margin-top: 25px;
+    background-color: #F8F7F0;
+}
+.add-goal-btn {
+    background-color: #2D2D2D;
+    color: white;
+    border: 1px solid white;
+    padding: 10px 20px;
+    font-weight: 600;
+    border-radius: 4px;
+    margin-top: 10px;
+    margin-left: 10px;
+}
+
+    .add-goal-btn:hover {
+        color: white; 
+        background-color: #1f1f1f; 
+        border-color: white; 
+    }
+
+.nav-tabs .nav-link {
+    color: #6c757d; 
+}
+
+    .nav-tabs .nav-link.active {
+        color: #000000; 
+        background-color: #f8f9fa; 
+        border-color: #dee2e6 #dee2e6 #fff; 
+    }
+.search-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: end;
+}
+
+.form-input {
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 15px;
+    background-color: #f9f9f9;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    flex-grow: 1;
+    min-width: 200px;
+}
+
+.search-form .form-input[name="query"] {
+    flex-basis: 100%;
+    max-width: 100%;
+}
+
+
+.form-input:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.15);
+    background-color: white;
+    outline: none;
+}
+
+.pagination .page-link.active-page {
+    font-weight: bold;
+    text-decoration: underline;
+}
