@@ -51,9 +51,9 @@
         <ul class="list-unstyled">
             @foreach (var f in (List<UserSummaryDTO>)ViewBag.Friends)
             {
-                var imgSrc = f.Picture != null
+                var imgSrc = (f.Picture != null && f.Picture.Length > 0)
                 ? $"data:image/jpeg;base64,{Convert.ToBase64String(f.Picture)}"
-                : Url.Content("~/images/default-avatar.png");
+                : null;
 
                 <li class="mb-1">
                     <label class="d-flex align-items-center">
@@ -61,10 +61,22 @@
                                name="friendIds"
                                value="@f.Id"
                                class="form-check-input me-2" />
-                        <img src="@imgSrc"
-                             alt="@f.Username"
-                             class="rounded-circle me-2"
-                             style="width:24px; height:24px;" />
+
+                        @if (imgSrc != null)
+                        {
+                            <img src="@imgSrc"
+                                 alt="@f.Username"
+                                 class="rounded-circle me-2"
+                                 style="width:24px; height:24px; object-fit: cover;" />
+                        }
+                        else
+                        {
+                            <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center me-2"
+                                 style="width:24px; height:24px; font-size:0.75rem; font-weight:bold;">
+                                @char.ToUpperInvariant(f.Username[0])
+                            </div>
+                        }
+
                         <span>@f.Username</span>
                     </label>
                 </li>
@@ -280,13 +292,25 @@
                             <ul class="list-inline mb-0">
                                 @foreach (var u in goal.Recipients)
                                 {
-                                    var imgSrc = u.Picture != null
+                                    var imgSrc = (u.Picture != null && u.Picture.Length > 0)
                                     ? $"data:image/jpeg;base64,{Convert.ToBase64String(u.Picture)}"
-                                    : Url.Content("~/images/default-avatar.png");
+                                    : null;
 
                                     <li class="list-inline-item text-center me-2">
-                                        <img src="@imgSrc" alt="@u.Username" class="rounded-circle mb-1" style="width:32px; height:32px;" />
-                                        <br />
+                                        @if (imgSrc != null)
+                                        {
+                                            <img src="@imgSrc"
+                                                 alt="@u.Username"
+                                                 class="rounded-circle mb-1"
+                                                 style="width:32px; height:32px; object-fit: cover;" />
+                                        }
+                                        else
+                                        {
+                                            <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center mb-1 mx-auto"
+                                                 style="width:32px; height:32px; font-size:0.9rem; font-weight:bold;">
+                                                @char.ToUpperInvariant(u.Username[0])
+                                            </div>
+                                        }
                                         <small>@u.Username</small>
                                     </li>
                                 }

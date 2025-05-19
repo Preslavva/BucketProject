@@ -20,13 +20,23 @@
         <ul class="list-group mb-4">
             @foreach (var f in Model.Friends)
             {
-                var imgSrc = f.Picture != null
+                var imgSrc = (f.Picture != null && f.Picture.Length > 0)
                 ? $"data:image/jpeg;base64,{Convert.ToBase64String(f.Picture)}"
-                : Url.Content("~/images/default-avatar.png");
+                : null;
 
                 <li class="list-group-item d-flex justify-content-between align-items-center">
                     <div class="d-flex align-items-center">
-                        <img src="@imgSrc" class="rounded-circle me-2" style="width:32px; height:32px;" />
+                        @if (imgSrc != null)
+                        {
+                            <img src="@imgSrc" class="rounded-circle me-2" style="width:32px; height:32px; object-fit: cover;" />
+                        }
+                        else
+                        {
+                            <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center me-2"
+                                 style="width:32px; height:32px; font-size:0.9rem; font-weight:bold;">
+                                @char.ToUpperInvariant(f.Username[0])
+                            </div>
+                        }
                         <span>@f.Username</span>
                     </div>
                     <form asp-action="RemoveFriend" method="post">
@@ -44,13 +54,23 @@
         <ul class="list-group mb-4">
             @foreach (var r in Model.IncomingRequests)
             {
-                var imgSrc = r.Picture != null
+                var imgSrc = (r.Picture != null && r.Picture.Length > 0)
                 ? $"data:image/jpeg;base64,{Convert.ToBase64String(r.Picture)}"
-                : Url.Content("~/images/default-avatar.png");
+                : null;
 
                 <li class="list-group-item d-flex justify-content-between align-items-center">
                     <div class="d-flex align-items-center">
-                        <img src="@imgSrc" class="rounded-circle me-2" style="width:32px; height:32px;" />
+                        @if (imgSrc != null)
+                        {
+                            <img src="@imgSrc" class="rounded-circle me-2" style="width:32px; height:32px; object-fit: cover;" />
+                        }
+                        else
+                        {
+                            <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center me-2"
+                                 style="width:32px; height:32px; font-size:0.9rem; font-weight:bold;">
+                                @char.ToUpperInvariant(r.Username[0])
+                            </div>
+                        }
                         <span>@r.Username</span>
                     </div>
                     <div class="btn-group">
@@ -74,13 +94,23 @@
         <ul class="list-group mb-4">
             @foreach (var o in Model.OutgoingRequests)
             {
-                var imgSrc = o.Picture != null
+                var imgSrc = (o.Picture != null && o.Picture.Length > 0)
                 ? $"data:image/jpeg;base64,{Convert.ToBase64String(o.Picture)}"
-                : Url.Content("~/images/default-avatar.png");
+                : null;
 
                 <li class="list-group-item d-flex justify-content-between align-items-center">
                     <div class="d-flex align-items-center">
-                        <img src="@imgSrc" class="rounded-circle me-2" style="width:32px; height:32px;" />
+                        @if (imgSrc != null)
+                        {
+                            <img src="@imgSrc" class="rounded-circle me-2" style="width:32px; height:32px; object-fit: cover;" />
+                        }
+                        else
+                        {
+                            <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center me-2"
+                                 style="width:32px; height:32px; font-size:0.9rem; font-weight:bold;">
+                                @char.ToUpperInvariant(o.Username[0])
+                            </div>
+                        }
                         <span>@o.Username</span>
                     </div>
                     <form asp-action="RemoveFriend" method="post">
@@ -94,4 +124,3 @@
 </div>
 
 <div id="searchResults"></div>
-
