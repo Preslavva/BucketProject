@@ -13,7 +13,7 @@ html {
   box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
 }
 
-h2 {
+h2,h3,h4,h5 {
     font-family: 'Playfair Display', serif;
 }
 
@@ -254,24 +254,26 @@ input[type="file"] {
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin: 20px auto;
     font-family: sans-serif;
+    margin: 5px; /* Reduced from 20px auto */
 }
 
+
 .circle-stat {
-    width: 200px;
-    height: 200px;
+    width: 120px;        /* reduced from 200px */
+    height: 120px;       /* reduced from 200px */
     border-radius: 50%;
-    border: 10px solid #2D2D2D;
+    border: 6px solid #2D2D2D; /* scaled border thickness */
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 2.2rem;
+    font-size: 1.4rem;   /* reduced from 2.2rem */
     font-weight: bold;
     color: #333;
     background: rgba(230, 240, 255, 0.3);
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    box-shadow: 0 0 6px rgba(0,0,0,0.1); /* softer shadow */
 }
+
 
 .circle-label {
     margin-top: 10px;
@@ -280,14 +282,20 @@ input[type="file"] {
     white-space: nowrap;
 }
 
-.circle-stats-container {
+.circle-stats-container-primary {
     display: flex;
     justify-content: center;
-    gap: 30px;
+    gap: 10px;
+    margin: 20px ;
+    flex-wrap: wrap;
+}
+.circle-stats-container-secondary{
+    display: flex;
+    justify-content: center;
+    gap: 40px;
     margin: 40px auto;
     flex-wrap: wrap;
 }
-
 .circle-wrapper {
     display: flex;
     flex-direction: column;
@@ -327,3 +335,11 @@ pagination {
         color: white;
         pointer-events: none;
     }
+
+.chart-container {
+    display: flex;
+    justify-content: center; /* or space-between */
+    gap: 40px; /* adjust spacing between the charts */
+    flex-wrap: wrap; /* allows stacking on small screens */
+    margin: 40px 0;
+}

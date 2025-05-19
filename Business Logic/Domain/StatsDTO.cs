@@ -32,9 +32,5 @@ namespace BucketProject.BLLBusiness_Logic.Domain
         public int Age { get; set; }
         public string Label { get; set; }
 
-
-
-
-
     }
 }

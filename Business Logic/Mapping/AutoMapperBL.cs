@@ -1,5 +1,4 @@
-﻿
-using AutoMapper;
+﻿using AutoMapper;
 using BucketProject.BLL.Business_Logic.Domain;
 using BucketProject.BLLBusiness_Logic.Domain;
 using BucketProject.DAL.Models.Entities;
@@ -16,9 +15,6 @@ namespace BucketProject.BLL.Business_Logic.Mapping
             CreateMap<UserEntity, UserSummaryDTO>();
             CreateMap<User, UserSummaryDTO>();
             CreateMap<GoalInvitation, GoalInviteDTO>();
-
-
-
 
         }
     }

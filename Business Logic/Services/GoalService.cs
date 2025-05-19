@@ -30,7 +30,6 @@ namespace BucketProject.BLL.Business_Logic.Services
             _mapper = mapper;
             _aIClient = aIClient;
             _inviteRepo = inviteRepo;
-          
         }
         public int GetCurrentUserId()
         {
@@ -61,7 +60,6 @@ namespace BucketProject.BLL.Business_Logic.Services
             if (goalDomain.Type == null)
             {
                 throw new ValidationException("Goal type cannot be empty.");
-
             }
 
             if (goalDomain.Description.Length > 50)

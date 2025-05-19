@@ -20,17 +20,21 @@
                       || (ViewBag.YearlySharedIncomplete as List<int> ?? new()).Any());
 }
 
-<h2>Your Statistics</h2>
+<h2 style="text-align: center; margin-bottom: 40px;">Your Statistics</h2>
+
+
 
 @if (hasGoals)
 {
-    <div class="circle-stats-container">
+    <div class="circle-stats-container-primary">
         <div class="circle-wrapper">
             <div class="circle-stat total">@ViewBag.TotalGoals</div>
             <div class="circle-label">Total Goals</div>
         </div>
         <div class="circle-wrapper"><div class="circle-stat completed">@ViewBag.CompletedGoals</div><div class="circle-label">Completed</div></div>
         <div class="circle-wrapper"><div class="circle-stat incomplete">@ViewBag.IncompleteGoals</div><div class="circle-label">Incomplete</div></div>
+    </div>
+        <div class="circle-stats-container-secondary">
         <div class="circle-wrapper"><div class="circle-stat personal">@ViewBag.PersonalGoals</div><div class="circle-label">Personal Goals</div></div>
         <div class="circle-wrapper"><div class="circle-stat shared">@ViewBag.SharedGoals</div><div class="circle-label">Shared Goals</div></div>
         <div class="circle-wrapper"><div class="circle-stat postponed">@ViewBag.PostponedGoals</div><div class="circle-label">Postponed Goals</div></div>
@@ -38,57 +42,60 @@
         <div class="circle-wrapper"><div class="circle-stat average">@ViewBag.AverageCompletionDays</div><div class="circle-label">Avg Days to Complete Goal</div></div>
     </div>
 
-    @if (hasTypeData)
-    {
-        <canvas id="goalTypeChart" width="300" height="300"></canvas>
-        <script>
-            const ctx1 = document.getElementById('goalTypeChart').getContext('2d');
-            new Chart(ctx1, {
-                type: 'pie',
-                data: {
-                    labels: @Html.Raw(Json.Serialize(ViewBag.TypeLabels)),
-                    datasets: [{
-                        data: @Html.Raw(Json.Serialize(ViewBag.TypeData)),
-                        backgroundColor: ['rgba(255, 99, 132, 0.6)', 'rgba(54, 162, 235, 0.6)', 'rgba(255, 206, 86, 0.6)', 'rgba(75, 192, 192, 0.6)'],
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: false,
-                    plugins: {
-                        legend: { position: 'bottom' },
-                        title: { display: true, text: 'Most Popular Goal Types' }
+    <div class="chart-container">
+        @if (hasTypeData)
+        {
+            <canvas id="goalTypeChart" width="300" height="300"></canvas>
+            <script>
+                const ctx1 = document.getElementById('goalTypeChart').getContext('2d');
+                new Chart(ctx1, {
+                    type: 'pie',
+                    data: {
+                        labels: @Html.Raw(Json.Serialize(ViewBag.TypeLabels)),
+                        datasets: [{
+                            data: @Html.Raw(Json.Serialize(ViewBag.TypeData)),
+                            backgroundColor: ['rgba(255, 99, 132, 0.6)', 'rgba(54, 162, 235, 0.6)', 'rgba(255, 206, 86, 0.6)', 'rgba(75, 192, 192, 0.6)'],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: false,
+                        plugins: {
+                            legend: { position: 'bottom' },
+                            title: { display: true, text: 'Most Popular Goal Types' }
+                        }
                     }
-                }
-            });
-        </script>
-    }
+                });
+            </script>
+        }
 
-    @if (hasCategoryData)
-    {
-        <canvas id="goalCategoryChart" width="300" height="300"></canvas>
-        <script>
-            const ctx2 = document.getElementById('goalCategoryChart').getContext('2d');
-            new Chart(ctx2, {
-                type: 'pie',
-                data: {
-                    labels: @Html.Raw(Json.Serialize(ViewBag.CategoryLabels)),
-                    datasets: [{
-                        data: @Html.Raw(Json.Serialize(ViewBag.CategoryData)),
-                        backgroundColor: ['rgba(153, 102, 255, 0.6)', 'rgba(255, 159, 64, 0.6)', 'rgba(255, 205, 86, 0.6)', 'rgba(75, 192, 192, 0.6)'],
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: false,
-                    plugins: {
-                        legend: { position: 'bottom' },
-                        title: { display: true, text: 'Goals by Category' }
+        @if (hasCategoryData)
+        {
+            <canvas id="goalCategoryChart" width="300" height="300"></canvas>
+            <script>
+                const ctx2 = document.getElementById('goalCategoryChart').getContext('2d');
+                new Chart(ctx2, {
+                    type: 'pie',
+                    data: {
+                        labels: @Html.Raw(Json.Serialize(ViewBag.CategoryLabels)),
+                        datasets: [{
+                            data: @Html.Raw(Json.Serialize(ViewBag.CategoryData)),
+                            backgroundColor: ['rgba(153, 102, 255, 0.6)', 'rgba(255, 159, 64, 0.6)', 'rgba(255, 205, 86, 0.6)', 'rgba(75, 192, 192, 0.6)'],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: false,
+                        plugins: {
+                            legend: { position: 'bottom' },
+                            title: { display: true, text: 'Goals by Category' }
+                        }
                     }
-                }
-            });
-        </script>
-    }
+                });
+            </script>
+        }
+    </div>
+
 
     @if (hasWeeklyData)
     {

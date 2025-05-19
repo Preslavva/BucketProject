@@ -10,11 +10,11 @@
     var hasAge = (ViewBag.AgeData as List<int> ?? new List<int>()).Any();
 }
 
-<h2>Manager Statistics</h2>
+<h2 style="text-align: center; margin-bottom: 40px;">Manager Statistics</h2>
 
 <div style="display: flex; flex-direction: column; gap: 40px;">
 
-    <div class="circle-stats-container" style="display: flex; flex-wrap: wrap; gap: 20px;">
+    <div class="circle-stats-container" style="display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; margin: 0 auto;">
         <div class="circle-wrapper"><div class="circle-stat total">@ViewBag.TotalGoals</div><div class="circle-label">Total Goals</div></div>
         <div class="circle-wrapper"><div class="circle-stat completed">@ViewBag.PersonalGoals</div><div class="circle-label">Personal Goals</div></div>
         <div class="circle-wrapper"><div class="circle-stat shared">@ViewBag.SharedGoals</div><div class="circle-label">Shared Goals</div></div>
@@ -22,6 +22,7 @@
         <div class="circle-wrapper"><div class="circle-stat ai">@ViewBag.AIGoals</div><div class="circle-label">AI Generated Goals</div></div>
         <div class="circle-wrapper"><div class="circle-stat active">@ViewBag.ActiveUsersCount</div><div class="circle-label">Active Users</div></div>
     </div>
+
 
     @if (hasUsers)
     {
