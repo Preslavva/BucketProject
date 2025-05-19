@@ -18,13 +18,19 @@ public class AIClient : IAIClient
 
     public async Task<List<string>> BreakDownTextIntoGoalsAsync(string description, Category category)
     {
-        string prompt = $@"Break down the following goal into 4 smaller, actionable sub-goals:
+        string prompt = $@"
+Break down the following goal into 4 smaller, actionable sub-goals:
+
 ""{description}""
-Take into consideration that this goal is meant to be accomplished within a {category.ToString().ToLower()} timeframe.
-Write each sub-goal as a plain sentence.    
-Do not number them, do not use bullets, dashes, or any formatting.
-Return exactly four plain sentences, each separated by a line break.
-Ensure the sub-goals are unique and tailored to the main goal every time you generate them. The lenght of the description of the goal must be below 50 characters.";
+
+This goal is intended to be completed within a {category.ToString().ToLower()} timeframe.
+
+Each sub-goal should be written as a plain sentence.  
+Do not number them or use bullets, dashes, or any formatting.  
+Do not mention specific days, weeks, dates, months, or times.  
+Return exactly four plain sentences, each on a new line.  
+Make sure the sub-goals are unique, clearly related to the main goal, and not repetitive.  
+Each sub-goal must be under 50 characters, including spaces.";
 
 
         var client = _httpClientFactory.CreateClient();
