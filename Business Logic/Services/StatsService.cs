@@ -5,13 +5,12 @@ using System.Text;
 using Microsoft.AspNetCore.Http;
 using BucketProject.DAL.Data.InterfacesRepo;
 using BucketProject.DAL.Models.Entities;
-using BucketProject.BLLBusiness_Logic.Domain;
 using BucketProject.BLL.Business_Logic.Domain;
 using AutoMapper;
 using BucketProject.BLL.Business_Logic.InterfacesService;
 using BucketProject.DAL.Data.Repositories;
 using System.Globalization;
-using Org.BouncyCastle.Asn1.X509.SigI;
+using BucketProject.BLL.Business_Logic.DTOs;
 
 namespace BucketProject.BLL.Business_Logic.Services
 {

@@ -8,7 +8,7 @@ using BucketProject.DAL.Data.InterfacesRepo;
 using BucketProjetc.BLL.Business_Logic.InterfacesService;
 
 using Microsoft.AspNetCore.Http;
-using BucketProject.BLLBusiness_Logic.Domain;
+using BucketProject.BLL.Business_Logic.DTOs;
 using BucketProject.DAL.Models.Entities;
 
 

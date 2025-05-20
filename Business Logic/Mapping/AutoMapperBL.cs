@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using BucketProject.BLL.Business_Logic.Domain;
-using BucketProject.BLLBusiness_Logic.Domain;
 using BucketProject.DAL.Models.Entities;
+using BucketProject.BLL.Business_Logic.DTOs;
 
 
 namespace BucketProject.BLL.Business_Logic.Mapping

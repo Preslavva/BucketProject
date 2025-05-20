@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="Domain\User.cs" />
+    <None Include="DTOs\User.cs" />
   </ItemGroup>
 
   <ItemGroup>

@@ -8,8 +8,8 @@ using BucketProject.DAL.Models.Entities;
 using BucketProject.BLL.Business_Logic.Domain;
 using System.Text;
 using BucketProjetc.BLL.Business_Logic.InterfacesService;
-using BucketProject.BLLBusiness_Logic.Domain;
 using System.ComponentModel.DataAnnotations;
+using BucketProject.BLL.Business_Logic.DTOs;
 
 
 

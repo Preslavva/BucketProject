@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using BucketProject.BLL.Business_Logic.Domain;
-using BucketProject.BLLBusiness_Logic.Domain;
+using BucketProject.BLL.Business_Logic.DTOs;
 using BucketProject.DAL.Models.Enums;
 using BucketProject.UI.ViewModels.ViewModels;
 

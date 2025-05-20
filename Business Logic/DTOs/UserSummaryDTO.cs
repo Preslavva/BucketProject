@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BucketProject.BLLBusiness_Logic.Domain
+namespace BucketProject.BLL.Business_Logic.DTOs
 {
     public class UserSummaryDTO
     {

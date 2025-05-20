@@ -1,6 +1,6 @@
 ﻿using BucketProject.BLL.Business_Logic.InterfacesService;
 using BucketProject.BLL.Business_Logic.Services;
-using BucketProject.BLLBusiness_Logic.Domain;
+using BucketProject.BLL.Business_Logic.DTOs;
 using Microsoft.AspNetCore.Mvc;
 using BucketProject.DAL.Data.Repositories;
 using BucketProject.DAL.Data.InterfacesRepo;

@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
-using BucketProject.BLLBusiness_Logic.Domain;
+using BucketProject.BLL.Business_Logic.DTOs;
 
 namespace BucketProject.BLL.Business_Logic.InterfacesService
 {

@@ -1,5 +1,5 @@
 ﻿using BucketProject.BLL.Business_Logic.InterfacesService;
-using BucketProject.BLLBusiness_Logic.Domain;
+using BucketProject.BLL.Business_Logic.DTOs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Identity.Client;
 using Org.BouncyCastle.Security;

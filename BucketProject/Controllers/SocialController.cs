@@ -4,7 +4,7 @@ using BucketProjetc.BLL.Business_Logic.InterfacesService;
 using Microsoft.AspNetCore.Mvc;
 using BucketProject.UI.ViewModels.ViewModels;
 using BucketProject.BLL.Business_Logic.Services;
-using BucketProject.BLLBusiness_Logic.Domain;
+using BucketProject.BLL.Business_Logic.DTOs;
 
 
 namespace BucketProject.Controllers

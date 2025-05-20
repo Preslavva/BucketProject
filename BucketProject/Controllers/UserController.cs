@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using BucketProject.BLL.Business_Logic.InterfacesService;
-using BucketProject.BLLBusiness_Logic.Domain;
+using BucketProject.BLL.Business_Logic.DTOs;
 using BucketProject.UI.ViewModels.ViewModels;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc.Rendering;

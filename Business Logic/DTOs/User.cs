@@ -1,4 +1,4 @@
-﻿namespace BucketProject.BLLBusiness_Logic.Domain
+﻿namespace BucketProject.BLL.Business_Logic.DTOs
 {
     public class User
     {

@@ -6,10 +6,10 @@ using Newtonsoft.Json;
 using BucketProject.BLL.Business_Logic.Domain;
 using BucketProject.UI.ViewModels.ViewModels;
 using BucketProjetc.BLL.Business_Logic.InterfacesService;
-using BucketProject.BLLBusiness_Logic.Domain;
 using BucketProject.DAL.Models.Entities;
 using System.ComponentModel.DataAnnotations;
 using BucketProject.BLL.Business_Logic.Services;
+using BucketProject.BLL.Business_Logic.DTOs;
 
 namespace BucketProject.UI.BucketProject.Controllers
 {

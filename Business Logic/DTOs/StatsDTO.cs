@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using BucketProject.DAL.Models.Enums;
 
-namespace BucketProject.BLLBusiness_Logic.Domain
+namespace BucketProject.BLL.Business_Logic.DTOs
 {
     public class StatsDTO
     {
