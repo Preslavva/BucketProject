@@ -1,7 +1,7 @@
 ﻿using BucketProject.UI.BucketProject.Mapping;
 using AutoMapper;
 using BucketProject.UI.ViewModels.ViewModels;
-using BucketProject.BLLBusiness_Logic.Domain;
+using BucketProject.BLL.Business_Logic.DTOs;
 using BucketProject.BLL.Business_Logic.Domain;
 using BucketProject.DAL.Models.Enums;
 

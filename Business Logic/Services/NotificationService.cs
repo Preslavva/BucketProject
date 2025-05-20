@@ -28,8 +28,6 @@ namespace BucketProject.BLL.Business_Logic.Services
             _userService = userService;
         }
 
-   
-
         public List<Goal> CheckAndNotify(DateTime today)
         {
             var notifications = new List<Goal>();
@@ -80,7 +78,6 @@ namespace BucketProject.BLL.Business_Logic.Services
 
             int currentUserId = _userService.GetCurrentUserId();
 
-          
             List<GoalEntity> entities = _goalRepo.LoadSharedGoalsCompletedByOthers(currentUserId);
 
             List<Goal> flatGoals = _mapper.Map<List<Goal>>(entities);
@@ -108,7 +105,6 @@ namespace BucketProject.BLL.Business_Logic.Services
             //    return new List<Goal>();
 
             int currentUserId = _userService.GetCurrentUserId();
-
 
             List<GoalEntity> entities = _goalRepo.LoadSharedDeletedGoals(currentUserId);
 

@@ -4,12 +4,12 @@ using BucketProject.DAL.Data.InterfacesRepo;
 using Microsoft.AspNetCore.Http;
 using AutoMapper;
 using BucketProject.BLL.Business_Logic.Services;
-using BucketProject.BLLBusiness_Logic.Domain;
+using BucketProject.BLL.Business_Logic.DTOs;
 using BucketProject.BLL.Business_Logic.Mapping;
 using BucketProject.DAL.Models.Entities;
 using BucketProject.BLL.Business_Logic.InterfacesService;
 using System.ComponentModel.DataAnnotations;
-using Data.Exceptions;
+using Exceptions.Exceptions;
 
 
 namespace BucketsTests
@@ -50,27 +50,45 @@ namespace BucketsTests
         }
 
         [TestMethod]
-        public void LogIn_EmptyPassword_ThrowsValidationException()
+        public void LogIn_EmptyPassword_ThrowsValidationExceptionCollection()
         {
             string username = "test";
             string password = "";
 
-            var ex = Assert.ThrowsException<ValidationException>(
+            var ex = Assert.ThrowsException<ValidationExceptionCollection>(
                 () => _userService.LogIn(username, password));
 
-            Assert.AreEqual("Enter your password", ex.Message);
+            CollectionAssert.Contains(ex.Errors, "Enter your password");
         }
 
         [TestMethod]
-        public void LogIn_EmptyUsername_ThrowsValidationException()
+        public void LogIn_EmptyUsername_ThrowsValidationExceptionCollection()
         {
             string username = "";
             string password = "somePassword";
 
-            var ex = Assert.ThrowsException<ValidationException>(
+            var ex = Assert.ThrowsException<ValidationExceptionCollection>(
                 () => _userService.LogIn(username, password));
 
-            Assert.AreEqual("Enter your username", ex.Message);
+            CollectionAssert.Contains(ex.Errors, "Enter your username");
+        }
+
+        [TestMethod]
+        public void LogIn_EmptyUsernameAndPassword_ThrowsValidationExceptionCollection()
+        {
+            string username = "";
+            string password = "";
+
+            var ex = Assert.ThrowsException<ValidationExceptionCollection>(
+                () => _userService.LogIn(username, password));
+
+            List<string> expectedErrors = new List<string>
+    {
+        "Enter your username",
+        "Enter your password"
+    };
+
+            CollectionAssert.AreEquivalent(expectedErrors, ex.Errors);
         }
 
         [TestMethod]
@@ -214,7 +232,7 @@ namespace BucketsTests
         }
 
         [TestMethod]
-        public async Task UpdateProfilePicture_UserNotFound_ThrowsValidationException()
+        public async Task UpdateProfilePicture_UserNotFound_ThrowsUserNotFoundException()
         {
             string username = "username";
             SetSession(username);
@@ -224,11 +242,11 @@ namespace BucketsTests
 
             _userRepo.Setup(r => r.GetUserByUsername(username)).Returns((UserEntity?)null);
 
-            var ex = await Assert.ThrowsExceptionAsync<ValidationException>(async () =>
+            var ex = await Assert.ThrowsExceptionAsync<UserNotFoundException>(async () =>
                 await _userService.UpdateProfilePicture(mockFile.Object)
             );
 
-            Assert.AreEqual("Logged-in user does not exist.", ex.Message);
+            Assert.AreEqual($"User '{username}' was not found.", ex.Message);
         }
 
     }

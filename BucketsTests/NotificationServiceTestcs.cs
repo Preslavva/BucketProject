@@ -4,8 +4,7 @@ using BucketProject.DAL.Data.InterfacesRepo;
 using Microsoft.AspNetCore.Http;
 using Moq;
 using BucketProject.BLL.Business_Logic.Services;
-using BucketProject.BLLBusiness_Logic.Domain;
-
+ using BucketProject.BLL.Business_Logic.DTOs;
 using BucketProject.BLL.Business_Logic.Mapping;
 using BucketProject.BLL.Business_Logic.Domain;
 using BucketProject.BLL.Business_Logic.InterfacesService;
@@ -22,7 +21,7 @@ namespace BucketsTests
         private readonly Mock<IHttpContextAccessor> _contextAccessor;
         private readonly Mock<IGoalRepo> _goalRepo;
         private readonly IMapper _mapper;
-        private readonly NotificationService _notificationService;
+        private readonly INotificationService _notificationService;
         //private readonly Mock<IDeadlineStrategy> _deadlineDeterminator;
         //private readonly Mock<INotificationStrategy> _notificationManager;
 
@@ -37,7 +36,7 @@ namespace BucketsTests
             });
             _mapper = config.CreateMapper();
 
-            _notificationService = new NotificationService(_goalRepo.Object, _contextAccessor.Object, _mapper);
+            //_notificationService = new INotificationService(_goalRepo.Object, _contextAccessor.Object, _mapper);
 
 
         }
@@ -73,7 +72,7 @@ namespace BucketsTests
 
            
 
-            _goalRepo.Setup(r => r.GetIdOfUser(username)).Returns(userId);
+            //_goalRepo.Setup(r => r.GetIdOfUser(username)).Returns(userId);
             _goalRepo.Setup(r => r.LoadGoalsOfUser(userId)).Returns(new List<GoalEntity> { goalEntity });
             _goalRepo.Setup(r => r.LoadSharedUsersForGoal(goal.Id, userId)).Returns(userEntities);
 

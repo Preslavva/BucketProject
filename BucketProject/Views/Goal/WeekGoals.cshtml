@@ -294,19 +294,16 @@
                 var editFormId = $"editSharedGoalForm-{goal.Id}";
 
                 <div class="goal-item mb-3 p-2 border position-relative">
-                    <!-- Status checkbox -->
                     <form method="post" asp-action="ChangeGoalStatusWeek" class="d-inline me-2">
                         <input type="hidden" name="Id" value="@goal.Id" />
                         <input type="checkbox"
                                name="isDone" value="true"
-                               class="form-check-input"
                         @(goal.IsDone ? "checked" : "")
                                onchange="this.form.submit()" />
                     </form>
 
                     @if (goal.OwnerId == ViewBag.CurrentUserId)
                     {
-                        <!-- Editable form with input inside -->
                         <form method="post" asp-action="EditWeekGoal" id="@editFormId" class="d-inline me-2">
                             <input type="hidden" name="Id" value="@goal.Id" />
                             <input type="text"
@@ -319,7 +316,6 @@
                                    style="min-width: 50px;" />
                         </form>
 
-                        <!-- Dropdown menu for actions -->
                         <div class="dropdown goal-actions d-inline">
                             <button class="custom-dropdown-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 <div class="menu-lines"><span></span></div>
@@ -440,17 +436,15 @@
                                 var editFormId2 = $"editChildForm-{sub.Id}";
 
                                 <div class="mb-1 position-relative">
-                                    <!-- Done checkbox -->
                                     <form method="post" asp-action="ChangeGoalStatusWeek" class="d-inline">
                                         <input type="hidden" name="Id" value="@sub.Id" />
-                                        <input type="checkbox" name="isDone" value="true" class="form-check-input"
+                                        <input type="checkbox" name="isDone" value="true"
                                         @(sub.IsDone ? "checked" : "")
                                                onchange="this.form.submit()" />
                                     </form>
 
                                     @if (sub.OwnerId == ViewBag.CurrentUserId)
                                     {
-                                        <!-- Description input with auto-resize -->
                                         <form method="post" asp-action="EditWeekGoal" id="@editFormId2" class="d-inline ms-2">
                                             <input type="hidden" name="Id" value="@sub.Id" />
                                             <input type="text"
@@ -463,7 +457,6 @@
                                                    style="min-width: 50px;" />
                                         </form>
 
-                                        <!-- Dropdown for Save/Delete -->
                                         <div class="dropdown d-inline goal-actions">
                                             <button class="custom-dropdown-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                                                 <div class="menu-lines small"><span></span></div>

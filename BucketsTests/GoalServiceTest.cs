@@ -9,6 +9,7 @@ using BucketProject.BLL.Business_Logic.Domain;
 using BucketProject.DAL.Models.Entities;
 using BucketProject.DAL.Models.Enums;
 using System.ComponentModel.DataAnnotations;
+using BucketProject.BLL.Business_Logic.InterfacesService;
 
 
 namespace BucketsTests
@@ -20,6 +21,8 @@ namespace BucketsTests
         private readonly Mock<IGoalInviteRepo> _inviteRepo;
         private readonly Mock<IHttpContextAccessor> _contextAccessor;
         private readonly Mock<IAIClient> _aIClient;
+        private readonly Mock<IUserService> _userService;
+
 
         private readonly IMapper _mapper;
         private readonly GoalService _goalService;
@@ -30,6 +33,7 @@ namespace BucketsTests
             _inviteRepo = new Mock<IGoalInviteRepo>();
             _aIClient = new Mock<IAIClient>();
             _contextAccessor = new Mock<IHttpContextAccessor>();
+            _userService = new Mock<IUserService>();
 
             var config = new MapperConfiguration(cfg =>
             {
@@ -37,7 +41,7 @@ namespace BucketsTests
             });
             _mapper = config.CreateMapper();
 
-            _goalService = new GoalService(_goalRepo.Object, _contextAccessor.Object, _mapper, _aIClient.Object, _inviteRepo.Object);
+            _goalService = new GoalService(_goalRepo.Object, _contextAccessor.Object, _mapper, _aIClient.Object, _inviteRepo.Object,_userService.Object);
         }
 
        
@@ -144,8 +148,8 @@ namespace BucketsTests
                 ownerId: ownerId
             );
 
-            _goalRepo.Setup(r => r.GetIdOfUser(username)).Returns(ownerId);
-          
+            _userService.Setup(r => r.GetCurrentUserId()).Returns(ownerId);
+
             _goalRepo.Setup(r => r.InsertGoal(ownerId, It.IsAny<GoalEntity>())).Callback<int, GoalEntity>((u, e) => e.Id = 42);
     
             _goalRepo.Setup(r => r.AssignUsersToGoal(42, new[] { ownerId }));
@@ -198,7 +202,7 @@ namespace BucketsTests
 
             List<int> sharedWith = new List<int> { 124, 125 };
 
-            _goalRepo.Setup(r => r.GetIdOfUser(username)).Returns(ownerId);
+            _userService.Setup(r => r.GetCurrentUserId()).Returns(ownerId);
 
             _goalRepo.Setup(r => r.InsertGoal(ownerId, It.IsAny<GoalEntity>()))
                      .Callback<int, GoalEntity>((u, e) => e.Id = 99);

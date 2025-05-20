@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
 using BucketProject.BLL.Business_Logic.Mapping;
-using BucketProject.BLLBusiness_Logic.Domain;
+using BucketProject.BLL.Business_Logic.DTOs;
 using BucketProject.BLL.Business_Logic.Domain;
 using BucketProject.DAL.Models.Entities;
 using BucketProject.DAL.Models.Enums;
