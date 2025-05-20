@@ -40,10 +40,10 @@ namespace BucketProject.BLL.Business_Logic.Services
                 throw new ValidationException(string.Join(" | ", errors));
 
             var entity = _userRepo.GetUserByUsername(username)
-                ?? throw new InvalidLoginException("Wrong username or password");
+                ?? throw new InvalidLoginException();
 
             if (!_hasher.VerifyPassword(password, entity.Password, entity.Salt))
-                throw new InvalidLoginException("Wrong username or password");
+                throw new InvalidLoginException();
 
             return _mapper.Map<User>(entity);
         }

@@ -8,7 +8,7 @@ namespace Data.Exceptions
 {
     public class InvalidLoginException:Exception
     {
-        public InvalidLoginException(string message) : base(message)
+        public InvalidLoginException() : base("Wrong username or password")
         {
         }
     }

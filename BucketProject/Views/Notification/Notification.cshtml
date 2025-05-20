@@ -1,7 +1,7 @@
 ﻿@model List<NotificationViewModel>
 
 <h2>Hello, @ViewBag.Username! Here are your notifications:</h2>
-
+<br></br>
 
 @if (!Model.Any())
 {
@@ -11,71 +11,106 @@
 }
 else
 {
-    <ul class="list-group">
-        @foreach (var item in Model)
+    var groupedNotifications = Model.GroupBy(n => n.TypeOfNotification).ToList();
+
+    <ul class="nav nav-tabs" id="notificationTabs" role="tablist">
+        @for (int i = 0; i < groupedNotifications.Count; i++)
         {
-            var notifId = $"notif-{item.Id}-{item.TypeOfNotification}";
-            <li class="list-group-item d-flex justify-content-between align-items-start" id="@notifId">
-                <div class="w-100">
-                    <strong>@item.Description</strong><br />
-                    <span>@item.Message</span>
+            var group = groupedNotifications[i];
+            var tabId = $"tab-{group.Key}";
 
-                    @if (item.Recipients?.Any() == true)
-                    {
-                        <div class="mt-2">
-                            <small class="text-muted">
-                                @(item.IsDone ? "Done by:" : "Shared with:")
-                            </small>
-                            @foreach (var u in item.Recipients)
-                            {
-                                <span class="ms-2 align-middle d-inline-flex">
-                                    @if (u.Picture != null && u.Picture.Length > 0)
-                                    {
-                                        <img src="data:image/png;base64,@Convert.ToBase64String(u.Picture)"
-                                             alt="@u.Username"
-                                             width="24" height="24"
-                                             class="rounded-circle me-1" />
-                                    }
-                                    else
-                                    {
-                                        <div class="rounded-circle bg-secondary text-white
-                                                   d-flex align-items-center justify-content-center me-1"
-                                             style="width:24px; height:24px; font-size:0.8rem;">
-                                            @u.Username.Substring(0, 1).ToUpper()
-                                        </div>
-                                    }
-                                    <span class="align-self-center">@u.Username</span>
-                                </span>
-                            }
-                        </div>
-                    }
-
-                    @if (!item.IsDone && item.OwnerId == ViewBag.CurrentUserId)
-                    {
-                        <form asp-action="PostponeGoal" method="post" style="margin-top: 10px;">
-                            <input type="hidden" name="Id" value="@item.Id" />
-                            <input type="hidden" name="Type" value="@item.Type" />
-                            <input type="hidden" name="Description" value="@item.Description" />
-                            <input type="hidden" name="Category" value="@item.Category" />
-                            <input type="hidden" name="CreatedAt" value="@item.CreatedAt:yyyy-MM-ddTHH:mm:ss" />
-                            <input type="hidden" name="Deadline" value="@item.Deadline:yyyy-MM-ddTHH:mm:ss" />
-                            <input type="hidden" name="IsPostponed" value="true" />
-                            <input type="hidden" name="IsDone" value="@item.IsDone" />
-                            <input type="hidden" name="IsDeleted" value="@item.IsDeleted" />
-
-                            <button type="submit" class="btn btn-warning btn-sm">Postpone</button>
-                        </form>
-                    }
-                </div>
-
-                <form asp-action="DismissNotification" method="post" style="margin-top: 10px;">
-                    <input type="hidden" name="GoalId" value="@item.Id" />
-                    <input type="hidden" name="NotificationType" value="@item.TypeOfNotification" />
-                    <input type="hidden" name="triggeredByUserId" value="@item.TriggeredByUserId" />
-
-                    <button type="submit" class="btn-close" aria-label="Dismiss invitation notification"></button>
-                </form>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link @(i == 0 ? "active" : "")"
+                        id="@tabId-tab"
+                        data-bs-toggle="tab"
+                        data-bs-target="#@tabId"
+                        type="button" role="tab"
+                        aria-controls="@tabId"
+                        aria-selected="@(i == 0 ? "true" : "false")">
+                    @group.Key
+                </button>
             </li>
         }
     </ul>
+
+    <div class="tab-content mt-3" id="notificationTabsContent">
+        @for (int i = 0; i < groupedNotifications.Count; i++)
+        {
+            var group = groupedNotifications[i];
+            var tabId = $"tab-{group.Key}";
+            var isActive = i == 0 ? "show active" : "";
+
+            <div class="tab-pane fade @isActive" id="@tabId" role="tabpanel" aria-labelledby="@tabId-tab">
+                <ul class="list-group">
+                    @foreach (var item in group)
+                    {
+                        var notifId = $"notif-{item.Id}-{item.TypeOfNotification}";
+                        <li class="list-group-item d-flex justify-content-between align-items-start" id="@notifId">
+                            <div class="w-100">
+                                <strong>@item.Description</strong><br />
+                                <span>@item.Message</span>
+
+                                @if (item.Recipients?.Any() == true)
+                                {
+                                    <div class="mt-2">
+                                        <small class="text-muted">
+                                            @(item.IsDone ? "Done by:" : "Shared with:")
+                                        </small>
+                                        @foreach (var u in item.Recipients)
+                                        {
+                                            <span class="ms-2 align-middle d-inline-flex">
+                                                @if (u.Picture != null && u.Picture.Length > 0)
+                                                {
+                                                    <img src="data:image/png;base64,@Convert.ToBase64String(u.Picture)"
+                                                         alt="@u.Username"
+                                                         width="24" height="24"
+                                                         class="rounded-circle me-1" />
+                                                }
+                                                else
+                                                {
+                                                    <div class="rounded-circle bg-secondary text-white
+                                                           d-flex align-items-center justify-content-center me-1"
+                                                         style="width:24px; height:24px; font-size:0.8rem;">
+                                                        @u.Username.Substring(0, 1).ToUpper()
+                                                    </div>
+                                                }
+                                                <span class="align-self-center">@u.Username</span>
+                                            </span>
+                                        }
+                                    </div>
+                                }
+
+                                @if (!item.IsDone && item.OwnerId == ViewBag.CurrentUserId)
+                                {
+                                    <form asp-action="PostponeGoal" method="post" style="margin-top: 10px;">
+                                        <input type="hidden" name="Id" value="@item.Id" />
+                                        <input type="hidden" name="Type" value="@item.Type" />
+                                        <input type="hidden" name="Description" value="@item.Description" />
+                                        <input type="hidden" name="Category" value="@item.Category" />
+                                        <input type="hidden" name="CreatedAt" value="@item.CreatedAt:yyyy-MM-ddTHH:mm:ss" />
+                                        <input type="hidden" name="Deadline" value="@item.Deadline:yyyy-MM-ddTHH:mm:ss" />
+                                        <input type="hidden" name="IsPostponed" value="true" />
+                                        <input type="hidden" name="IsDone" value="@item.IsDone" />
+                                        <input type="hidden" name="IsDeleted" value="@item.IsDeleted" />
+
+                                        <button type="submit" class="btn btn-warning btn-sm">Postpone</button>
+                                    </form>
+                                }
+                            </div>
+
+                            <form asp-action="DismissNotification" method="post" style="margin-top: 10px;">
+                                <input type="hidden" name="GoalId" value="@item.Id" />
+                                <input type="hidden" name="NotificationType" value="@item.TypeOfNotification" />
+                                <input type="hidden" name="triggeredByUserId" value="@item.TriggeredByUserId" />
+
+                                <button type="submit" class="btn-close" aria-label="Dismiss invitation notification"></button>
+                            </form>
+                        </li>
+                    }
+                </ul>
+            </div>
+        }
+    </div>
 }
+
+              

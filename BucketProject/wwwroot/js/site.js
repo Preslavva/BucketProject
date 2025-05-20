@@ -73,3 +73,32 @@ $(document).ready(function () {
         });
     });
 });
+
+function resizeInput(input) {
+    input.style.width = "1px";
+    input.style.width = (input.scrollWidth + 5) + "px"; 
+}
+
+window.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.auto-resize-input').forEach(function (input) {
+        resizeInput(input);
+    });
+});
+
+function resizeInput(input) {
+    let span = document.createElement('span');
+    span.style.visibility = 'hidden';
+    span.style.position = 'absolute';
+    span.style.whiteSpace = 'pre';
+    span.style.font = getComputedStyle(input).font;
+    span.textContent = input.value || input.placeholder || '';
+    document.body.appendChild(span);
+    input.style.width = span.offsetWidth + 10 + 'px';
+    document.body.removeChild(span);
+}
+
+window.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.auto-resize-input').forEach(function (input) {
+        resizeInput(input);
+    });
+});

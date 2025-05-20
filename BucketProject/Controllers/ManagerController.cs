@@ -108,8 +108,8 @@ namespace BucketProject.Controllers
         {
             const int pageSize = 4;
 
-            var pagedUsers = new List<User>();
-            var totalUserCount = 0;
+            List<User> pagedUsers = new List<User>();
+            int totalUserCount = 0;
 
             if (HasActiveFilters(query, gender, nationality, minAge, maxAge, createdAfter))
             {
@@ -122,7 +122,6 @@ namespace BucketProject.Controllers
 
             return PartialView("_UserTablePartial", pagedUsers);
         }
-
 
     }
 }

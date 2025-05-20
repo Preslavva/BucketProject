@@ -4,6 +4,7 @@
 }
 
 <h2>Search Users</h2>
+<hr></hr>
 <form method="get" class="mb-4">
     <div class="input-group">
         <input type="text"
@@ -17,6 +18,7 @@
     @if (Model.Friends.Any())
     {
         <h3>Your Friends</h3>
+        <hr></hr>
         <ul class="list-group mb-4">
             @foreach (var f in Model.Friends)
             {
@@ -51,6 +53,7 @@
     @if (Model.IncomingRequests.Any())
     {
         <h3>Incoming Friend Requests</h3>
+        <hr></hr>
         <ul class="list-group mb-4">
             @foreach (var r in Model.IncomingRequests)
             {
@@ -91,6 +94,7 @@
     @if (Model.OutgoingRequests.Any())
     {
         <h3>Pending Friend Requests</h3>
+        <hr></hr>
         <ul class="list-group mb-4">
             @foreach (var o in Model.OutgoingRequests)
             {
