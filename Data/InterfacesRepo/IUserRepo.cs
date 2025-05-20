@@ -11,5 +11,6 @@ namespace BucketProject.DAL.Data.InterfacesRepo
         void UpdateName(UserEntity user, string username);
 
         void AddPhoto(UserEntity user, byte[] pictute);
+        int GetIdOfUser(string username);
     }
 }

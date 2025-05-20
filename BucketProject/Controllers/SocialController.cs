@@ -25,19 +25,11 @@ namespace BucketProject.Controllers
             _configuration = configuration;
             _userService = userService;
         }
-        private int CurrentUserId
-        {
-            get
-            {
-                
-                User currentUser = _userService.GetUserByUsername();
-                return currentUser.Id;
-            }
-        }
+        
         [HttpGet]
         public IActionResult Social()
         {
-            int uid = CurrentUserId;
+            int uid = _userService.GetCurrentUserId();
 
             List<UserSummaryDTO> friends = _socialService.GetFriends(uid);
             List<UserSummaryDTO> incoming = _socialService.GetIncomingFriendRequests(uid);
@@ -59,7 +51,7 @@ namespace BucketProject.Controllers
         [HttpGet]
         public IActionResult Search(string searchTerm)
         {
-            int uid = CurrentUserId;
+            int uid = _userService.GetCurrentUserId();
             searchTerm ??= "";
 
             List<UserSummaryDTO> friends = _socialService.GetFriends(uid)
@@ -99,28 +91,28 @@ namespace BucketProject.Controllers
         [HttpPost]
         public IActionResult SendFriendRequest(int friendId)
         {
-            _socialService.SendFriendRequest(CurrentUserId, friendId);
+            _socialService.SendFriendRequest(_userService.GetCurrentUserId(), friendId);
             return RedirectToAction("Social");
         }
 
         [HttpPost]
         public IActionResult AcceptFriendRequest(int requesterId)
         {
-            _socialService.AcceptFriendRequest(CurrentUserId, requesterId);
+            _socialService.AcceptFriendRequest(_userService.GetCurrentUserId(), requesterId);
             return RedirectToAction("Social");
         }
 
         [HttpPost]
         public IActionResult DeclineFriendRequest(int requesterId)
         {
-            _socialService.DeclineFriendRequest(CurrentUserId, requesterId);
+            _socialService.DeclineFriendRequest(_userService.GetCurrentUserId(), requesterId);
             return RedirectToAction("Social");
         }
 
         [HttpPost]
         public IActionResult RemoveFriend(int friendId)
         {
-            _socialService.RemoveFriend(CurrentUserId, friendId);
+            _socialService.RemoveFriend(_userService.GetCurrentUserId(), friendId);
             return RedirectToAction("Social");
         }
     }

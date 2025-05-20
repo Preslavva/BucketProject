@@ -1,5 +1,4 @@
-﻿
-using BucketProject.BLL.Business_Logic.DTOs;
+﻿using BucketProject.BLL.Business_Logic.DTOs;
 
 namespace BucketProject.UI.ViewModels.ViewModels
 {

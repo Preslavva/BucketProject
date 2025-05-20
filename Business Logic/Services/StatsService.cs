@@ -11,6 +11,7 @@ using BucketProject.BLL.Business_Logic.InterfacesService;
 using BucketProject.DAL.Data.Repositories;
 using System.Globalization;
 using BucketProject.BLL.Business_Logic.DTOs;
+using Exceptions.Exceptions;
 
 namespace BucketProject.BLL.Business_Logic.Services
 {
@@ -18,30 +19,23 @@ namespace BucketProject.BLL.Business_Logic.Services
     {
         private readonly IGoalRepo _goalRepo;
         private readonly IManagerRepo _managerRepo;
+        private readonly IUserService _userService;
         private readonly IHttpContextAccessor _contextAccessor;
         private readonly IMapper _mapper;
 
-        public StatsService(IGoalRepo goalRepo, IHttpContextAccessor contextAccessor, IMapper mapper, IManagerRepo managerRepo)
+        public StatsService(IGoalRepo goalRepo, IHttpContextAccessor contextAccessor, IMapper mapper, IManagerRepo managerRepo, IUserService userService)
         {
             _goalRepo = goalRepo;
             _contextAccessor = contextAccessor;
             _mapper = mapper;
             _managerRepo = managerRepo;
+            _userService = userService;
         }
-        public int GetCurrentUserId()
-        {
-            string? username = _contextAccessor.HttpContext.Session.GetString("Username");
-            if (string.IsNullOrEmpty(username))
-                throw new Exception("User not logged in.");
-
-
-            int userId = _goalRepo.GetIdOfUser(username);
-            return userId;
-        }
+   
 
         public List<StatsDTO> GetGoalTypeStatistics()
         {
-            int id = GetCurrentUserId();
+            int id = _userService.GetCurrentUserId();
             List<GoalEntity> entities = _goalRepo.LoadGoalsOfUser(id);
             List<Goal> goals = _mapper.Map<List<Goal>>(entities);
 
@@ -57,7 +51,7 @@ namespace BucketProject.BLL.Business_Logic.Services
 
         public List<StatsDTO> GetGoalCategoryStatistics()
         {
-            int id = GetCurrentUserId();
+            int id = _userService.GetCurrentUserId();
             List<GoalEntity> entities = _goalRepo.LoadGoalsOfUser(id);
             List<Goal> goals = _mapper.Map<List<Goal>>(entities);
 
@@ -73,7 +67,7 @@ namespace BucketProject.BLL.Business_Logic.Services
 
         public List<StatsDTO> GetGoalAmountStatisticsWeekly()
         {
-            int id = GetCurrentUserId();
+            int id = _userService.GetCurrentUserId();
 
             List<Goal> goalsPersonal = _mapper.Map<List<Goal>>(_goalRepo.LoadPersonalGoalsOfUser(id));
             List<Goal> goalsShared = _mapper.Map<List<Goal>>(_goalRepo.LoadSharedGoalsOfUser(id));
@@ -116,7 +110,7 @@ namespace BucketProject.BLL.Business_Logic.Services
 
         public List<StatsDTO> GetGoalAmountStatisticsMonthly()
         {
-            int id = GetCurrentUserId();
+            int id = _userService.GetCurrentUserId();
 
             List<Goal> goalsPersonal = _mapper.Map<List<Goal>>(_goalRepo.LoadPersonalGoalsOfUser(id));
             List<Goal> goalsShared = _mapper.Map<List<Goal>>(_goalRepo.LoadSharedGoalsOfUser(id));
@@ -153,7 +147,7 @@ namespace BucketProject.BLL.Business_Logic.Services
 
         public List<StatsDTO> GetGoalAmountStatisticsYearly()
         {
-            int id = GetCurrentUserId();
+            int id = _userService.GetCurrentUserId();
 
             List<Goal> goalsPersonal = _mapper.Map<List<Goal>>(_goalRepo.LoadPersonalGoalsOfUser(id));
             List<Goal> goalsShared = _mapper.Map<List<Goal>>(_goalRepo.LoadSharedGoalsOfUser(id));
@@ -186,7 +180,7 @@ namespace BucketProject.BLL.Business_Logic.Services
 
         public double GetAverageCompletionTimeInDays()
         {
-            int id = GetCurrentUserId();
+            int id = _userService.GetCurrentUserId();
 
             List<Goal> allGoals = _mapper.Map<List<Goal>>(
                 _goalRepo.LoadPersonalGoalsOfUser(id)
@@ -203,7 +197,7 @@ namespace BucketProject.BLL.Business_Logic.Services
 
         public StatsDTO GetGoalSummaryStats()
         {
-            int userId = GetCurrentUserId();
+            int userId = _userService.GetCurrentUserId();
 
             var personalGoals = _mapper.Map<List<Goal>>(_goalRepo.LoadPersonalGoalsOfUser(userId));
             var sharedGoals = _mapper.Map<List<Goal>>(_goalRepo.LoadSharedGoalsOfUser(userId));
@@ -298,8 +292,11 @@ namespace BucketProject.BLL.Business_Logic.Services
                     Type = g.Key.ToString(),
                     Count = g.Count()
                 })
+                .OrderByDescending(stat => stat.Count)
+                .Take(5)
                 .ToList();
         }
+
 
         public List<StatsDTO> GetGoalCategoryStatisticsManager()
         {
@@ -328,11 +325,11 @@ namespace BucketProject.BLL.Business_Logic.Services
                     Nationality = g.Key,
                     Count = g.Count()
                 })
+                .OrderByDescending(stat => stat.Count)
+                .Take(5)
                 .ToList();
-
-
-
         }
+
         public List<StatsDTO> GetUsersGenderStatistics()
         {
             List<UserEntity> entities = _managerRepo.GetAllUsers();

@@ -10,6 +10,7 @@ using System.Text;
 using BucketProjetc.BLL.Business_Logic.InterfacesService;
 using System.ComponentModel.DataAnnotations;
 using BucketProject.BLL.Business_Logic.DTOs;
+using Exceptions.Exceptions;
 
 
 
@@ -22,28 +23,22 @@ namespace BucketProject.BLL.Business_Logic.Services
         private readonly IMapper _mapper;
         private readonly IAIClient _aIClient;
         private readonly IGoalInviteRepo _inviteRepo;
+        private readonly IUserService _userService;
 
-        public GoalService(IGoalRepo goalRepo, IHttpContextAccessor contextAccessor, IMapper mapper, IAIClient aIClient, IGoalInviteRepo inviteRepo)
+
+        public GoalService(IGoalRepo goalRepo, IHttpContextAccessor contextAccessor, IMapper mapper, IAIClient aIClient, IGoalInviteRepo inviteRepo, IUserService userService)
         {
             _goalRepo = goalRepo;
             _contextAccessor = contextAccessor;
             _mapper = mapper;
             _aIClient = aIClient;
             _inviteRepo = inviteRepo;
+            _userService = userService;
         }
-        public int GetCurrentUserId()
-        {
-            string? username = _contextAccessor.HttpContext.Session.GetString("Username");
-            if (string.IsNullOrEmpty(username))
-                throw new Exception("User not logged in.");
-
-
-            int userId = _goalRepo.GetIdOfUser(username);
-            return userId;
-        }
+       
         private void EnsureUserIsOwner(int goalId, int currentUserId)
         {
-            GoalEntity goalEntity = _goalRepo.GetGoalById(goalId,GetCurrentUserId());
+            GoalEntity goalEntity = _goalRepo.GetGoalById(goalId,_userService.GetCurrentUserId());
 
             if (goalEntity == null)
                 throw new Exception("Goal not found.");
@@ -65,7 +60,7 @@ namespace BucketProject.BLL.Business_Logic.Services
             if (goalDomain.Description.Length > 50)
                 throw new ValidationException("Goal description is too long. Maximum allowed is 50 characters.");
 
-            int ownerId = GetCurrentUserId();
+            int ownerId = _userService.GetCurrentUserId();
             GoalEntity entity = _mapper.Map<GoalEntity>(goalDomain);
 
             bool shareIntent = sharedWithUserIds != null && sharedWithUserIds.Any();
@@ -91,7 +86,7 @@ namespace BucketProject.BLL.Business_Logic.Services
         {
             Enum.TryParse<Category>(category, true, out var parsedCategory);
 
-            int userId = GetCurrentUserId();
+            int userId = _userService.GetCurrentUserId();
 
             List<GoalEntity> allEntities = _goalRepo.LoadPersonalGoalsOfUserbyCategory(userId, parsedCategory);
 
@@ -106,7 +101,7 @@ namespace BucketProject.BLL.Business_Logic.Services
         public List<Goal> LoadSharedGoalsByCategory(string category)
         {
 
-            int userId = GetCurrentUserId();
+            int userId = _userService.GetCurrentUserId();
             Enum.TryParse<Category>(category, true, out var parsedCategory);
 
             List<GoalEntity> entities = _goalRepo.LoadSharedGoalsOfUserByCategory(userId, parsedCategory);
@@ -133,10 +128,10 @@ namespace BucketProject.BLL.Business_Logic.Services
             {
                 throw new ValidationException("New description cannot be empty");
             }
-            int userId = GetCurrentUserId();
+            int userId = _userService.GetCurrentUserId();
             EnsureUserIsOwner(goalId, userId);
 
-            GoalEntity entityGoal = _goalRepo.GetGoalById(goalId,GetCurrentUserId());
+            GoalEntity entityGoal = _goalRepo.GetGoalById(goalId, _userService.GetCurrentUserId());
            
 
             entityGoal.Description = goalDomain.Description.Trim();
@@ -147,10 +142,10 @@ namespace BucketProject.BLL.Business_Logic.Services
 
         public void DeleteGoal(int goalId)
         {
-            int userId = GetCurrentUserId();
+            int userId = _userService.GetCurrentUserId();
             EnsureUserIsOwner(goalId, userId);
 
-            GoalEntity goal = _goalRepo.GetGoalById(goalId, GetCurrentUserId());
+            GoalEntity goal = _goalRepo.GetGoalById(goalId, userId);
 
             _goalRepo.DeleteGoal(goal);
         }
@@ -158,7 +153,7 @@ namespace BucketProject.BLL.Business_Logic.Services
 
         public void ChangeGoalStatus(int goalId, bool isDone)
         {
-            GoalEntity entityGoal = _goalRepo.GetGoalById(goalId,GetCurrentUserId());
+            GoalEntity entityGoal = _goalRepo.GetGoalById(goalId, _userService.GetCurrentUserId());
 
             Goal goal = _mapper.Map<Goal>(entityGoal);
 
@@ -169,17 +164,17 @@ namespace BucketProject.BLL.Business_Logic.Services
 
             entityGoal = _mapper.Map<GoalEntity>(goal);
 
-            _goalRepo.ChangeGoalStatus(entityGoal, GetCurrentUserId());
+            _goalRepo.ChangeGoalStatus(entityGoal, _userService.GetCurrentUserId());
         }
 
 
         public void PostponeGoal(int goalId)
         {
 
-            int userId = GetCurrentUserId();
+            int userId = _userService.GetCurrentUserId();
             EnsureUserIsOwner(goalId, userId);
 
-            GoalEntity entityGoal = _goalRepo.GetGoalById(goalId,GetCurrentUserId());
+            GoalEntity entityGoal = _goalRepo.GetGoalById(goalId,userId);
 
             Goal goal = _mapper.Map<Goal>(entityGoal);
 
@@ -202,7 +197,7 @@ namespace BucketProject.BLL.Business_Logic.Services
             if (string.IsNullOrEmpty(username))
                 return grouped;
 
-            int userId = _goalRepo.GetIdOfUser(username);
+            int userId = _userService.GetCurrentUserId();
 
             List<GoalEntity> expiredEntities = _goalRepo.LoadExpiredGoalsOfUser(userId);
             List<Goal> expiredGoals = _mapper.Map<List<Goal>>(expiredEntities);
@@ -276,7 +271,7 @@ namespace BucketProject.BLL.Business_Logic.Services
 
         public async Task<List<Goal>> BreakDownGoalAsync(int goalId)
         {
-            GoalEntity entity = _goalRepo.GetGoalById(goalId, GetCurrentUserId());
+            GoalEntity entity = _goalRepo.GetGoalById(goalId, _userService.GetCurrentUserId());
 
             Goal goal = _mapper.Map<Goal>(entity);
 
@@ -309,7 +304,7 @@ namespace BucketProject.BLL.Business_Logic.Services
 
         public void RespondToInvitation(int invitationId, bool accept, int currentUserId)
         {
-            var inv = _inviteRepo.GetById(invitationId);
+            GoalInvitation inv = _inviteRepo.GetById(invitationId);
 
             _inviteRepo.UpdateStatus(invitationId, accept ? "Accepted" : "Declined");
 
@@ -321,13 +316,13 @@ namespace BucketProject.BLL.Business_Logic.Services
 
         public string GetGoalDescription(int goalId)
         {
-            GoalEntity goal = _goalRepo.GetGoalById(goalId, GetCurrentUserId());
+            GoalEntity goal = _goalRepo.GetGoalById(goalId, _userService.GetCurrentUserId());
             return goal.Description;
         }
 
         public DateTime GetCreatedAt(int goalId)
         {
-            GoalEntity goal = _goalRepo.GetGoalById(goalId, GetCurrentUserId());
+            GoalEntity goal = _goalRepo.GetGoalById(goalId, _userService.GetCurrentUserId());
             return goal.CreatedAt;
         }
         public string GetInvitationStatus(int goalId, int invitedId)

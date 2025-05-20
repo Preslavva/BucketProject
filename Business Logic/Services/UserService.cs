@@ -5,7 +5,7 @@ using BucketProject.BLL.Business_Logic.DTOs;
 using BucketProject.DAL.Data.InterfacesRepo;
 using BucketProject.DAL.Models.Entities;
 using Microsoft.AspNetCore.Http;
-using Data.Exceptions;
+using Exceptions.Exceptions;
 
 
 namespace BucketProject.BLL.Business_Logic.Services
@@ -25,10 +25,19 @@ namespace BucketProject.BLL.Business_Logic.Services
             _mapper = mapper;
             _hasher = hasher;
         }
+        public int GetCurrentUserId()
+        {
+            string? username = _contextAccessor.HttpContext.Session.GetString("Username");
+            if (string.IsNullOrEmpty(username))
+                throw new UserNotLoggedInException();
 
+
+            int userId = _userRepo.GetIdOfUser(username);
+            return userId;
+        }
         public User? LogIn(string username, string password)
         {
-            var errors = new List<string>();
+            List<string> errors = new List<string>();
 
             if (string.IsNullOrWhiteSpace(username))
                 errors.Add("Enter your username");
@@ -37,9 +46,9 @@ namespace BucketProject.BLL.Business_Logic.Services
                 errors.Add("Enter your password");
 
             if (errors.Any())
-                throw new ValidationException(string.Join(" | ", errors));
+                throw new ValidationExceptionCollection(errors);
 
-            var entity = _userRepo.GetUserByUsername(username)
+            UserEntity entity = _userRepo.GetUserByUsername(username)
                 ?? throw new InvalidLoginException();
 
             if (!_hasher.VerifyPassword(password, entity.Password, entity.Salt))
@@ -97,12 +106,13 @@ namespace BucketProject.BLL.Business_Logic.Services
                 throw new ValidationException("The new Username cannot be empty or whitespace.");
 
             string currentUsername = _contextAccessor.HttpContext!
-                                      .Session
-                                      .GetString("Username")
-                                  ?? throw new ValidationException("No logged-in user found.");
+                             .Session
+                             .GetString("Username")
+                         ?? throw new UserNotLoggedInException();
 
             UserEntity user = _userRepo.GetUserByUsername(currentUsername)
-                       ?? throw new ValidationException("Logged-in user does not exist.");
+                       ?? throw new UserNotFoundException(currentUsername);
+
 
             _userRepo.UpdateName(user, newUsername);
 
@@ -118,13 +128,14 @@ namespace BucketProject.BLL.Business_Logic.Services
                 throw new ValidationException("Please select a photo to upload");
 
             string username = _contextAccessor.HttpContext!
-                                      .Session
-                                      .GetString("Username")
-                                  ?? throw new ValidationException("No logged-in user found.");
+                            .Session
+                            .GetString("Username")
+                        ?? throw new UserNotLoggedInException();
+
 
 
             UserEntity user = _userRepo.GetUserByUsername(username)
-                      ?? throw new ValidationException("Logged-in user does not exist.");
+             ?? throw new UserNotFoundException(username);
 
             using (var memoryStream = new MemoryStream())
             {

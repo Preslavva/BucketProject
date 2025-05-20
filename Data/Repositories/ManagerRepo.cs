@@ -516,10 +516,12 @@ FETCH NEXT @PageSize ROWS ONLY;
             catch (SqlException ex)
             {
                 _logger.LogError(ex, "SQL error in CountFilteredUsers");
+                throw new Exception("A database error occurred while counting filtered users.", ex);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Unexpected error in CountFilteredUsers");
+                throw;
             }
 
             return count;

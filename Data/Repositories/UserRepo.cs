@@ -1,7 +1,7 @@
 ﻿using System.Data;
 using BucketProject.DAL.Data.InterfacesRepo;
 using BucketProject.DAL.Models.Entities;
-using Data.Exceptions;
+using Exceptions.Exceptions;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -34,7 +34,7 @@ namespace BucketProject.DAL.Data.Repositories
                 int count = (int)checkCommand.ExecuteScalar();
                 if (count > 0)
                 {
-                    throw new DuplicateUserException("Username or Email is already taken.");
+                    throw new DuplicateUserException();
                 }
 
                 string insertSql = @"
@@ -208,5 +208,42 @@ namespace BucketProject.DAL.Data.Repositories
             }
             return null;
         }
+
+        public int GetIdOfUser(string username)
+        {
+            try
+            {
+                using (SqlConnection conn = GetSqlConnection())
+                {
+                    conn.Open();
+                    string queryUpdateName = @"select UserId from [User] where Username = @Username";
+
+                    using (SqlCommand changeStatus = new SqlCommand(queryUpdateName, conn))
+                    {
+                        changeStatus.Parameters.AddWithValue("@Username", username);
+
+                        int id = (int)changeStatus.ExecuteScalar();
+                        return id;
+                    }
+                }
+            }
+
+            catch (SqlException sqlEx)
+            {
+                _logger.LogError(sqlEx,
+                    "SQL error in GetIdofUser (Username={username}",
+                    username);
+
+                throw new Exception("A database error occurred while getting id of user", sqlEx);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex,
+                    "SQL error in GetIdofUser (Username={username}",
+                    username);
+                throw;
+            }
+        }
     }
+
 }

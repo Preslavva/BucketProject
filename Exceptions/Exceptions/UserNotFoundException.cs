@@ -6,10 +6,12 @@ using System.Threading.Tasks;
 
 namespace Exceptions.Exceptions
 {
-    public class InvalidLoginException:Exception
+    public class UserNotFoundException : Exception
     {
-        public InvalidLoginException() : base("Wrong username or password")
+        public UserNotFoundException(string username)
+            : base($"User '{username}' was not found.")
         {
         }
     }
+
 }

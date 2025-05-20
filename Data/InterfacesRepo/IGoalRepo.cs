@@ -7,7 +7,7 @@ namespace BucketProject.DAL.Data.InterfacesRepo;
 
     public interface IGoalRepo
     {
-    int GetIdOfUser(string username);
+    //int GetIdOfUser(string username);
  
      List<GoalEntity> LoadPersonalGoalsOfUserbyCategory(int userId, Category category);
     List<GoalEntity> LoadSharedGoalsOfUserByCategory(int userId, Category category);

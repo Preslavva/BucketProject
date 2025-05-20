@@ -32,15 +32,6 @@ namespace BucketProject.UI.BucketProject.Controllers
             _notificationService = notificationService;
 
         }
-        private int CurrentUserId
-        {
-            get
-            {
-
-                User currentUser = _userService.GetUserByUsername();
-                return currentUser.Id;
-            }
-        }
 
         [HttpPost]
         public IActionResult CreateMonthGoal(GoalViewModel viewModel, int[] friendIds)
@@ -50,7 +41,7 @@ namespace BucketProject.UI.BucketProject.Controllers
             if (!ModelState.IsValid)
             {
                 ViewBag.AvailableTypes = GetAvailableTypes();
-                ViewBag.Friends = _socialService.GetFriends(CurrentUserId);
+                ViewBag.Friends = _socialService.GetFriends(_userService.GetCurrentUserId());
                 TempData.Keep("SubGoals");
                 TempData.Keep("SubGoalForId");
                 return RedirectToAction("MonthGoals");
@@ -102,7 +93,7 @@ namespace BucketProject.UI.BucketProject.Controllers
             if (!ModelState.IsValid)
             {
                 ViewBag.AvailableTypes = GetAvailableTypes();
-                ViewBag.Friends = _socialService.GetFriends(CurrentUserId);
+                ViewBag.Friends = _socialService.GetFriends(_userService.GetCurrentUserId());
                 TempData.Keep("SubGoals");
                 TempData.Keep("SubGoalForId");
                 return RedirectToAction("YearGoals");
@@ -152,7 +143,7 @@ namespace BucketProject.UI.BucketProject.Controllers
             if (!ModelState.IsValid)
             {
                 ViewBag.AvailableTypes = GetAvailableTypes();
-                ViewBag.Friends = _socialService.GetFriends(CurrentUserId);
+                ViewBag.Friends = _socialService.GetFriends(_userService.GetCurrentUserId());
                 TempData.Keep("SubGoals");
                 TempData.Keep("SubGoalForId");
                 return RedirectToAction("BucketListGoals");
@@ -198,7 +189,7 @@ namespace BucketProject.UI.BucketProject.Controllers
         {
             viewModel.Category = "Week";
             ViewBag.AvailableTypes = GetAvailableTypes();
-            ViewBag.Friends = _socialService.GetFriends(CurrentUserId);
+            ViewBag.Friends = _socialService.GetFriends(_userService.GetCurrentUserId());
             TempData.Keep("SubGoals");
             TempData.Keep("SubGoalForId");
 
@@ -380,7 +371,7 @@ namespace BucketProject.UI.BucketProject.Controllers
             }
 
 
-            List<GoalInviteDTO> pendingInvitations = _goalService.GetPendingInvitations(CurrentUserId, "Week");
+            List<GoalInviteDTO> pendingInvitations = _goalService.GetPendingInvitations(_userService.GetCurrentUserId(), "Week");
 
 
             List<GoalInviteViewModel> pendingInvitationVMs = pendingInvitations
@@ -396,7 +387,7 @@ namespace BucketProject.UI.BucketProject.Controllers
 
 
 
-            List<GoalInviteDTO> sentInvitationsOfUser = _goalService.GetInvitationsOf(CurrentUserId, "Week");
+            List<GoalInviteDTO> sentInvitationsOfUser = _goalService.GetInvitationsOf(_userService.GetCurrentUserId(), "Week");
             List<GoalInviteViewModel> sentInvitationsOFVMs = sentInvitationsOfUser
   .Select(inv => new GoalInviteViewModel
   {
@@ -422,8 +413,8 @@ namespace BucketProject.UI.BucketProject.Controllers
             };
 
             ViewBag.AvailableTypes = GetAvailableTypes();
-            ViewBag.Friends = _socialService.GetFriends(CurrentUserId);
-            ViewBag.CurrentUserId = _goalService.GetCurrentUserId();
+            ViewBag.Friends = _socialService.GetFriends(_userService.GetCurrentUserId());
+            ViewBag.CurrentUserId = _userService.GetCurrentUserId();
 
             if (TempData.TryGetValue("ErrorMessage", out var obj)
        && obj is string msg && !string.IsNullOrEmpty(msg))
@@ -497,7 +488,7 @@ namespace BucketProject.UI.BucketProject.Controllers
             }
 
 
-            List<GoalInviteDTO> pendingInvitations = _goalService.GetPendingInvitations(CurrentUserId, "Year");
+            List<GoalInviteDTO> pendingInvitations = _goalService.GetPendingInvitations(_userService.GetCurrentUserId(), "Year");
 
             List<GoalInviteViewModel> pendingInvitationVMs = pendingInvitations
                 .Select(inv => new GoalInviteViewModel
@@ -512,7 +503,7 @@ namespace BucketProject.UI.BucketProject.Controllers
 
 
 
-            List<GoalInviteDTO> sentInvitationsOfUser = _goalService.GetInvitationsOf(CurrentUserId, "Year");
+            List<GoalInviteDTO> sentInvitationsOfUser = _goalService.GetInvitationsOf(_userService.GetCurrentUserId(), "Year");
             List<GoalInviteViewModel> sentInvitationsOFVMs = sentInvitationsOfUser
   .Select(inv => new GoalInviteViewModel
   {
@@ -538,8 +529,8 @@ namespace BucketProject.UI.BucketProject.Controllers
             };
 
             ViewBag.AvailableTypes = GetAvailableTypes();
-            ViewBag.Friends = _socialService.GetFriends(CurrentUserId);
-            ViewBag.CurrentUserId = _goalService.GetCurrentUserId();
+            ViewBag.Friends = _socialService.GetFriends(_userService.GetCurrentUserId());
+            ViewBag.CurrentUserId = _userService.GetCurrentUserId();
 
             if (TempData.TryGetValue("ErrorMessage", out var obj)
        && obj is string msg && !string.IsNullOrEmpty(msg))
@@ -581,7 +572,7 @@ namespace BucketProject.UI.BucketProject.Controllers
             }
 
 
-            List<GoalInviteDTO> pendingInvitations = _goalService.GetPendingInvitations(CurrentUserId, "Bucket_list");
+            List<GoalInviteDTO> pendingInvitations = _goalService.GetPendingInvitations(_userService.GetCurrentUserId(), "Bucket_list");
 
             List<GoalInviteViewModel> pendingInvitationVMs = pendingInvitations
                 .Select(inv => new GoalInviteViewModel
@@ -596,7 +587,7 @@ namespace BucketProject.UI.BucketProject.Controllers
 
 
 
-            List<GoalInviteDTO> sentInvitationsOfUser = _goalService.GetInvitationsOf(CurrentUserId, "Bucket_list");
+            List<GoalInviteDTO> sentInvitationsOfUser = _goalService.GetInvitationsOf(_userService.GetCurrentUserId(), "Bucket_list");
             List<GoalInviteViewModel> sentInvitationsOFVMs = sentInvitationsOfUser
   .Select(inv => new GoalInviteViewModel
   {
@@ -622,8 +613,8 @@ namespace BucketProject.UI.BucketProject.Controllers
             };
 
             ViewBag.AvailableTypes = GetAvailableTypes();
-            ViewBag.Friends = _socialService.GetFriends(CurrentUserId);
-            ViewBag.CurrentUserId = _goalService.GetCurrentUserId();
+            ViewBag.Friends = _socialService.GetFriends(_userService.GetCurrentUserId());
+            ViewBag.CurrentUserId = _userService.GetCurrentUserId();
 
             if (TempData.TryGetValue("ErrorMessage", out var obj)
        && obj is string msg && !string.IsNullOrEmpty(msg))
@@ -664,7 +655,7 @@ namespace BucketProject.UI.BucketProject.Controllers
             }
 
 
-            List<GoalInviteDTO> pendingInvitations = _goalService.GetPendingInvitations(CurrentUserId, "Month");
+            List<GoalInviteDTO> pendingInvitations = _goalService.GetPendingInvitations(_userService.GetCurrentUserId(), "Month");
 
             List<GoalInviteViewModel> pendingInvitationVMs = pendingInvitations
                 .Select(inv => new GoalInviteViewModel
@@ -677,7 +668,7 @@ namespace BucketProject.UI.BucketProject.Controllers
                 .ToList();
 
 
-            List<GoalInviteDTO> sentInvitationsOfUser = _goalService.GetInvitationsOf(CurrentUserId, "Month");
+            List<GoalInviteDTO> sentInvitationsOfUser = _goalService.GetInvitationsOf(_userService.GetCurrentUserId(), "Month");
             List<GoalInviteViewModel> sentInvitationsOFVMs = sentInvitationsOfUser
   .Select(inv => new GoalInviteViewModel
   {
@@ -703,8 +694,8 @@ namespace BucketProject.UI.BucketProject.Controllers
             };
 
             ViewBag.AvailableTypes = GetAvailableTypes();
-            ViewBag.Friends = _socialService.GetFriends(CurrentUserId);
-            ViewBag.CurrentUserId = _goalService.GetCurrentUserId();
+            ViewBag.Friends = _socialService.GetFriends(_userService.GetCurrentUserId());
+            ViewBag.CurrentUserId = _userService.GetCurrentUserId();
 
             if (TempData.TryGetValue("ErrorMessage", out var obj)
        && obj is string msg && !string.IsNullOrEmpty(msg))
@@ -1027,7 +1018,7 @@ namespace BucketProject.UI.BucketProject.Controllers
         [HttpPost]
         public IActionResult RespondInvitationWeek(int invitationId, bool accept)
         {
-            int currentUserId = CurrentUserId;
+            int currentUserId = _userService.GetCurrentUserId();
 
             _goalService.RespondToInvitation(invitationId, accept, currentUserId);
 
@@ -1036,7 +1027,7 @@ namespace BucketProject.UI.BucketProject.Controllers
         [HttpPost]
         public IActionResult RespondInvitationMonth(int invitationId, bool accept)
         {
-            int currentUserId = CurrentUserId;
+            int currentUserId = _userService.GetCurrentUserId();
 
             _goalService.RespondToInvitation(invitationId, accept, currentUserId);
 
@@ -1045,7 +1036,7 @@ namespace BucketProject.UI.BucketProject.Controllers
         [HttpPost]
         public IActionResult RespondInvitationYear(int invitationId, bool accept)
         {
-            int currentUserId = CurrentUserId;
+            int currentUserId = _userService.GetCurrentUserId();
 
             _goalService.RespondToInvitation(invitationId, accept, currentUserId);
 
@@ -1054,7 +1045,7 @@ namespace BucketProject.UI.BucketProject.Controllers
         [HttpPost]
         public IActionResult RespondInvitationBucketList(int invitationId, bool accept)
         {
-            int currentUserId = CurrentUserId;
+            int currentUserId = _userService.GetCurrentUserId();
 
             _goalService.RespondToInvitation(invitationId, accept, currentUserId);
 
@@ -1064,7 +1055,7 @@ namespace BucketProject.UI.BucketProject.Controllers
         [HttpPost]
         public IActionResult DismissNotificationWeek(int goalId, string notificationType, int triggeredByUserId)
         {
-            int userId = _goalService.GetCurrentUserId();
+            int userId = _userService.GetCurrentUserId();
             _notificationService.DismissNotification(userId, goalId, notificationType, triggeredByUserId);
             return RedirectToAction("WeekGoals");
         }
@@ -1072,7 +1063,7 @@ namespace BucketProject.UI.BucketProject.Controllers
         [HttpPost]
         public IActionResult DismissNotificationMonth(int goalId, string notificationType, int triggeredByUserId)
         {
-            int userId = _goalService.GetCurrentUserId();
+            int userId = _userService.GetCurrentUserId();
             _notificationService.DismissNotification(userId, goalId, notificationType, triggeredByUserId);
             return RedirectToAction("MonthGoals");
         }
@@ -1080,7 +1071,7 @@ namespace BucketProject.UI.BucketProject.Controllers
         [HttpPost]
         public IActionResult DismissNotificationYear(int goalId, string notificationType, int triggeredByUserId)
         {
-            int userId = _goalService.GetCurrentUserId();
+            int userId = _userService.GetCurrentUserId();
             _notificationService.DismissNotification(userId, goalId, notificationType, triggeredByUserId);
             return RedirectToAction("YearGoals");
         }
@@ -1088,7 +1079,7 @@ namespace BucketProject.UI.BucketProject.Controllers
         [HttpPost]
         public IActionResult DismissNotificationBucketList(int goalId, string notificationType, int triggeredByUserId)
         {
-            int userId = _goalService.GetCurrentUserId();
+            int userId = _userService.GetCurrentUserId();
             _notificationService.DismissNotification(userId, goalId, notificationType, triggeredByUserId);
             return RedirectToAction("BucketList");
         }

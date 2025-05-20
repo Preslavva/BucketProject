@@ -7,6 +7,7 @@ using BucketProject.DAL.Models.Entities;
 using Microsoft.AspNetCore.Http;
 using AutoMapper;
 using BucketProject.BLL.Business_Logic.InterfacesService;
+using Exceptions.Exceptions;
 
 namespace BucketProject.BLL.Business_Logic.Services
 {
@@ -16,23 +17,25 @@ namespace BucketProject.BLL.Business_Logic.Services
         private readonly IHttpContextAccessor _contextAccessor;
         private readonly IGoalRepo _goalRepo;
         private readonly IMapper _mapper;
+        private readonly IUserService _userService;
 
-        public NotificationService(IGoalRepo goalRepo, IHttpContextAccessor contextAccessor, IMapper mapper)
+
+        public NotificationService(IGoalRepo goalRepo, IHttpContextAccessor contextAccessor, IMapper mapper, IUserService userService)
         {
             _goalRepo = goalRepo;
             _contextAccessor = contextAccessor;
             _mapper = mapper;
+            _userService = userService;
         }
 
+   
 
         public List<Goal> CheckAndNotify(DateTime today)
         {
             var notifications = new List<Goal>();
-            string? username = _contextAccessor.HttpContext.Session.GetString("Username");
-            if (username == null)
-                return notifications;
+         
 
-            int userId = _goalRepo.GetIdOfUser(username);
+            int userId = _userService.GetCurrentUserId();
 
             List<GoalEntity> goalEntities = _goalRepo.LoadGoalsOfUser(userId);
             List<Goal> goals = _mapper.Map<List<Goal>>(goalEntities);
@@ -71,11 +74,11 @@ namespace BucketProject.BLL.Business_Logic.Services
         }
         public List<Goal> GetSharedCompletionGoals()
         {
-            string? username = _contextAccessor.HttpContext?.Session.GetString("Username");
-            if (string.IsNullOrEmpty(username))
-                return new List<Goal>();
+            //string? username = _contextAccessor.HttpContext?.Session.GetString("Username");
+            //if (string.IsNullOrEmpty(username))
+            //    return new List<Goal>();
 
-            int currentUserId = _goalRepo.GetIdOfUser(username);
+            int currentUserId = _userService.GetCurrentUserId();
 
           
             List<GoalEntity> entities = _goalRepo.LoadSharedGoalsCompletedByOthers(currentUserId);
@@ -100,11 +103,11 @@ namespace BucketProject.BLL.Business_Logic.Services
 
         public List<Goal> GetSharedDeletedGoals()
         {
-            var username = _contextAccessor.HttpContext?.Session.GetString("Username");
-            if (string.IsNullOrEmpty(username))
-                return new List<Goal>();
+            //var username = _contextAccessor.HttpContext?.Session.GetString("Username");
+            //if (string.IsNullOrEmpty(username))
+            //    return new List<Goal>();
 
-            int currentUserId = _goalRepo.GetIdOfUser(username);
+            int currentUserId = _userService.GetCurrentUserId();
 
 
             List<GoalEntity> entities = _goalRepo.LoadSharedDeletedGoals(currentUserId);
@@ -128,11 +131,11 @@ namespace BucketProject.BLL.Business_Logic.Services
         }
         public List<Goal> GetSharedPostponedGoals()
         {
-            var username = _contextAccessor.HttpContext?.Session.GetString("Username");
-            if (string.IsNullOrEmpty(username))
-                return new List<Goal>();
+            //var username = _contextAccessor.HttpContext?.Session.GetString("Username");
+            //if (string.IsNullOrEmpty(username))
+            //    return new List<Goal>();
 
-            int currentUserId = _goalRepo.GetIdOfUser(username);
+            int currentUserId = _userService.GetCurrentUserId();
 
 
             List<GoalEntity> entities = _goalRepo.LoadSharedPostponedGoals(currentUserId);

@@ -14,15 +14,17 @@ namespace BucketProject.BLL.Business_Logic.Controllers
     public class NotificationController : Controller
     {
         
-        private readonly GoalService _goalService;
+        private readonly IGoalService _goalService;
+        private readonly IUserService _userService;
         private readonly IMapper _mapper;
         private readonly INotificationService _notificationService;
 
-        public NotificationController(INotificationService notificationService, GoalService goalService, IMapper mapper)
+        public NotificationController(INotificationService notificationService, IGoalService goalService, IMapper mapper, IUserService userService)
         {
             _notificationService = notificationService;
             _goalService = goalService;
             _mapper = mapper;
+            _userService = userService;
         }
         [HttpGet]
         public IActionResult Notification()
@@ -30,7 +32,7 @@ namespace BucketProject.BLL.Business_Logic.Controllers
             var username = HttpContext.Session.GetString("Username");
             ViewBag.Username = username;
 
-            int currentUserId = _goalService.GetCurrentUserId();
+            int currentUserId = _userService.GetCurrentUserId();
             ViewBag.CurrentUserId = currentUserId;
 
             DateTime today = DateTime.Today;
@@ -119,7 +121,7 @@ namespace BucketProject.BLL.Business_Logic.Controllers
         [HttpPost]
         public IActionResult DismissNotification(int goalId, string notificationType, int triggeredByUserId)
         {
-            int userId = _goalService.GetCurrentUserId();
+            int userId = _userService.GetCurrentUserId();
             _notificationService.DismissNotification(userId, goalId, notificationType, triggeredByUserId);
             return RedirectToAction("Notification");
         }

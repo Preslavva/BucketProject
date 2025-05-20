@@ -6,7 +6,7 @@ using AutoMapper;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Text.Json;
 using System.ComponentModel.DataAnnotations;
-using Data.Exceptions;
+using Exceptions.Exceptions;
 
 
 namespace BucketProject.UI.BucketProject.Controllers
@@ -103,17 +103,21 @@ namespace BucketProject.UI.BucketProject.Controllers
                     ? RedirectToAction("ManagerSearch", "Manager")
                     : RedirectToAction("Index", "Home");
             }
-            catch (ValidationException ex)
+            catch (ValidationExceptionCollection ex)
             {
-                ModelState.AddModelError(string.Empty, ex.Message);
+                foreach (var error in ex.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error);
+                }
             }
-            catch (InvalidLoginException ex)
+            catch (InvalidLoginException lex)
             {
-                ModelState.AddModelError(string.Empty, ex.Message);
+                ModelState.AddModelError(string.Empty, lex.Message);
             }
 
             return View(vm);
         }
+
 
 
 

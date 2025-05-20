@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Data.Exceptions
+namespace Exceptions.Exceptions
 {
-    public class DuplicateUserException: ApplicationException
+    public class DuplicateUserException: Exception
     {
-        public DuplicateUserException(string message) : base(message) { }
+        public DuplicateUserException() : base("Username or Email is already taken.") { }
     }
 }

@@ -6,10 +6,8 @@ using System.Threading.Tasks;
 
 namespace Exceptions.Exceptions
 {
-    public class InvalidLoginException:Exception
+    public class UserNotLoggedInException:Exception
     {
-        public InvalidLoginException() : base("Wrong username or password")
-        {
-        }
+        public UserNotLoggedInException() : base("User not logged in.") { }
     }
 }

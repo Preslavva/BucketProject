@@ -22,7 +22,6 @@ namespace BucketProject.BLL.Business_Logic.InterfacesService
         List<GoalInviteDTO> GetPendingInvitations(int userId, string category);
         void RespondToInvitation(int invitationId, bool accept, int currentUserId);
         string GetGoalDescription(int goalId);
-        int GetCurrentUserId();
         List<GoalInviteDTO> GetInvitationsOf(int userId, string category);
 
         DateTime GetCreatedAt(int goalId);

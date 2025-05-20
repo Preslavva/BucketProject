@@ -630,41 +630,41 @@ WHERE Id            = @Id
         }
     }
 
-       public int GetIdOfUser(string username)
-        {
-        try
-        {
-            using (SqlConnection conn = GetSqlConnection())
-            {
-                conn.Open();
-                string queryUpdateName = @"select UserId from [User] where Username = @Username";
+    //   public int GetIdOfUser(string username)
+    //    {
+    //    try
+    //    {
+    //        using (SqlConnection conn = GetSqlConnection())
+    //        {
+    //            conn.Open();
+    //            string queryUpdateName = @"select UserId from [User] where Username = @Username";
 
-                using (SqlCommand changeStatus = new SqlCommand(queryUpdateName, conn))
-                {
-                    changeStatus.Parameters.AddWithValue("@Username", username);
+    //            using (SqlCommand changeStatus = new SqlCommand(queryUpdateName, conn))
+    //            {
+    //                changeStatus.Parameters.AddWithValue("@Username", username);
 
-                    int id = (int)changeStatus.ExecuteScalar();
-                    return id;
-                }
-            }
-        }
+    //                int id = (int)changeStatus.ExecuteScalar();
+    //                return id;
+    //            }
+    //        }
+    //    }
 
-        catch (SqlException sqlEx)
-        {
-            _logger.LogError(sqlEx,
-                "SQL error in GetIdofUser (Username={username}",
-                username);
+    //    catch (SqlException sqlEx)
+    //    {
+    //        _logger.LogError(sqlEx,
+    //            "SQL error in GetIdofUser (Username={username}",
+    //            username);
 
-            throw new Exception("A database error occurred while getting id of user", sqlEx);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex,
-                "SQL error in GetIdofUser (Username={username}",
-                username);
-            throw;
-        }
-    }
+    //        throw new Exception("A database error occurred while getting id of user", sqlEx);
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        _logger.LogError(ex,
+    //            "SQL error in GetIdofUser (Username={username}",
+    //            username);
+    //        throw;
+    //    }
+    //}
 
     public List<GoalEntity> LoadExpiredGoalsOfUser(int userId)
     {
