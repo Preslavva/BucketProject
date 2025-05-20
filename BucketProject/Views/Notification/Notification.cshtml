@@ -14,24 +14,27 @@ else
     var groupedNotifications = Model.GroupBy(n => n.TypeOfNotification).ToList();
 
     <ul class="nav nav-tabs" id="notificationTabs" role="tablist">
-        @for (int i = 0; i < groupedNotifications.Count; i++)
-        {
-            var group = groupedNotifications[i];
-            var tabId = $"tab-{group.Key}";
+            @for (int i = 0; i < groupedNotifications.Count; i++)
+            {
+                var group = groupedNotifications[i];
+                var tabId = $"tab-{group.Key}";
+                var count = group.Count();
 
-            <li class="nav-item" role="presentation">
-                <button class="nav-link @(i == 0 ? "active" : "")"
-                        id="@tabId-tab"
-                        data-bs-toggle="tab"
-                        data-bs-target="#@tabId"
-                        type="button" role="tab"
-                        aria-controls="@tabId"
-                        aria-selected="@(i == 0 ? "true" : "false")">
-                    @group.Key
-                </button>
-            </li>
-        }
-    </ul>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link @(i == 0 ? "active" : "")"
+                            id="@tabId-tab"
+                            data-bs-toggle="tab"
+                            data-bs-target="#@tabId"
+                            type="button"
+                            role="tab"
+                            aria-controls="@tabId"
+                            aria-selected="@(i == 0 ? "true" : "false")">
+                        @group.Key (@count)
+                    </button>
+                </li>
+            }
+        </ul>
+
 
     <div class="tab-content mt-3" id="notificationTabsContent">
         @for (int i = 0; i < groupedNotifications.Count; i++)
