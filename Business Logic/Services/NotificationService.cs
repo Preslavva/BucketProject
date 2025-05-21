@@ -30,12 +30,10 @@ namespace BucketProject.BLL.Business_Logic.Services
 
         public List<Goal> CheckAndNotify(DateTime today)
         {
-            var notifications = new List<Goal>();
-         
-
+            List<Goal> notifications = new List<Goal>();
             int userId = _userService.GetCurrentUserId();
 
-            List<GoalEntity> goalEntities = _goalRepo.LoadGoalsOfUser(userId);
+            List<GoalEntity> goalEntities = _goalRepo.LoadActiveGoalsExcludingDismissed(userId);
             List<Goal> goals = _mapper.Map<List<Goal>>(goalEntities);
 
             foreach (Goal goal in goals)
@@ -44,8 +42,8 @@ namespace BucketProject.BLL.Business_Logic.Services
                 if (goal.IsDone)
                     continue;
 
-                var deadlineStrategy = DeadlineStrategyDeterminator.GetStrategy(goal.Category);
-                var notificationStrategy = NotificationStrategyManager.GetStrategy(goal.Category);
+                IDeadlineStrategy? deadlineStrategy = DeadlineStrategyDeterminator.GetStrategy(goal.Category);
+                INotificationStrategy? notificationStrategy = NotificationStrategyManager.GetStrategy(goal.Category);
                 if (deadlineStrategy == null || notificationStrategy == null)
                     continue;
 

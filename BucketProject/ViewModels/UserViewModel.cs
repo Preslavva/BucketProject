@@ -8,7 +8,8 @@ namespace BucketProject.UI.ViewModels.ViewModels
     {
         public byte[] Picture { get; set; }
 
-        [Required(ErrorMessage = "The new Username cannot be empty or whitespace.")]
+        [Required]
+        [StringLength(20, MinimumLength = 3, ErrorMessage = "Username must be between 3 and 20 characters.")]
         public string Username { get; set; }
 
         public string Email { get; set; }

@@ -10,7 +10,8 @@ namespace BucketProject.UI.ViewModels.ViewModels
     {
         
             [Required]
-            public string Username { get; set; }
+        [StringLength(20, MinimumLength = 3, ErrorMessage = "Username must be between 3 and 20 characters.")]
+        public string Username { get; set; }
 
             [Required, EmailAddress]
             public string Email { get; set; }
@@ -24,8 +25,9 @@ namespace BucketProject.UI.ViewModels.ViewModels
             [Required]
             public string Gender { get; set; }
 
-            [Required, StringLength(50, MinimumLength = 6), DataType(DataType.Password)]
-            public string Password { get; set; }
+        [Required]
+        [StringLength(50, MinimumLength = 6, ErrorMessage = "Password must be at least 6 characters.")]
+        public string Password { get; set; }
 
             [Required, Compare(nameof(Password))]
             public string ConfirmPassword { get; set; }

@@ -14,7 +14,8 @@ namespace BucketProject.UI.ViewModels.ViewModels
         [Required]
         public string Type { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Description is required.")]
+        [StringLength(50, MinimumLength = 5, ErrorMessage = "Description must be between 5 and 50 characters.")]
         public string Description { get; set; }
         public bool IsDone { get; set; }
         public DateTime? CompletedAt { get; set; }

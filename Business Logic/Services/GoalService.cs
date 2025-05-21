@@ -52,13 +52,15 @@ namespace BucketProject.BLL.Business_Logic.Services
             if (string.IsNullOrWhiteSpace(goalDomain.Description))
                 throw new ValidationException("Goal description cannot be empty.");
 
-            if (goalDomain.Type == null)
-            {
-                throw new ValidationException("Goal type cannot be empty.");
-            }
+            if (goalDomain.Description.Length < 5)
+                throw new ValidationException("Goal description must have at least 5 characters.");
 
             if (goalDomain.Description.Length > 50)
                 throw new ValidationException("Goal description is too long. Maximum allowed is 50 characters.");
+
+            if (goalDomain.Type == null)
+                throw new ValidationException("Goal type cannot be empty.");
+
 
             int ownerId = _userService.GetCurrentUserId();
             GoalEntity entity = _mapper.Map<GoalEntity>(goalDomain);

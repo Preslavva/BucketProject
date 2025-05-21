@@ -42,19 +42,26 @@ namespace BucketProject.BLL.Business_Logic.Controllers
             List<Goal> deadlineGoals = _notificationService.CheckAndNotify(today);
             foreach (Goal goal in deadlineGoals)
             {
-                var ds = DeadlineStrategyDeterminator.GetStrategy(goal.Category);
-                var ns = NotificationStrategyManager.GetStrategy(goal.Category);
+                IDeadlineStrategy? ds = DeadlineStrategyDeterminator.GetStrategy(goal.Category);
+                INotificationStrategy? ns = NotificationStrategyManager.GetStrategy(goal.Category);
                 if (ds == null || ns == null)
                     continue;
 
-                var dl = ds.GetDeadline(goal.CreatedAt, goal.IsPostponed);
+                DateTime? dl = ds.GetDeadline(goal.CreatedAt, goal.IsPostponed);
                 if (!dl.HasValue)
                     continue;
 
                 NotificationViewModel vm = _mapper.Map<NotificationViewModel>(goal);
                 vm.TypeOfNotification = "Deadline";
                 vm.Message = ns.GetNotificationMessage(goal.Description, dl.Value);
-              //  vm.TriggeredByUserId = goal.Recipients.First().Id; 
+                if (goal.Recipients != null && goal.Recipients.Any())
+                {
+                    vm.TriggeredByUserId = goal.Recipients.First().Id;
+                }
+                else
+                {
+                    vm.TriggeredByUserId = goal.OwnerId;
+                }
 
 
                 notifications.Add(vm);

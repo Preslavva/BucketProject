@@ -51,8 +51,16 @@ namespace BucketProject.UI.BucketProject.Controllers
                 return RedirectToAction("MonthGoals");
             }
 
-            Goal domainModel = _mapper.Map<Goal>(viewModel);
-            _goalService.CreateGoal(domainModel, friendIds);
+            try
+            {
+                Goal domainModel = _mapper.Map<Goal>(viewModel);
+                _goalService.CreateGoal(domainModel, friendIds);
+            }
+            catch (ValidationException vex)
+            {
+                TempData["ErrorMessage"] = vex.Message;
+                return RedirectToAction("MonthGoals");
+            }
 
             if (TempData.ContainsKey("SubGoals"))
             {
@@ -103,8 +111,16 @@ namespace BucketProject.UI.BucketProject.Controllers
                 return RedirectToAction("YearGoals");
             }
 
-            Goal domainModel = _mapper.Map<Goal>(viewModel);
-            _goalService.CreateGoal(domainModel, friendIds);
+            try
+            {
+                Goal domainModel = _mapper.Map<Goal>(viewModel);
+                _goalService.CreateGoal(domainModel, friendIds);
+            }
+            catch (ValidationException vex)
+            {
+                TempData["ErrorMessage"] = vex.Message;
+                return RedirectToAction("YearGoals");
+            };
 
             if (TempData.ContainsKey("SubGoals"))
             {
@@ -153,8 +169,16 @@ namespace BucketProject.UI.BucketProject.Controllers
                 return RedirectToAction("BucketListGoals");
             }
 
-            Goal domainModel = _mapper.Map<Goal>(viewModel);
-            _goalService.CreateGoal(domainModel, friendIds);
+            try
+            {
+                Goal domainModel = _mapper.Map<Goal>(viewModel);
+                _goalService.CreateGoal(domainModel, friendIds);
+            }
+            catch (ValidationException vex)
+            {
+                TempData["ErrorMessage"] = vex.Message;
+                return RedirectToAction("BucketList");
+            }
 
             if (TempData.ContainsKey("SubGoals"))
             {

@@ -31,5 +31,6 @@ namespace BucketProject.DAL.Data.InterfacesRepo;
     void DismissNotification(int userId, int goalId, string type, int triggeredByUserId);
     List<GoalEntity> LoadSharedGoalsOfUser(int userId);
     List<GoalEntity> LoadPersonalGoalsOfUser(int userId);
+    List<GoalEntity> LoadActiveGoalsExcludingDismissed(int userId);
 
 }

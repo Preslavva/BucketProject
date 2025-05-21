@@ -63,6 +63,8 @@ namespace BucketProject.BLL.Business_Logic.Services
         {
             if (string.IsNullOrWhiteSpace(userDomain.Username))
                 throw new ValidationException("Username is required.");
+            if (userDomain.Username.Length<3)
+                throw new ValidationException("Username must be at least 3 characters.");
             if (string.IsNullOrWhiteSpace(userDomain.Email))
                 throw new ValidationException("Email is required.");
             if (string.IsNullOrWhiteSpace(userDomain.Nationality))
@@ -71,7 +73,8 @@ namespace BucketProject.BLL.Business_Logic.Services
                 throw new ValidationException("Gender is required.");
             if (string.IsNullOrWhiteSpace(userDomain.Password))
                 throw new ValidationException("Password is required.");
-           
+            if (userDomain.Password.Length < 6)
+                throw new ValidationException("Password must be at least 6 characters.");
 
             var emailAttr = new EmailAddressAttribute();
             if (!emailAttr.IsValid(userDomain.Email))
@@ -104,6 +107,12 @@ namespace BucketProject.BLL.Business_Logic.Services
         {
             if (string.IsNullOrWhiteSpace(newUsername))
                 throw new ValidationException("The new Username cannot be empty or whitespace.");
+
+            if (newUsername.Length > 20)
+                throw new ValidationException("Username must be under 20 characters.");
+            
+            if (newUsername.Length < 3)
+                throw new ValidationException("Username must be at least 3 characters.");
 
             string currentUsername = _contextAccessor.HttpContext!
                              .Session

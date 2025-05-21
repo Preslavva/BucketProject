@@ -630,41 +630,7 @@ WHERE Id            = @Id
         }
     }
 
-    //   public int GetIdOfUser(string username)
-    //    {
-    //    try
-    //    {
-    //        using (SqlConnection conn = GetSqlConnection())
-    //        {
-    //            conn.Open();
-    //            string queryUpdateName = @"select UserId from [User] where Username = @Username";
-
-    //            using (SqlCommand changeStatus = new SqlCommand(queryUpdateName, conn))
-    //            {
-    //                changeStatus.Parameters.AddWithValue("@Username", username);
-
-    //                int id = (int)changeStatus.ExecuteScalar();
-    //                return id;
-    //            }
-    //        }
-    //    }
-
-    //    catch (SqlException sqlEx)
-    //    {
-    //        _logger.LogError(sqlEx,
-    //            "SQL error in GetIdofUser (Username={username}",
-    //            username);
-
-    //        throw new Exception("A database error occurred while getting id of user", sqlEx);
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        _logger.LogError(ex,
-    //            "SQL error in GetIdofUser (Username={username}",
-    //            username);
-    //        throw;
-    //    }
-    //}
+   
 
     public List<GoalEntity> LoadExpiredGoalsOfUser(int userId)
     {
@@ -1349,6 +1315,87 @@ WHERE ug.UserId   = @UserId
 
         return goals;
     }
+    public List<GoalEntity> LoadActiveGoalsExcludingDismissed(int userId)
+    {
+        var goals = new List<GoalEntity>();
+
+        const string sql = @"
+SELECT 
+    g.Id,
+    g.Category,
+    g.Type,
+    g.[Description],
+    g.CreatedAt,
+    g.Deadline,
+    ug.CompletedAt,
+    ug.IsDone,
+    g.IsDeleted,
+    g.ParentGoalId,
+    g.OwnerId,
+    g.IsPostponed
+FROM dbo.User_Goal ug
+JOIN dbo.Goal g ON g.Id = ug.GoalId
+WHERE 
+    ug.UserId = @UserId
+    AND g.IsDeleted = 0
+    AND NOT EXISTS (
+        SELECT 1
+        FROM DismissedNotifications dn
+        WHERE 
+            dn.UserId = @UserId
+            AND dn.GoalId = g.Id
+    );
+";
+
+        try
+        {
+            using var conn = GetSqlConnection();
+            conn.Open();
+
+            using var cmd = new SqlCommand(sql, conn);
+            cmd.Parameters.AddWithValue("@UserId", userId);
+
+            using var reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                var goal = new GoalEntity(
+                    id: reader.GetInt32(reader.GetOrdinal("Id")),
+                    category: Enum.Parse<Category>(reader.GetString(reader.GetOrdinal("Category"))),
+                    type: Enum.Parse<GoalType>(reader.GetString(reader.GetOrdinal("Type"))),
+                    description: reader.GetString(reader.GetOrdinal("Description")),
+                    createdAt: reader.GetDateTime(reader.GetOrdinal("CreatedAt")),
+                    deadline: reader.IsDBNull(reader.GetOrdinal("Deadline"))
+                        ? null
+                        : reader.GetDateTime(reader.GetOrdinal("Deadline")),
+                    completedAt: reader.IsDBNull(reader.GetOrdinal("CompletedAt"))
+                        ? null
+                        : reader.GetDateTime(reader.GetOrdinal("CompletedAt")),
+                    isDone: reader.GetBoolean(reader.GetOrdinal("IsDone")),
+                    isDeleted: reader.GetBoolean(reader.GetOrdinal("IsDeleted")),
+                    isPostponed: reader.GetBoolean(reader.GetOrdinal("IsPostponed")),
+                    parentGoalId: reader.IsDBNull(reader.GetOrdinal("ParentGoalId"))
+                        ? null
+                        : reader.GetInt32(reader.GetOrdinal("ParentGoalId")),
+                    ownerId: reader.GetInt32(reader.GetOrdinal("OwnerId"))
+                );
+
+                goals.Add(goal);
+            }
+        }
+        catch (SqlException ex)
+        {
+            _logger.LogError(ex, "SQL error in LoadActiveGoalsExcludingDismissed (UserId={UserId})", userId);
+            throw new Exception("A database error occurred while loading active goals.", ex);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Unexpected error in LoadActiveGoalsExcludingDismissed (UserId={UserId})", userId);
+            throw;
+        }
+
+        return goals;
+    }
+
 }
 
 

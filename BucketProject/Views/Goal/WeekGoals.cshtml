@@ -25,9 +25,10 @@
 <form method="post" asp-controller="Goal" asp-action="CreateWeekGoal">
     <div class="d-flex align-items-start gap-3 mb-3 flex-wrap">
         <div class="input-container">
-            <input type="text" name="Description" required />
-            <label class="label">Enter Goal</label>
+            <input asp-for="NewGoal.Description" class="form-control" />
+            <label asp-for="NewGoal.Description" class="label">Enter Goal</label>
             <div class="underline"></div>
+            <span asp-validation-for="NewGoal.Description" class="text-danger"></span>
         </div>
 
         <select name="Type" required class="form-select custom-dropdown">
@@ -109,7 +110,7 @@
     </li>
     <li class="nav-item" role="presentation">
         <button class="nav-link" id="invites-tab" data-bs-toggle="tab" data-bs-target="#invites" type="button">
-            Invitations (@Model.PendingInvitations.Count)
+            Invitations (@(Model.PendingInvitations.Count + Model.SentInvitations.Count))
         </button>
     </li>
 </ul>
@@ -490,9 +491,11 @@
 
 
         }
-        <hr />
-        <br/>
-        <h5>Invitations You’ve Sent</h5>
+        
+       
+    </div>
+    <div class="tab-pane fade" id="invites" role="tabpanel">
+        <h5>Invitations You’ve Sent</h5> 
         @if (!Model.SentInvitations.Any())
         {
             <p class="text-muted">No sent invitations.</p>
@@ -505,7 +508,7 @@
                     <li class="list-group-item mb-2 position-relative" id="invite-@inv.InvitationId">
 
                         <form asp-action="DismissNotificationWeek" method="post" class="position-absolute top-0 end-0 m-2">
-                 
+
                             <input type="hidden" name="goalId" value="@inv.GoalId" />
                             <input type="hidden" name="notificationType" value="Invite" />
                             <input type="hidden" name="triggeredByUserId" value="@inv.TriggeredByUserId" />
@@ -531,10 +534,9 @@
 
             </ul>
         }
-    </div>
-    <div class="tab-pane fade" id="invites" role="tabpanel">
+        <hr></hr>
         <p>
-            <strong>Pending Invitations:</strong> @Model.PendingInvitations.Count
+            <h5>Pending Invitations:</h5>
         </p>
 
         @if (!Model.PendingInvitations.Any())
@@ -584,3 +586,6 @@
 </div>
 
 
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -159,6 +159,24 @@ namespace BucketsTests
             _userRepo.Verify(r => r.UpdateName(It.IsAny<UserEntity>(), It.IsAny<string>()), Times.Never);
         }
 
+        [TestMethod]
+        public void UpdateUsername_TooShortNewUsername_ThrowsValidationException()
+        {
+            string oldUsername = "oldUsername";
+            string newUsername = "ab";
+            SetSession(oldUsername);
+
+            UserEntity userEntity = new UserEntity(1, oldUsername, "john@mail.com", "password", new byte[] { 0x01 }, "salt", "nationality", DateTime.Now, "Gender", DateOnly.MaxValue, "Role");
+
+            _userRepo.Setup(r => r.GetUserByUsername(oldUsername)).Returns(userEntity);
+
+            var ex = Assert.ThrowsException<ValidationException>(() =>
+                _userService.UpdateUsername(newUsername)
+            );
+
+            Assert.AreEqual("Username must be at least 3 characters.", ex.Message);
+            _userRepo.Verify(r => r.UpdateName(It.IsAny<UserEntity>(), It.IsAny<string>()), Times.Never);
+        }
 
         [TestMethod]
         public void UpdateUsername_ValidUsername_UpdatesSessionAndRepository()
