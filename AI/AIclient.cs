@@ -50,7 +50,12 @@ Each sub-goal must be under 50 characters, including spaces.";
         if (!response.IsSuccessStatusCode)
         {
             var errorContent = await response.Content.ReadAsStringAsync();
-            throw new Exception($"OpenAI API call failed. Status: {(int)response.StatusCode} - {response.ReasonPhrase}. Response body: {errorContent}");
+
+            string userMessage = "We couldn't generate sub-goals right now. Please try again later.";
+            string devMessage = $"OpenAI API call failed. Status: {(int)response.StatusCode} - {response.ReasonPhrase}. Response body: {errorContent}";
+
+            throw new AIRequestFailedException(userMessage, devMessage);
+
         }
 
 
@@ -65,7 +70,5 @@ Each sub-goal must be under 50 characters, including spaces.";
             .Select(s => s.Trim())
             .Where(s => !string.IsNullOrWhiteSpace(s))
             .ToList();
-
-
     }
 }

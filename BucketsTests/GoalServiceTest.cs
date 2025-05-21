@@ -342,18 +342,18 @@ namespace BucketsTests
         }
 
         [TestMethod]
-        public async Task BreakDownGoalAsync_AIResponseEmpty_ThrowsEmptyAIResponseException()
+        public async Task BreakDownGoalAsync_AIFailure_ThrowsAIRequestFailedException()
         {
-            int userId = 1;
-            int goalId = 101;
+            int goalId = 123;
+            int userId = 99;
 
-            var entity = new GoalEntity(
+            GoalEntity entity = new GoalEntity(
                 id: goalId,
                 category: Category.Week,
                 type: GoalType.Education,
                 createdAt: DateTime.UtcNow,
                 completedAt: DateTime.UtcNow,
-                description: "Learn programming",
+                description: "Learn programming", 
                 deadline: DateTime.UtcNow.AddDays(7),
                 isDone: false,
                 isDeleted: false,
@@ -362,14 +362,20 @@ namespace BucketsTests
                 ownerId: userId
             );
 
-            _userService.Setup(s => s.GetCurrentUserId()).Returns(userId);
+            _userService.Setup(u => u.GetCurrentUserId()).Returns(userId);
             _goalRepo.Setup(r => r.GetGoalById(goalId, userId)).Returns(entity);
-            _aIClient.Setup(ai => ai.BreakDownTextIntoGoalsAsync(It.IsAny<string>(), It.IsAny<Category>()))
-                     .ThrowsAsync(new EmptyAIResponseException());
 
-            await Assert.ThrowsExceptionAsync<EmptyAIResponseException>(() =>
+            var userMessage = "User-friendly message.";
+            var devMessage = "Developer-only technical message.";
+
+            _aIClient.Setup(ai => ai.BreakDownTextIntoGoalsAsync("Learn programming", Category.Week))
+                     .ThrowsAsync(new AIRequestFailedException(userMessage, devMessage));
+
+            var ex = await Assert.ThrowsExceptionAsync<AIRequestFailedException>(() =>
                 _goalService.BreakDownGoalAsync(goalId));
-        }
 
+            Assert.AreEqual(userMessage, ex.UserMessage);
+            Assert.AreEqual(devMessage, ex.Message);
+        }
     }
 }

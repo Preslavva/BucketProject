@@ -22,8 +22,10 @@ namespace BucketProject.UI.BucketProject.Controllers
         private readonly ISocialService _socialService;
         private readonly IUserService _userService;
         private readonly INotificationService _notificationService;
+        private readonly ILogger<GoalController> _logger;
 
-        public GoalController(IGoalService goalService, IMapper mapper, IConfiguration configuration, ISocialService socialService, IUserService userService, INotificationService notificationService)
+
+        public GoalController(IGoalService goalService, IMapper mapper, IConfiguration configuration, ISocialService socialService, IUserService userService, INotificationService notificationService, ILogger<GoalController> logger)
         {
             _goalService = goalService;
             _mapper = mapper;
@@ -31,6 +33,7 @@ namespace BucketProject.UI.BucketProject.Controllers
             _socialService = socialService;
             _userService = userService;
             _notificationService = notificationService;
+            _logger = logger;
 
         }
 
@@ -858,6 +861,14 @@ namespace BucketProject.UI.BucketProject.Controllers
                 TempData["ErrorMessage"] = ex.Message;
                 return RedirectToAction("WeekGoals");
             }
+            catch (AIRequestFailedException ex)
+            {
+                TempData["ErrorMessage"] = ex.UserMessage;
+
+                _logger.LogError(ex, "AI call failed during goal breakdown.");
+
+                return RedirectToAction("WeekGoals");
+            }
         }
 
             [HttpPost]
@@ -882,6 +893,14 @@ namespace BucketProject.UI.BucketProject.Controllers
             catch (VagueGoalDescriptionException ex)
             {
                 TempData["ErrorMessage"] = ex.Message;
+                return RedirectToAction("MonthGoals");
+            }
+            catch (AIRequestFailedException ex)
+            {
+                TempData["ErrorMessage"] = ex.UserMessage;
+
+                _logger.LogError(ex, "AI call failed during goal breakdown.");
+
                 return RedirectToAction("MonthGoals");
             }
 
@@ -911,6 +930,14 @@ namespace BucketProject.UI.BucketProject.Controllers
                 TempData["ErrorMessage"] = ex.Message;
                 return RedirectToAction("YearGoals");
             }
+            catch (AIRequestFailedException ex)
+            {
+                TempData["ErrorMessage"] = ex.UserMessage;
+
+                _logger.LogError(ex, "AI call failed during goal breakdown.");
+
+                return RedirectToAction("YearGoals");
+            }
         }
 
         [HttpPost]
@@ -935,6 +962,14 @@ namespace BucketProject.UI.BucketProject.Controllers
             catch (VagueGoalDescriptionException ex)
             {
                 TempData["ErrorMessage"] = ex.Message;
+                return RedirectToAction("BucketList");
+            }
+            catch (AIRequestFailedException ex)
+            {
+                TempData["ErrorMessage"] = ex.UserMessage;
+
+                _logger.LogError(ex, "AI call failed during goal breakdown.");
+
                 return RedirectToAction("BucketList");
             }
 
