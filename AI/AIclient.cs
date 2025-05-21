@@ -5,6 +5,7 @@ using BucketProject.Infrastructure.AI;
 using BucketProjetc.BLL.Business_Logic.InterfacesService;
 using Microsoft.Extensions.Configuration;
 using BucketProject.DAL.Models.Enums;
+using Exceptions.Exceptions;
 public class AIClient : IAIClient
 {
     private readonly IHttpClientFactory _httpClientFactory;
@@ -58,7 +59,7 @@ Each sub-goal must be under 50 characters, including spaces.";
 
         string reply = result?.Choices?[0]?.Message?.Content;
         if (string.IsNullOrWhiteSpace(reply))
-            throw new Exception("OpenAI response is empty.");
+            throw new EmptyAIResponseException();
 
         return reply.Split(new[] { "\n", "\r\n" }, StringSplitOptions.RemoveEmptyEntries)
             .Select(s => s.Trim())

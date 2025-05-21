@@ -10,6 +10,7 @@ using BucketProject.DAL.Models.Entities;
 using System.ComponentModel.DataAnnotations;
 using BucketProject.BLL.Business_Logic.Services;
 using BucketProject.BLL.Business_Logic.DTOs;
+using Exceptions.Exceptions;
 
 namespace BucketProject.UI.BucketProject.Controllers
 {
@@ -836,55 +837,106 @@ namespace BucketProject.UI.BucketProject.Controllers
 
         public async Task<IActionResult> BreakDownGoalWeek(int id)
         {
-            List<Goal> subGoals = await _goalService.BreakDownGoalAsync(id);
+            try
+            {
+                List<Goal> subGoals = await _goalService.BreakDownGoalAsync(id);
 
-            List<GoalViewModel> subGoalViewModels = _mapper.Map<List<GoalViewModel>>(subGoals);
+                List<GoalViewModel> subGoalViewModels = _mapper.Map<List<GoalViewModel>>(subGoals);
 
-            TempData["SubGoals"] = JsonConvert.SerializeObject(subGoalViewModels);
-            TempData["SubGoalForId"] = id;
+                TempData["SubGoals"] = JsonConvert.SerializeObject(subGoalViewModels);
+                TempData["SubGoalForId"] = id;
 
-            return RedirectToAction("WeekGoals");
+                return RedirectToAction("WeekGoals");
+            }
+            catch (EmptyAIResponseException ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+                return RedirectToAction("WeekGoals");
+            }
+            catch (VagueGoalDescriptionException ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+                return RedirectToAction("WeekGoals");
+            }
         }
 
-        [HttpPost]
+            [HttpPost]
         public async Task<IActionResult> BreakDownGoalMonth(int id)
         {
-            List<Goal> subGoals = await _goalService.BreakDownGoalAsync(id);
+            try
+            {
+                List<Goal> subGoals = await _goalService.BreakDownGoalAsync(id);
 
-            List<GoalViewModel> subGoalViewModels = _mapper.Map<List<GoalViewModel>>(subGoals);
+                List<GoalViewModel> subGoalViewModels = _mapper.Map<List<GoalViewModel>>(subGoals);
 
-            TempData["SubGoals"] = JsonConvert.SerializeObject(subGoals);
-            TempData["SubGoalForId"] = id;
+                TempData["SubGoals"] = JsonConvert.SerializeObject(subGoalViewModels);
+                TempData["SubGoalForId"] = id;
 
-            return RedirectToAction("MonthGoals");
+                return RedirectToAction("MonthGoals");
+            }
+            catch (EmptyAIResponseException ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+                return RedirectToAction("MonthGoals");
+            }
+            catch (VagueGoalDescriptionException ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+                return RedirectToAction("MonthGoals");
+            }
 
         }
 
         [HttpPost]
         public async Task<IActionResult> BreakDownGoalYear(int id)
         {
-            List<Goal> subGoals = await _goalService.BreakDownGoalAsync(id);
+            try
+            {
+                List<Goal> subGoals = await _goalService.BreakDownGoalAsync(id);
 
-            List<GoalViewModel> subGoalViewModels = _mapper.Map<List<GoalViewModel>>(subGoals);
+                List<GoalViewModel> subGoalViewModels = _mapper.Map<List<GoalViewModel>>(subGoals);
 
-            TempData["SubGoals"] = JsonConvert.SerializeObject(subGoals);
-            TempData["SubGoalForId"] = id;
+                TempData["SubGoals"] = JsonConvert.SerializeObject(subGoalViewModels);
+                TempData["SubGoalForId"] = id;
 
-            return RedirectToAction("YearGoals");
-
+                return RedirectToAction("YearGoals");
+            }
+            catch (EmptyAIResponseException ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+                return RedirectToAction("YearGoals");
+            }
+            catch (VagueGoalDescriptionException ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+                return RedirectToAction("YearGoals");
+            }
         }
 
         [HttpPost]
         public async Task<IActionResult> BreakDownGoalBucketList(int id)
         {
-            List<Goal> subGoals = await _goalService.BreakDownGoalAsync(id);
+            try
+            {
+                List<Goal> subGoals = await _goalService.BreakDownGoalAsync(id);
 
-            List<GoalViewModel> subGoalViewModels = _mapper.Map<List<GoalViewModel>>(subGoals);
+                List<GoalViewModel> subGoalViewModels = _mapper.Map<List<GoalViewModel>>(subGoals);
 
-            TempData["SubGoals"] = JsonConvert.SerializeObject(subGoals);
-            TempData["SubGoalForId"] = id;
+                TempData["SubGoals"] = JsonConvert.SerializeObject(subGoalViewModels);
+                TempData["SubGoalForId"] = id;
 
-            return RedirectToAction("BcuketList");
+                return RedirectToAction("BucketList");
+            }
+            catch (EmptyAIResponseException ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+                return RedirectToAction("BucketList");
+            }
+            catch (VagueGoalDescriptionException ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+                return RedirectToAction("BucketList");
+            }
 
         }
         private List<string> GetAvailableTypes()

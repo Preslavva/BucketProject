@@ -10,6 +10,7 @@ using BucketProject.DAL.Models.Entities;
 using BucketProject.DAL.Models.Enums;
 using System.ComponentModel.DataAnnotations;
 using BucketProject.BLL.Business_Logic.InterfacesService;
+using Exceptions.Exceptions;
 
 
 namespace BucketsTests
@@ -273,6 +274,101 @@ namespace BucketsTests
                 ),
                 Times.Once
             );
+        }
+
+        [TestMethod]
+        public async Task BreakDownGoalAsync_VagueDescription_ThrowsVagueGoalDescriptionException()
+        {
+            int userId = 1;
+            int goalId = 101;
+
+            var entity = new GoalEntity(
+                id: goalId,
+                category: Category.Week,
+                type: GoalType.Education,
+                createdAt: DateTime.UtcNow,
+                completedAt: DateTime.UtcNow,
+                description: "abc", 
+                deadline: DateTime.UtcNow.AddDays(7),
+                isDone: false,
+                isDeleted: false,
+                isPostponed: false,
+                parentGoalId: null,
+                ownerId: userId
+            );
+
+            _userService.Setup(s => s.GetCurrentUserId()).Returns(userId);
+            _goalRepo.Setup(r => r.GetGoalById(goalId, userId)).Returns(entity);
+
+            await Assert.ThrowsExceptionAsync<VagueGoalDescriptionException>(() =>
+                _goalService.BreakDownGoalAsync(goalId));
+        }
+
+        [TestMethod]
+        public async Task BreakDownGoalAsync_ValidDescription_ReturnsSubGoals()
+        {
+            int userId = 1;
+            int goalId = 101;
+
+            var entity = new GoalEntity(
+                id: goalId,
+                category: Category.Week,
+                type: GoalType.Education,
+                createdAt: DateTime.UtcNow,
+                completedAt: DateTime.UtcNow,
+                description: "Learn programming",
+                deadline: DateTime.UtcNow.AddDays(7),
+                isDone: false,
+                isDeleted: false,
+                isPostponed: false,
+                parentGoalId: null,
+                ownerId: userId
+            );
+
+            List<string> subGoalDescriptions = new List<string>
+    {
+        "Choose language", "Install tools", "Write first app", "Test and debug"
+    };
+
+            _userService.Setup(s => s.GetCurrentUserId()).Returns(userId);
+            _goalRepo.Setup(r => r.GetGoalById(goalId, userId)).Returns(entity);
+            _aIClient.Setup(ai => ai.BreakDownTextIntoGoalsAsync("Learn programming", Category.Week))
+                     .ReturnsAsync(subGoalDescriptions);
+
+            List<Goal> result = await _goalService.BreakDownGoalAsync(goalId);
+
+            Assert.AreEqual(4, result.Count);
+            CollectionAssert.AreEqual(subGoalDescriptions, result.Select(g => g.Description).ToList());
+        }
+
+        [TestMethod]
+        public async Task BreakDownGoalAsync_AIResponseEmpty_ThrowsEmptyAIResponseException()
+        {
+            int userId = 1;
+            int goalId = 101;
+
+            var entity = new GoalEntity(
+                id: goalId,
+                category: Category.Week,
+                type: GoalType.Education,
+                createdAt: DateTime.UtcNow,
+                completedAt: DateTime.UtcNow,
+                description: "Learn programming",
+                deadline: DateTime.UtcNow.AddDays(7),
+                isDone: false,
+                isDeleted: false,
+                isPostponed: false,
+                parentGoalId: null,
+                ownerId: userId
+            );
+
+            _userService.Setup(s => s.GetCurrentUserId()).Returns(userId);
+            _goalRepo.Setup(r => r.GetGoalById(goalId, userId)).Returns(entity);
+            _aIClient.Setup(ai => ai.BreakDownTextIntoGoalsAsync(It.IsAny<string>(), It.IsAny<Category>()))
+                     .ThrowsAsync(new EmptyAIResponseException());
+
+            await Assert.ThrowsExceptionAsync<EmptyAIResponseException>(() =>
+                _goalService.BreakDownGoalAsync(goalId));
         }
 
     }

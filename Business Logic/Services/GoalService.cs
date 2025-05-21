@@ -275,6 +275,11 @@ namespace BucketProject.BLL.Business_Logic.Services
 
             Goal goal = _mapper.Map<Goal>(entity);
 
+            if (string.IsNullOrWhiteSpace(goal.Description) || goal.Description.Trim().Length < 5)
+            {
+                throw new VagueGoalDescriptionException();
+            }
+
             List<string> subGoalDescriptions = await _aIClient.BreakDownTextIntoGoalsAsync(goal.Description, goal.Category);
 
             List<Goal> subGoals = subGoalDescriptions.Select(desc =>
