@@ -1344,6 +1344,8 @@ WHERE
         WHERE 
             dn.UserId = @UserId
             AND dn.GoalId = g.Id
+AND dn.NotificationType = 'Deadline'
+AND dn.TriggeredByUserId = ug.UserId
     );
 ";
 
