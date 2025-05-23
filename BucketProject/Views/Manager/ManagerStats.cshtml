@@ -8,138 +8,172 @@
     var hasNationality = (ViewBag.NationalityData as List<int> ?? new List<int>()).Any();
     var hasGender = (ViewBag.GenderData as List<int> ?? new List<int>()).Any();
     var hasAge = (ViewBag.AgeData as List<int> ?? new List<int>()).Any();
+    var hasUserCombos = (ViewBag.UserComboData as List<int> ?? new List<int>()).Any();
 }
 
 <h2 style="text-align: center; margin-bottom: 40px;">Manager Statistics</h2>
 
-<div style="display: flex; flex-direction: column; gap: 40px;">
+<ul class="nav nav-tabs" id="statsTabs" role="tablist">
+    <li class="nav-item">
+        <button class="nav-link active" id="summary-tab" data-bs-toggle="tab" data-bs-target="#summary" type="button" role="tab">Summary Circles</button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link" id="line-tab" data-bs-toggle="tab" data-bs-target="#lines" type="button" role="tab">Line Graphs</button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link" id="pie-tab" data-bs-toggle="tab" data-bs-target="#piecharts" type="button" role="tab">Pie Charts</button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link" id="bar-tab" data-bs-toggle="tab" data-bs-target="#barcharts" type="button" role="tab">Bar Charts</button>
+    </li>
+</ul>
 
-    <div class="circle-stats-container" style="display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; margin: 0 auto;">
-        <div class="circle-wrapper"><div class="circle-stat total">@ViewBag.TotalGoals</div><div class="circle-label">Total Goals</div></div>
-        <div class="circle-wrapper"><div class="circle-stat completed">@ViewBag.PersonalGoals</div><div class="circle-label">Personal Goals</div></div>
-        <div class="circle-wrapper"><div class="circle-stat shared">@ViewBag.SharedGoals</div><div class="circle-label">Shared Goals</div></div>
-        <div class="circle-wrapper"><div class="circle-stat postponed">@ViewBag.PostponedGoals</div><div class="circle-label">Postponed Goals</div></div>
-        <div class="circle-wrapper"><div class="circle-stat ai">@ViewBag.AIGoals</div><div class="circle-label">AI Generated Goals</div></div>
-        <div class="circle-wrapper"><div class="circle-stat active">@ViewBag.ActiveUsersCount</div><div class="circle-label">Active Users</div></div>
+<div class="tab-content mt-4" id="statsTabContent">
+
+    <div class="tab-pane fade show active" id="summary" role="tabpanel" aria-labelledby="summary-tab">
+        <div class="circle-stats-container" style="display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; margin: 0 auto;">
+            <div class="circle-wrapper"><div class="circle-stat total">@ViewBag.TotalGoals</div><div class="circle-label">Total Goals</div></div>
+            <div class="circle-wrapper"><div class="circle-stat completed">@ViewBag.PersonalGoals</div><div class="circle-label">Personal Goals</div></div>
+            <div class="circle-wrapper"><div class="circle-stat shared">@ViewBag.SharedGoals</div><div class="circle-label">Shared Goals</div></div>
+            <div class="circle-wrapper"><div class="circle-stat postponed">@ViewBag.PostponedGoals</div><div class="circle-label">Postponed Goals</div></div>
+            <div class="circle-wrapper"><div class="circle-stat ai">@ViewBag.AIGoals</div><div class="circle-label">AI Generated Goals</div></div>
+            <div class="circle-wrapper">
+                <div class="circle-stat active">
+                    @ViewBag.ActiveUsersCount
+                    <span class="tooltip-text">Number of users who have created or accepted an invite for a goal in the past 2 weeks</span>
+                </div>
+                <div class="circle-label">Active Users</div>
+            </div>
+        </div>
     </div>
 
+    <div class="tab-pane fade" id="lines" role="tabpanel" aria-labelledby="line-tab">
+        @if (hasUsers)
+        {
+            <div class="my-4">
+                <canvas id="userLineChart"></canvas>
+            </div>
+        }
 
-    @if (hasUsers)
-    {
-        <div>
-            <canvas id="userLineChart"></canvas>
-        </div>
-    }
-
-    @if (hasGoals)
-    {
-        <div>
-            <canvas id="goalsLineChart"></canvas>
-        </div>
-    }
-
-    <div style="display: flex; flex-wrap: wrap; gap: 20px;">
-        @if (hasGoalType)
+        @if (hasGoals)
         {
-            <canvas id="goalTypeChart" width="300" height="300"></canvas>
-        }
-        @if (hasCategory)
-        {
-            <canvas id="goalCategoryChart" width="300" height="300"></canvas>
-        }
-        @if (hasNationality)
-        {
-            <canvas id="nationalityChart" width="300" height="300"></canvas>
-        }
-        @if (hasGender)
-        {
-            <canvas id="genderChart" width="300" height="300"></canvas>
-        }
-        @if (hasAge)
-        {
-            <canvas id="ageChart" width="300" height="300"></canvas>
+            <div class="my-4">
+                <canvas id="goalsLineChart"></canvas>
+            </div>
         }
     </div>
+
+    <div class="tab-pane fade" id="piecharts" role="tabpanel" aria-labelledby="pie-tab">
+        <div class="d-flex flex-wrap gap-4">
+            @if (hasGoalType)
+            {
+                <canvas id="goalTypeChart" width="300" height="300"></canvas>
+            }
+            @if (hasCategory)
+            {
+                <canvas id="goalCategoryChart" width="300" height="300"></canvas>
+            }
+            @if (hasNationality)
+            {
+                <canvas id="nationalityChart" width="300" height="300"></canvas>
+            }
+            @if (hasGender)
+            {
+                <canvas id="genderChart" width="300" height="300"></canvas>
+            }
+            @if (hasAge)
+            {
+                <canvas id="ageChart" width="300" height="300"></canvas>
+            }
+        </div>
+    </div>
+
+    <div class="tab-pane fade" id="barcharts" role="tabpanel" aria-labelledby="bar-tab">
+        @if (hasUserCombos)
+        {
+            <div class="mt-4">
+                <canvas id="userComboChart"></canvas>
+            </div>
+        }
+    </div>
+
 </div>
 
+
+
 @section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         @if (hasUsers)
         {
             <text>
-                                const userCtx = document.getElementById('userLineChart').getContext('2d');
-            new Chart(userCtx, {
-                type: 'line',
-                data: {
-                    labels: @Html.Raw(Json.Serialize(ViewBag.UserLabels)),
-                    datasets: [{
-                        label: 'User Registrations',
-                        data: @Html.Raw(Json.Serialize(ViewBag.UserData)),
-                        borderColor: 'rgba(75, 192, 192, 1)',
-                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                        tension: 0.3,
-                        fill: true,
-                        pointRadius: 4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        title: { display: true, text: 'Monthly User Registrations' },
-                        legend: { position: 'bottom' }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                stepSize: 10,
-                                precision: 0
+                    const userCtx = document.getElementById('userLineChart').getContext('2d');
+                    new Chart(userCtx, {
+                        type: 'line',
+                        data: {
+                            labels: @Html.Raw(Json.Serialize(ViewBag.UserLabels)),
+                            datasets: [{
+                                label: 'User Registrations',
+                                data: @Html.Raw(Json.Serialize(ViewBag.UserData)),
+                                borderColor: 'rgba(75, 192, 192, 1)',
+                                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                                tension: 0.3,
+                                fill: true,
+                                pointRadius: 4
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                title: { display: true, text: 'Monthly User Registrations' },
+                                legend: { position: 'bottom' }
                             },
-                            suggestedMax: 100
+                            scales: {
+                                y: {
+                                    beginAtZero: true
+                                   
+                                }
+                            }
                         }
-                    }
-
-                }
-            });
+                    });
             </text>
         }
 
         @if (hasGoals)
         {
             <text>
-                                const goalCtx = document.getElementById('goalsLineChart').getContext('2d');
-            new Chart(goalCtx, {
-                type: 'line',
-                data: {
-                    labels: @Html.Raw(Json.Serialize(ViewBag.GoalLabels)),
-                    datasets: [{
-                        label: 'Goals Created',
-                        data: @Html.Raw(Json.Serialize(ViewBag.GoalData)),
-                        borderColor: 'rgba(153, 102, 255, 1)',
-                        backgroundColor: 'rgba(153, 102, 255, 0.2)',
-                        tension: 0.3,
-                        fill: true,
-                        pointRadius: 4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        title: { display: true, text: 'Monthly Goal Creation' },
-                        legend: { position: 'bottom' }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: { stepSize: 1, precision: 0 }
+                    const goalCtx = document.getElementById('goalsLineChart').getContext('2d');
+                    new Chart(goalCtx, {
+                        type: 'line',
+                        data: {
+                            labels: @Html.Raw(Json.Serialize(ViewBag.GoalLabels)),
+                            datasets: [{
+                                label: 'Goals Created',
+                                data: @Html.Raw(Json.Serialize(ViewBag.GoalData)),
+                                borderColor: 'rgba(153, 102, 255, 1)',
+                                backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                                tension: 0.3,
+                                fill: true,
+                                pointRadius: 4
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                title: { display: true, text: 'Monthly Goal Creation' },
+                                legend: { position: 'bottom' }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true
+                                }
+                            }
                         }
-                    }
-                }
-            });
+                    });
             </text>
         }
 
-                const pieConfigs = [
+        const pieConfigs = [
             {
                 id: 'goalTypeChart',
                 data: @Html.Raw(Json.Serialize(ViewBag.TypeData)),
@@ -205,5 +239,48 @@
                 }
             }
         });
+
+        @if (hasUserCombos)
+        {
+            <text>
+                    const comboCtx = document.getElementById('userComboChart').getContext('2d');
+                    new Chart(comboCtx, {
+                        type: 'bar',
+                        data: {
+                            labels: @Html.Raw(Json.Serialize(ViewBag.UserComboLabels)),
+                            datasets: [{
+                                label: 'Users',
+                                data: @Html.Raw(Json.Serialize(ViewBag.UserComboData)),
+                                backgroundColor: 'rgba(255, 99, 132, 0.6)',
+                                borderColor: 'rgba(255, 99, 132, 1)',
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                title: {
+                                    display: true,
+                                    text: 'Top 5 User Combinations (Age, Nationality, Gender)'
+                                },
+                                legend: { display: false }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true
+                                },
+                                x: {
+                                    ticks: {
+                                        callback: function(value) {
+                                            let label = this.getLabelForValue(value);
+                                            return label.length > 25 ? label.slice(0, 25) + '…' : label;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+            </text>
+        }
     </script>
 }

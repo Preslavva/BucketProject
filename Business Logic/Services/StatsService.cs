@@ -31,7 +31,7 @@ namespace BucketProject.BLL.Business_Logic.Services
             _managerRepo = managerRepo;
             _userService = userService;
         }
-   
+
 
         public List<StatsDTO> GetGoalTypeStatistics()
         {
@@ -46,6 +46,8 @@ namespace BucketProject.BLL.Business_Logic.Services
                     Type = g.Key.ToString(),
                     Count = g.Count()
                 })
+                .OrderByDescending(g => g.Count) 
+                .Take(5)                         
                 .ToList();
         }
 
@@ -65,39 +67,27 @@ namespace BucketProject.BLL.Business_Logic.Services
                 .ToList();
         }
 
-        public List<StatsDTO> GetGoalAmountStatisticsWeekly()
+        public List<StatsDTO> GetCompletedGoalsPerWeek()
         {
-            int id = _userService.GetCurrentUserId();
+            int userId = _userService.GetCurrentUserId();
 
-            List<Goal> goalsPersonal = _mapper.Map<List<Goal>>(_goalRepo.LoadPersonalGoalsOfUser(id));
-            List<Goal> goalsShared = _mapper.Map<List<Goal>>(_goalRepo.LoadSharedGoalsOfUser(id));
+            List<Goal> personalGoals = _mapper.Map<List<Goal>>(_goalRepo.LoadPersonalGoalsOfUser(userId));
+            List<Goal> sharedGoals = _mapper.Map<List<Goal>>(_goalRepo.LoadSharedGoalsOfUser(userId));
+            var allGoals = personalGoals.Concat(sharedGoals);
 
-            var groupedPersonal = goalsPersonal
+            var completedPerWeek = allGoals
+                .Where(g => g.IsDone)
                 .GroupBy(g => GetWeekLabel(g.CreatedAt))
                 .Select(g => new StatsDTO
                 {
                     Period = g.Key,
-                    Ownership = "Personal",
-                    Completed = g.Count(x => x.IsDone),
-                    Incomplete = g.Count(x => !x.IsDone)
-                });
-
-            var groupedShared = goalsShared
-                .GroupBy(g => GetWeekLabel(g.CreatedAt))
-                .Select(g => new StatsDTO
-                {
-                    Period = g.Key,
-                    Ownership = "Shared",
-                    Completed = g.Count(x => x.IsDone),
-                    Incomplete = g.Count(x => !x.IsDone)
-                });
-
-            return groupedPersonal
-                .Concat(groupedShared)
+                    Count = g.Count() 
+                })
                 .OrderBy(s => s.Period)
                 .ToList();
-        }
 
+            return completedPerWeek;
+        }
 
 
         private string GetWeekLabel(DateTime date)
@@ -108,74 +98,52 @@ namespace BucketProject.BLL.Business_Logic.Services
             return $"{startOfWeek:yyyy-MM-dd} - {endOfWeek:yyyy-MM-dd}";
         }
 
-        public List<StatsDTO> GetGoalAmountStatisticsMonthly()
+        public List<StatsDTO> GetCompletedGoalsPerMonth()
         {
-            int id = _userService.GetCurrentUserId();
+            int userId = _userService.GetCurrentUserId();
 
-            List<Goal> goalsPersonal = _mapper.Map<List<Goal>>(_goalRepo.LoadPersonalGoalsOfUser(id));
-            List<Goal> goalsShared = _mapper.Map<List<Goal>>(_goalRepo.LoadSharedGoalsOfUser(id));
+            List<Goal> personalGoals = _mapper.Map<List<Goal>>(_goalRepo.LoadPersonalGoalsOfUser(userId));
+            List<Goal> sharedGoals = _mapper.Map<List<Goal>>(_goalRepo.LoadSharedGoalsOfUser(userId));
+            var allGoals = personalGoals.Concat(sharedGoals);
 
-            var groupedPersonal = goalsPersonal
+            var completedPerMonth = allGoals
+                .Where(g => g.IsDone)
                 .GroupBy(g => GetMonthLabel(g.CreatedAt))
                 .Select(g => new StatsDTO
                 {
                     Period = g.Key,
-                    Ownership = "Personal",
-                    Completed = g.Count(x => x.IsDone),
-                    Incomplete = g.Count(x => !x.IsDone)
-                });
-
-            var groupedShared = goalsShared
-                .GroupBy(g => GetMonthLabel(g.CreatedAt))
-                .Select(g => new StatsDTO
-                {
-                    Period = g.Key,
-                    Ownership = "Shared",
-                    Completed = g.Count(x => x.IsDone),
-                    Incomplete = g.Count(x => !x.IsDone)
-                });
-
-            return groupedPersonal
-                .Concat(groupedShared)
+                    Count = g.Count()
+                })
                 .OrderBy(s => s.Period)
                 .ToList();
+
+            return completedPerMonth;
         }
         private string GetMonthLabel(DateTime date)
         {
             return date.ToString("MMMM yyyy");
         }
 
-        public List<StatsDTO> GetGoalAmountStatisticsYearly()
+        public List<StatsDTO> GetCompletedGoalsPerYear()
         {
-            int id = _userService.GetCurrentUserId();
+            int userId = _userService.GetCurrentUserId();
 
-            List<Goal> goalsPersonal = _mapper.Map<List<Goal>>(_goalRepo.LoadPersonalGoalsOfUser(id));
-            List<Goal> goalsShared = _mapper.Map<List<Goal>>(_goalRepo.LoadSharedGoalsOfUser(id));
+            List<Goal> personalGoals = _mapper.Map<List<Goal>>(_goalRepo.LoadPersonalGoalsOfUser(userId));
+            List<Goal> sharedGoals = _mapper.Map<List<Goal>>(_goalRepo.LoadSharedGoalsOfUser(userId));
+            var allGoals = personalGoals.Concat(sharedGoals);
 
-            var groupedPersonal = goalsPersonal
+            var completedPerYear = allGoals
+                .Where(g => g.IsDone)
                 .GroupBy(g => g.CreatedAt.Year.ToString())
                 .Select(g => new StatsDTO
                 {
                     Period = g.Key,
-                    Ownership = "Personal",
-                    Completed = g.Count(x => x.IsDone),
-                    Incomplete = g.Count(x => !x.IsDone)
-                });
-
-            var groupedShared = goalsShared
-                .GroupBy(g => g.CreatedAt.Year.ToString())
-                .Select(g => new StatsDTO
-                {
-                    Period = g.Key,
-                    Ownership = "Shared",
-                    Completed = g.Count(x => x.IsDone),
-                    Incomplete = g.Count(x => !x.IsDone)
-                });
-
-            return groupedPersonal
-                .Concat(groupedShared)
+                    Count = g.Count()
+                })
                 .OrderBy(s => s.Period)
                 .ToList();
+
+            return completedPerYear;
         }
 
         public double GetAverageCompletionTimeInDays()
@@ -394,6 +362,36 @@ namespace BucketProject.BLL.Business_Logic.Services
         {
             return _managerRepo.CountFilteredUsers(query, gender, nationality, minAge, maxAge, createdAfter);
         }
+
+        public List<StatsDTO> GetTopUserCombinations()
+        {
+            List<UserEntity> entities = _managerRepo.GetAllUsers();
+            List<User> users = _mapper.Map<List<User>>(entities);
+            DateTime now = DateTime.Today;
+
+            var result = users
+                .Select(u => new
+                {
+                    Age = now.Year - u.DateOfBirth.Year - (u.DateOfBirth.Date > now.AddYears(-(now.Year - u.DateOfBirth.Year)) ? 1 : 0),
+                    u.Nationality,
+                    u.Gender
+                })
+                .GroupBy(u => new { u.Age, u.Nationality, u.Gender })
+                .Select(g => new StatsDTO
+                {
+                    Age = g.Key.Age,
+                    Nationality = g.Key.Nationality,
+                    Gender = g.Key.Gender,
+                    Count = g.Count()
+                })
+                .OrderByDescending(x => x.Count)
+                .Take(5)
+                .ToList();
+
+            return result;
+        }
+
+
 
     }
 

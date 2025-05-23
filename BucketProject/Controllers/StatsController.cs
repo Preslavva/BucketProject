@@ -29,72 +29,26 @@ namespace BucketProject.UI.BucketProject.Controllers
             ViewBag.CategoryData = categoryStats.Select(s => s.Count).ToList();
 
 
-            var weeklyStats = _statsService.GetGoalAmountStatisticsWeekly();
+            List<StatsDTO> weeklyStats = _statsService.GetCompletedGoalsPerWeek();
 
-            ViewBag.WeeklyPeriods = weeklyStats.Select(s => s.Period).Distinct().ToList();
-
-            ViewBag.WeeklyPersonalCompleted = weeklyStats
-                .Where(s => s.Ownership == "Personal")
-                .Select(s => s.Completed).ToList();
-
-            ViewBag.WeeklyPersonalIncomplete = weeklyStats
-                .Where(s => s.Ownership == "Personal")
-                .Select(s => s.Incomplete).ToList();
-
-            ViewBag.WeeklySharedCompleted = weeklyStats
-                .Where(s => s.Ownership == "Shared")
-                .Select(s => s.Completed).ToList();
-
-            ViewBag.WeeklySharedIncomplete = weeklyStats
-                .Where(s => s.Ownership == "Shared")
-                .Select(s => s.Incomplete).ToList();
+            ViewBag.WeekLabels = weeklyStats.Select(s => s.Period).ToList();
+            ViewBag.WeekData = weeklyStats.Select(s => s.Count).ToList();
 
 
-            var monthlyStats = _statsService.GetGoalAmountStatisticsMonthly();
+            List<StatsDTO> monthlyStats = _statsService.GetCompletedGoalsPerMonth();
 
-            ViewBag.MonthlyPeriods = monthlyStats.Select(s => s.Period).Distinct().ToList();
+            ViewBag.MonthLabels = monthlyStats.Select(s => s.Period).ToList();
+            ViewBag.MonthData = monthlyStats.Select(s => s.Count).ToList();
 
-            ViewBag.MonthlyPersonalCompleted = monthlyStats
-                .Where(s => s.Ownership == "Personal")
-                .Select(s => s.Completed).ToList();
+            List<StatsDTO> yearlyStats = _statsService.GetCompletedGoalsPerYear();
 
-            ViewBag.MonthlyPersonalIncomplete = monthlyStats
-                .Where(s => s.Ownership == "Personal")
-                .Select(s => s.Incomplete).ToList();
-
-            ViewBag.MonthlySharedCompleted = monthlyStats
-                .Where(s => s.Ownership == "Shared")
-                .Select(s => s.Completed).ToList();
-
-            ViewBag.MonthlySharedIncomplete = monthlyStats
-                .Where(s => s.Ownership == "Shared")
-                .Select(s => s.Incomplete).ToList();
-
-            var yearlyStats = _statsService.GetGoalAmountStatisticsYearly();
-
-            ViewBag.YearlyPeriods = yearlyStats.Select(s => s.Period).Distinct().ToList();
-
-            ViewBag.YearlyPersonalCompleted = yearlyStats
-                .Where(s => s.Ownership == "Personal")
-                .Select(s => s.Completed).ToList();
-
-            ViewBag.YearlyPersonalIncomplete = yearlyStats
-                .Where(s => s.Ownership == "Personal")
-                .Select(s => s.Incomplete).ToList();
-
-            ViewBag.YearlySharedCompleted = yearlyStats
-                .Where(s => s.Ownership == "Shared")
-                .Select(s => s.Completed).ToList();
-
-            ViewBag.YearlySharedIncomplete = yearlyStats
-                .Where(s => s.Ownership == "Shared")
-                .Select(s => s.Incomplete).ToList();
-
+            ViewBag.YearLabels = yearlyStats.Select(s => s.Period).ToList();
+            ViewBag.YearData = yearlyStats.Select(s => s.Count).ToList();
 
             double avgDays = _statsService.GetAverageCompletionTimeInDays();
             ViewBag.AverageCompletionDays = Math.Round(avgDays, 1);
 
-            var summary = _statsService.GetGoalSummaryStats();
+            StatsDTO summary = _statsService.GetGoalSummaryStats();
 
             ViewBag.TotalGoals = summary.TotalGoals;
             ViewBag.CompletedGoals = summary.CompletedGoals;
@@ -105,7 +59,7 @@ namespace BucketProject.UI.BucketProject.Controllers
             ViewBag.AIGoals = summary.AIGoals;
 
 
-            var stats = _statsService.GetUserRegistrationsPerMonth();
+            List<StatsDTO> stats = _statsService.GetUserRegistrationsPerMonth();
             ViewBag.Labels = stats.Select(s => s.Period).ToList();
             ViewBag.Data = stats.Select(s => s.Count).ToList();
 

@@ -11,9 +11,9 @@ public interface IStatsService
 {
     List<StatsDTO> GetGoalTypeStatistics();
     List<StatsDTO> GetGoalCategoryStatistics();
-    List<StatsDTO> GetGoalAmountStatisticsWeekly();
-    List<StatsDTO> GetGoalAmountStatisticsMonthly();
-    List<StatsDTO> GetGoalAmountStatisticsYearly();
+    List<StatsDTO> GetCompletedGoalsPerWeek();
+    List<StatsDTO> GetCompletedGoalsPerMonth();
+    List<StatsDTO> GetCompletedGoalsPerYear();
     double GetAverageCompletionTimeInDays();
     StatsDTO GetGoalSummaryStats();
     List<StatsDTO> GetUserRegistrationsPerMonth();
@@ -29,4 +29,5 @@ public interface IStatsService
     List<string> GetAllNationalities();
     List<User> SearchUsers(string query, string gender, string nationality, int? minAge, int? maxAge, DateTime? createdAfter, int page, int pageSize);
     int GetFilteredUserCount(string query, string gender, string nationality, int? minAge, int? maxAge, DateTime? createdAfter);
+    List<StatsDTO> GetTopUserCombinations();
 }

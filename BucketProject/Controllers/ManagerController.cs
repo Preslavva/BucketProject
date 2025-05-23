@@ -90,6 +90,15 @@ namespace BucketProject.Controllers
             ViewBag.AgeLabels = ageStats.Select(s => s.Label).ToList();
             ViewBag.AgeData = ageStats.Select(s => s.Count).ToList();
 
+            var userCombinations = _statsService.GetTopUserCombinations();
+            ViewBag.UserComboLabels = userCombinations
+                .Select(c => $"{c.Age}, {c.Nationality}, {c.Gender}")
+                .ToList();
+            ViewBag.UserComboData = userCombinations
+                .Select(c => c.Count)
+                .ToList();
+
+
             return View("ManagerStats");
         }
 
