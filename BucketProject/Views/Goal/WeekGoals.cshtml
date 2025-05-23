@@ -126,6 +126,12 @@
             <strong>Remaining:</strong> @Model.RemainingPersonal
         </p>
 
+        @if (!Model.Goals.Any())
+        {
+            <p class="text-muted">You have no personal goals yet.</p>
+        }
+        else
+        {
         @foreach (var goal in Model.Goals)
         {
             var editFormId = $"editForm-{goal.Id}";
@@ -273,7 +279,9 @@
                     </div>
 
                 }
+                
             </div>
+        }
         }
     </div>
 
@@ -286,7 +294,8 @@
 
         @if (!Model.SharedGoals.Any())
         {
-            <p>No shared goals this week.</p>
+            <p class="text-muted">No shared goals this week.</p>
+
         }
         else
         {

@@ -14,7 +14,9 @@
     @foreach (var goal in Model.Goals)
     {
         <li style="list-style-type:none;">
-            @(goal.IsDone ? "☑" : "☐") @goal.Description
+            <span class="custom-checkbox @(goal.IsDone ? "checked" : "")"></span> @goal.Description
+
+
 
             @if (goal.Children?.Any() == true)
             {
@@ -22,7 +24,8 @@
                     @foreach (var sub in goal.Children)
                     {
                         <li style="list-style-type:none;">
-                            @(sub.IsDone ? "☑" : "☐") @sub.Description
+                            <span class="custom-checkbox @(sub.IsDone ? "checked" : "")"></span> @sub.Description
+
                         </li>
                     }
                 </ul>
@@ -32,7 +35,7 @@
     @foreach (var goal in Model.SharedGoals)
     {
         <li style="list-style-type:none;">
-            @(goal.IsDone ? "☑" : "☐") @goal.Description
+            <span class="custom-checkbox @(goal.IsDone ? "checked" : "")"></span> @goal.Description
 
             @if (goal.Children?.Any() == true)
             {
@@ -40,7 +43,7 @@
                     @foreach (var sub in goal.Children)
                     {
                         <li style="list-style-type:none;">
-                            @(sub.IsDone ? "☑" : "☐") @sub.Description
+                            <span class="custom-checkbox @(sub.IsDone ? "checked" : "")"></span> @sub.Description
                         </li>
                     }
                 </ul>
