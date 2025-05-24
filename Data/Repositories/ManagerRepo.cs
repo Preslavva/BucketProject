@@ -434,7 +434,7 @@ FETCH NEXT @PageSize ROWS ONLY;
             try
             {
                 using var conn = GetSqlConnection();
-                var cmd = new SqlCommand("SELECT DISTINCT Nationality FROM [User] ORDER BY Nationality", conn);
+                var cmd = new SqlCommand("SELECT DISTINCT Nationality FROM [User] WHERE Role <> 'Manager' ORDER BY Nationality", conn);
 
                 conn.Open();
                 using var reader = cmd.ExecuteReader();

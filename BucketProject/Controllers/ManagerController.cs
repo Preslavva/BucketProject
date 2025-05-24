@@ -32,7 +32,7 @@ namespace BucketProject.Controllers
             ViewBag.Genders = _statsService.GetAllGenders();
             ViewBag.Nationalities = _statsService.GetAllNationalities();
 
-            var pagedUsers = new List<User>();
+            List<User> pagedUsers = new List<User>();
             var totalUserCount = 0;
 
             if (HasActiveFilters(query, gender, nationality, minAge, maxAge, createdAfter))
@@ -50,19 +50,19 @@ namespace BucketProject.Controllers
         [HttpGet]
         public IActionResult ManagerStats()
         {
-            var role = HttpContext.Session.GetString("Role");
+            string? role = HttpContext.Session.GetString("Role");
             if (role != "Manager")
                 return RedirectToAction("LogIn", "User");
 
-            var userStats = _statsService.GetUserRegistrationsPerMonth();
+            List<StatsDTO> userStats = _statsService.GetUserRegistrationsPerMonth();
             ViewBag.UserLabels = userStats.Select(s => s.Period).ToList();
             ViewBag.UserData = userStats.Select(s => s.Count).ToList();
 
-            var goalStats = _statsService.GetGoalsPerMonth();
+            List<StatsDTO> goalStats = _statsService.GetGoalsPerMonth();
             ViewBag.GoalLabels = goalStats.Select(s => s.Period).ToList();
             ViewBag.GoalData = goalStats.Select(s => s.Count).ToList();
 
-            var summary = _statsService.GetGoalSummaryStatsManager();
+            StatsDTO summary = _statsService.GetGoalSummaryStatsManager();
             ViewBag.TotalGoals = summary.TotalGoals;
             ViewBag.PersonalGoals = summary.PersonalGoals;
             ViewBag.SharedGoals = summary.SharedGoals;
@@ -70,15 +70,15 @@ namespace BucketProject.Controllers
             ViewBag.AIGoals = summary.AIGoals;
             ViewBag.ActiveUsersCount = summary.ActiveUsersCount;
 
-            var typeStats = _statsService.GetGoalTypeStatisticsManager();
+            List<StatsDTO> typeStats = _statsService.GetGoalTypeStatisticsManager();
             ViewBag.TypeLabels = typeStats.Select(s => s.Type).ToList();
             ViewBag.TypeData = typeStats.Select(s => s.Count).ToList();
 
-            var categoryStats = _statsService.GetGoalCategoryStatisticsManager();
+            List<StatsDTO> categoryStats = _statsService.GetGoalCategoryStatisticsManager();
             ViewBag.CategoryLabels = categoryStats.Select(s => s.Category).ToList();
             ViewBag.CategoryData = categoryStats.Select(s => s.Count).ToList();
 
-            var nationalityStats = _statsService.GetUsersNationalityStatistics();
+            List<StatsDTO> nationalityStats = _statsService.GetUsersNationalityStatistics();
             ViewBag.NationalityLabels = nationalityStats.Select(s => s.Nationality).ToList();
             ViewBag.NationalityData = nationalityStats.Select(s => s.Count).ToList();
 
