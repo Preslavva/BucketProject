@@ -17,6 +17,7 @@ namespace BucketProject.Controllers
             _mapper = mapper;
         }
 
+        [HttpGet]
         public IActionResult History()
         {
             var groupedGoals = _goalService.LoadGroupedExpiredGoals();
@@ -35,17 +36,36 @@ namespace BucketProject.Controllers
 
                     foreach (var type in timeframe.Value)
                     {
-                        List<HistoryViewModel> viewModels = type.Value
+                        // First map all goals
+                        var allViewModels = type.Value
                             .Select(goal => _mapper.Map<HistoryViewModel>(goal))
                             .ToList();
 
-                        groupedViewModels[category.Key][timeframe.Key][type.Key] = viewModels;
+                        // Build a lookup dictionary: Id -> ViewModel
+                        var viewModelDict = allViewModels.ToDictionary(vm => vm.Id, vm => vm);
+
+                        // Assign child goals to their parents
+                        foreach (var vm in allViewModels)
+                        {
+                            if (vm.ParentGoalId.HasValue && viewModelDict.ContainsKey(vm.ParentGoalId.Value))
+                            {
+                                viewModelDict[vm.ParentGoalId.Value].ChildGoals.Add(vm);
+                            }
+                        }
+
+                        // Only return top-level (parent) goals
+                        var topLevelGoals = allViewModels
+                            .Where(vm => !vm.ParentGoalId.HasValue)
+                            .ToList();
+
+                        groupedViewModels[category.Key][timeframe.Key][type.Key] = topLevelGoals;
                     }
                 }
             }
 
             return View(groupedViewModels);
         }
+
 
     }
 }

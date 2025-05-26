@@ -60,9 +60,7 @@
                                         <div class="d-flex justify-content-between">
                                             <div>
                                                 <strong>@goal.Description</strong><br />
-                                                <small class="text-muted">
-                                                    Deadline: @goal.Deadline?.ToShortDateString()
-                                                </small>
+                                                <small class="text-muted">Deadline: @goal.Deadline?.ToShortDateString()</small>
 
                                                 @if (goal.Recipients != null && goal.Recipients.Any())
                                                 {
@@ -91,7 +89,6 @@
                                                     </div>
                                                 }
                                             </div>
-
                                             <div class="text-end">
                                                 @if (goal.IsDone)
                                                 {
@@ -107,6 +104,62 @@
                                             </div>
                                         </div>
                                     </li>
+
+                                  
+                                    @if (goal.ChildGoals != null && goal.ChildGoals.Any())
+                                    {
+                                        foreach (var child in goal.ChildGoals)
+                                        {
+                                            <li class="list-group-item ms-4 border-start ps-3">
+                                                <div class="d-flex justify-content-between">
+                                                    <div>
+                                                        ↳ <strong>@child.Description</strong><br />
+                                                        <small class="text-muted">Deadline: @child.Deadline?.ToShortDateString()</small>
+
+                                                        @if (child.Recipients != null && child.Recipients.Any())
+                                                        {
+                                                            <div class="mt-1">
+                                                                <small class="text-muted">Shared with:</small>
+                                                                @foreach (var u in child.Recipients)
+                                                                {
+                                                                    <span class="ms-2 align-middle d-inline-flex">
+                                                                        @if (u.Picture != null && u.Picture.Length > 0)
+                                                                        {
+                                                                            <img src="data:image/png;base64,@Convert.ToBase64String(u.Picture)"
+                                                                                 alt="@u.Username"
+                                                                                 width="24" height="24"
+                                                                                 class="rounded-circle me-1" />
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center me-1"
+                                                                                 style="width:24px; height:24px; font-size:0.8rem;">
+                                                                                @u.Username.Substring(0, 1).ToUpper()
+                                                                            </div>
+                                                                        }
+                                                                        <span class="align-self-center">@u.Username</span>
+                                                                    </span>
+                                                                }
+                                                            </div>
+                                                        }
+                                                    </div>
+                                                    <div class="text-end">
+                                                        @if (child.IsDone)
+                                                        {
+                                                            <span class="badge bg-success">Completed</span>
+
+                                                            <br />
+                                                            <small class="text-muted">on @child.CompletedAt?.ToShortDateString()</small>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span class="badge bg-danger">Not Completed</span>
+                                                        }
+                                                    </div>
+                                                </div>
+                                            </li>
+                                        }
+                                    }
                                 }
                             </ul>
                         }
@@ -116,4 +169,3 @@
         </div>
     }
 </div>
-

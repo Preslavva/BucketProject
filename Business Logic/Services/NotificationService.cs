@@ -159,10 +159,10 @@ namespace BucketProject.BLL.Business_Logic.Services
 
         public int GetTotalNotificationGoalCount(DateTime today)
         {
-            var completedGoals = GetSharedCompletionGoals();
-            var deletedGoals = GetSharedDeletedGoals();
-            var postponedGoals = GetSharedPostponedGoals();
-            var notifyGoals = CheckAndNotify(today);
+            List<Goal> completedGoals = GetSharedCompletionGoals();
+            List<Goal> deletedGoals = GetSharedDeletedGoals();
+            List<Goal> postponedGoals = GetSharedPostponedGoals();
+            List<Goal> notifyGoals = CheckAndNotify(today);
 
             int totalCount = completedGoals.Count
                            + deletedGoals.Count

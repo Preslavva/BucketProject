@@ -12,5 +12,8 @@ namespace BucketProject.UI.ViewModels.ViewModels
         public string Type { get; set; }
         public string Category { get; set; }
         public List<UserSummaryDTO> Recipients { get; set; } = new();
+        public int? ParentGoalId { get; set; }
+        public List<HistoryViewModel> ChildGoals { get; set; } = new List<HistoryViewModel>();
+
     }
 }
