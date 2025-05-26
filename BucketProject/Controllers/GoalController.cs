@@ -42,15 +42,12 @@ namespace BucketProject.UI.BucketProject.Controllers
         {
             viewModel.Category = "Month";
 
-            if (!ModelState.IsValid)
-            {
+         
                 ViewBag.AvailableTypes = GetAvailableTypes();
                 ViewBag.Friends = _socialService.GetFriends(_userService.GetCurrentUserId());
                 TempData.Keep("SubGoals");
                 TempData.Keep("SubGoalForId");
-                return RedirectToAction("MonthGoals");
-            }
-
+                
             try
             {
                 Goal domainModel = _mapper.Map<Goal>(viewModel);
@@ -59,7 +56,6 @@ namespace BucketProject.UI.BucketProject.Controllers
             catch (ValidationException vex)
             {
                 TempData["ErrorMessage"] = vex.Message;
-                return RedirectToAction("MonthGoals");
             }
 
             if (TempData.ContainsKey("SubGoals"))
@@ -99,18 +95,13 @@ namespace BucketProject.UI.BucketProject.Controllers
         [HttpPost]
         public IActionResult CreateYearGoal(GoalViewModel viewModel, int[] friendIds)
         {
-            viewModel.Category = "Year";
+               viewModel.Category = "Year";
 
-
-            if (!ModelState.IsValid)
-            {
                 ViewBag.AvailableTypes = GetAvailableTypes();
                 ViewBag.Friends = _socialService.GetFriends(_userService.GetCurrentUserId());
                 TempData.Keep("SubGoals");
                 TempData.Keep("SubGoalForId");
-                return RedirectToAction("YearGoals");
-            }
-
+              
             try
             {
                 Goal domainModel = _mapper.Map<Goal>(viewModel);
@@ -119,8 +110,7 @@ namespace BucketProject.UI.BucketProject.Controllers
             catch (ValidationException vex)
             {
                 TempData["ErrorMessage"] = vex.Message;
-                return RedirectToAction("YearGoals");
-            };
+            }
 
             if (TempData.ContainsKey("SubGoals"))
             {
@@ -160,15 +150,12 @@ namespace BucketProject.UI.BucketProject.Controllers
         {
             viewModel.Category = "Bucket_list";
 
-            if (!ModelState.IsValid)
-            {
+           
                 ViewBag.AvailableTypes = GetAvailableTypes();
                 ViewBag.Friends = _socialService.GetFriends(_userService.GetCurrentUserId());
                 TempData.Keep("SubGoals");
                 TempData.Keep("SubGoalForId");
-                return RedirectToAction("BucketListGoals");
-            }
-
+            
             try
             {
                 Goal domainModel = _mapper.Map<Goal>(viewModel);
@@ -177,7 +164,6 @@ namespace BucketProject.UI.BucketProject.Controllers
             catch (ValidationException vex)
             {
                 TempData["ErrorMessage"] = vex.Message;
-                return RedirectToAction("BucketList");
             }
 
             if (TempData.ContainsKey("SubGoals"))
@@ -216,13 +202,11 @@ namespace BucketProject.UI.BucketProject.Controllers
         public IActionResult CreateWeekGoal(GoalViewModel viewModel, int[] friendIds)
         {
             viewModel.Category = "Week";
+
             ViewBag.AvailableTypes = GetAvailableTypes();
             ViewBag.Friends = _socialService.GetFriends(_userService.GetCurrentUserId());
             TempData.Keep("SubGoals");
             TempData.Keep("SubGoalForId");
-
-            if (!ModelState.IsValid)
-                return RedirectToAction("WeekGoals");
 
             try
             {
@@ -232,7 +216,6 @@ namespace BucketProject.UI.BucketProject.Controllers
             catch (ValidationException vex)
             {
                 TempData["ErrorMessage"] = vex.Message;
-                return RedirectToAction("WeekGoals");
             }
 
             if (TempData.ContainsKey("SubGoals"))

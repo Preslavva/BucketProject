@@ -130,6 +130,9 @@ namespace BucketProject.BLL.Business_Logic.Services
             {
                 throw new ValidationException("New description cannot be empty");
             }
+            if (goalDomain.Description.Length < 5)
+                throw new ValidationException("Goal description must have at least 5 characters.");
+
             int userId = _userService.GetCurrentUserId();
             EnsureUserIsOwner(goalId, userId);
 
