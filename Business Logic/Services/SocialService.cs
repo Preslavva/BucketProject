@@ -4,9 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
-using BucketProject.DAL.Data.InterfacesRepo;
+using BucketProject.BLL.Business_Logic.InterfacesRepo;
 using BucketProjetc.BLL.Business_Logic.InterfacesService;
-
 using Microsoft.AspNetCore.Http;
 using BucketProject.BLL.Business_Logic.DTOs;
 using BucketProject.DAL.Models.Entities;

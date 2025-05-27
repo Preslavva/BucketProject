@@ -2,7 +2,7 @@
 using System.Text;
 using Newtonsoft.Json;
 using BucketProject.Infrastructure.AI;
-using BucketProjetc.BLL.Business_Logic.InterfacesService;
+using BucketProject.BLL.Business_Logic.InterfacesService;
 using Microsoft.Extensions.Configuration;
 using BucketProject.DAL.Models.Enums;
 using Exceptions.Exceptions;

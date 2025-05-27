@@ -878,7 +878,7 @@ namespace BucketProject.UI.BucketProject.Controllers
             }
         }
 
-            [HttpPost]
+        [HttpPost]
         public async Task<IActionResult> BreakDownGoalMonth(int id)
         {
             try

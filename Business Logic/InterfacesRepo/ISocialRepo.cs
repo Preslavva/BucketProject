@@ -5,9 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using BucketProject.DAL.Models.Entities;
 
-namespace BucketProject.DAL.Data.InterfacesRepo;
+namespace BucketProject.BLL.Business_Logic.InterfacesRepo;
 
-    public interface ISocialRepo
+public interface ISocialRepo
     {
     List<UserEntity> LoadFriends(int userId);
     List<UserEntity> LoadNonFriends(int userId);

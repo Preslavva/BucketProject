@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.AspNetCore.Http;
-using BucketProject.DAL.Data.InterfacesRepo;
+using BucketProject.BLL.Business_Logic.InterfacesRepo;
 using BucketProject.DAL.Models.Entities;
 using BucketProject.BLL.Business_Logic.Domain;
 using AutoMapper;

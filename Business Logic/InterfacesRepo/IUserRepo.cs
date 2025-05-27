@@ -1,8 +1,8 @@
 ﻿using BucketProject.DAL.Models.Entities;
 
-namespace BucketProject.DAL.Data.InterfacesRepo
-{
-    public interface IUserRepo
+namespace BucketProject.BLL.Business_Logic.InterfacesRepo;
+
+public interface IUserRepo
     {
         bool Register(UserEntity user);
 
@@ -13,4 +13,4 @@ namespace BucketProject.DAL.Data.InterfacesRepo
         void AddPhoto(UserEntity user, byte[] pictute);
         int GetIdOfUser(string username);
     }
-}
+

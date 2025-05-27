@@ -23,6 +23,7 @@
   <ItemGroup>
     <ProjectReference Include="..\AI\AI.csproj" />
     <ProjectReference Include="..\Business Logic\BusinessLogic.csproj" />
+    <ProjectReference Include="..\Data\Data.csproj" />
     <ProjectReference Include="..\Models\Models.csproj" /> 
 
 

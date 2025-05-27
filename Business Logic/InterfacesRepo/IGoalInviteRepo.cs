@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using BucketProject.DAL.Models.Entities;
 
-namespace BucketProject.DAL.Data.InterfacesRepo
+namespace BucketProject.BLL.Business_Logic.InterfacesRepo
 {
     public interface IGoalInviteRepo
     {

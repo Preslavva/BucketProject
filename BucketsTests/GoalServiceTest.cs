@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using BucketProject.BLL.Business_Logic.Services;
-using BucketProject.DAL.Data.InterfacesRepo;
-using BucketProjetc.BLL.Business_Logic.InterfacesService;
+using BucketProject.BLL.Business_Logic.InterfacesRepo;
 using Microsoft.AspNetCore.Http;
 using Moq;
 using BucketProject.BLL.Business_Logic.Mapping;

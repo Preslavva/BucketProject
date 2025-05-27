@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
-using BucketProject.DAL.Data.InterfacesRepo;
+using BucketProject.BLL.Business_Logic.InterfacesRepo;
 using BucketProject.DAL.Models.Entities;
 using BucketProject.DAL.Models.Enums;
 using Microsoft.Data.SqlClient;

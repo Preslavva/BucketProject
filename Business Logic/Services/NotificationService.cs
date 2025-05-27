@@ -2,7 +2,7 @@
 using BucketProject.BLL.Business_Logic.Strategies;
 using BucketProject.BLL.Business_Logic.Domain;
 using BucketProject.BLL.Business_Logic.DTOs;
-using BucketProject.DAL.Data.InterfacesRepo;
+using BucketProject.BLL.Business_Logic.InterfacesRepo;
 using BucketProject.DAL.Models.Entities;
 using Microsoft.AspNetCore.Http;
 using AutoMapper;

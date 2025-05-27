@@ -9,6 +9,7 @@ using BucketProject.BLL.Business_Logic.DTOs;
 using BucketProject.BLL.Business_Logic.Domain;
 using BucketProject.DAL.Models.Entities;
 using BucketProject.DAL.Models.Enums;
+using static Org.BouncyCastle.Math.EC.ECCurve;
 
 
 namespace BucketsTests
@@ -17,19 +18,23 @@ namespace BucketsTests
     public class AutoMapperBLTests
     {
         private readonly IMapper _mapper;
+        private readonly MapperConfiguration _config;
 
         public AutoMapperBLTests()
         {
-            var config = new MapperConfiguration(cfg =>
+            _config = new MapperConfiguration(cfg =>
             {
                 cfg.AddProfile(new AutoMapperBL());
             });
-            _mapper = config.CreateMapper();
+            _mapper = _config.CreateMapper();
     
-            //config.AssertConfigurationIsValid();
-
-            _mapper = config.CreateMapper();
         }
+
+        //[TestMethod]
+        //public void AutoMapper_Configuration_Is_Valid()
+        //{
+        //    _config.AssertConfigurationIsValid(); 
+        //}
 
         [TestMethod]
         public void User_ToUserEntity_Maps_Correctly()

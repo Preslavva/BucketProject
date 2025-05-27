@@ -1,5 +1,4 @@
 ﻿using BucketProject.BLL.Business_Logic.InterfacesService;
-using BucketProject.DAL.Data.InterfacesRepo;
 using BucketProject.DAL.Models.Enums;
 using Microsoft.AspNetCore.Http;
 using BucketProject.BLL.Business_Logic.Strategies;
@@ -7,10 +6,11 @@ using AutoMapper;
 using BucketProject.DAL.Models.Entities;
 using BucketProject.BLL.Business_Logic.Domain;
 using System.Text;
-using BucketProjetc.BLL.Business_Logic.InterfacesService;
 using System.ComponentModel.DataAnnotations;
 using BucketProject.BLL.Business_Logic.DTOs;
 using Exceptions.Exceptions;
+using BucketProject.BLL.Business_Logic.InterfacesRepo;
+
 
 
 

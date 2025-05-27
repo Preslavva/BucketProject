@@ -1,5 +1,5 @@
 ﻿using System.Data;
-using BucketProject.DAL.Data.InterfacesRepo;
+using BucketProject.BLL.Business_Logic.InterfacesRepo;
 using BucketProject.DAL.Models.Entities;
 using Exceptions.Exceptions;
 using Microsoft.Data.SqlClient;

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using BucketProject.DAL.Data.InterfacesRepo;
+﻿using BucketProject.BLL.Business_Logic.InterfacesRepo;
 using BucketProject.DAL.Models.Entities;
 using BucketProject.DAL.Models.Enums;
 using Microsoft.Data.SqlClient;

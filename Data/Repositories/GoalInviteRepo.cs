@@ -1,4 +1,4 @@
-﻿using BucketProject.DAL.Data.InterfacesRepo;
+﻿using BucketProject.BLL.Business_Logic.InterfacesRepo;
 using BucketProject.DAL.Models.Entities;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;

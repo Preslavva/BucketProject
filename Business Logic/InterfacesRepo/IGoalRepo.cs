@@ -3,9 +3,9 @@ using BucketProject.DAL.Models.Enums;
 using BucketProject.DAL.Models.Entities;
 
 
-namespace BucketProject.DAL.Data.InterfacesRepo;
+namespace BucketProject.BLL.Business_Logic.InterfacesRepo;
 
-    public interface IGoalRepo
+public interface IGoalRepo
     {
     //int GetIdOfUser(string username);
  

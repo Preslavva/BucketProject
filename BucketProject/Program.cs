@@ -1,4 +1,4 @@
-using BucketProject.DAL.Data.InterfacesRepo;
+using BucketProject.BLL.Business_Logic.InterfacesRepo;
 using BucketProject.BLL.Business_Logic.Services;
 using BucketProject.BLL.Business_Logic.InterfacesService;
 using BucketProject.UI.BucketProject.Mapping;

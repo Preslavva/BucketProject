@@ -1,6 +1,6 @@
 ﻿using BucketProject.DAL.Models.Enums;
 
-namespace BucketProjetc.BLL.Business_Logic.InterfacesService
+namespace BucketProject.BLL.Business_Logic.InterfacesService
 {
     public interface IAIClient
     {
