@@ -48,20 +48,50 @@
     </div>
 
     <div class="tab-pane fade" id="lines" role="tabpanel" aria-labelledby="line-tab">
-        @if (hasUsers)
-        {
-            <div class="my-4">
-                <canvas id="userLineChart"></canvas>
-            </div>
-        }
 
-        @if (hasGoals)
-        {
-            <div class="my-4">
-                <canvas id="goalsLineChart"></canvas>
-            </div>
-        }
+        <ul class="nav nav-tabs justify-content-center my-3" role="tablist">
+            @if (hasUsers)
+            {
+                <li class="nav-item">
+                    <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#user-chart" type="button" role="tab">
+                        Users Chart
+                    </button>
+                </li>
+            }
+            @if (hasGoals)
+            {
+                <li class="nav-item">
+                    <button class="nav-link @(hasUsers ? "" : "active")" data-bs-toggle="tab" data-bs-target="#goals-chart" type="button" role="tab">
+                        Goals Chart
+                    </button>
+                </li>
+            }
+        </ul>
+
+        <div class="tab-content text-center">
+
+            @if (hasUsers)
+            {
+                <div class="tab-pane fade show active" id="user-chart" role="tabpanel">
+                    <canvas id="userLineChart" class="chart-canvas"></canvas>
+                </div>
+            }
+
+            @if (hasGoals)
+            {
+                <div class="tab-pane fade @(hasUsers ? "" : "show active")" id="goals-chart" role="tabpanel">
+                    <canvas id="goalsLineChart" class="chart-canvas"></canvas>
+                </div>
+            }
+
+            @if (!hasUsers && !hasGoals)
+            {
+                <p class="mt-3 text-center">No data available for charts.</p>
+            }
+
+        </div>
     </div>
+
 
     <div class="tab-pane fade" id="piecharts" role="tabpanel" aria-labelledby="pie-tab">
         <div class="d-flex flex-wrap gap-4">

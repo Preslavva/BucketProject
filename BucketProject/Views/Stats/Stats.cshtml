@@ -50,24 +50,58 @@
 
    
     <div class="tab-pane fade" id="line-graphs" role="tabpanel">
-        @if (hasWeeklyData)
-        {
-            <canvas id="weeklyChart" width="200" height="100"></canvas>
-        }
-        @if (hasMonthlyData)
-        {
-            <canvas id="monthlyChart" width="200" height="100"></canvas>
-        }
-        @if (hasYearlyData)
-        {
-            <canvas id="yearlyChart" width="200" height="100"></canvas>
-        }
-        @if (!hasWeeklyData && !hasMonthlyData && !hasYearlyData)
-        {
-            <p class="text-center"> You don't have any accomplished goals yet.</p>
-        }
+
+        <ul class="nav nav-tabs justify-content-center mb-3" id="goalTab" role="tablist">
+            <li class="nav-item">
+                <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#weekly-goals" type="button" role="tab">By Week</button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#monthly-goals" type="button" role="tab">By Month</button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#yearly-goals" type="button" role="tab">By Year</button>
+            </li>
+        </ul>
+
+        <div class="tab-content">
+
+            <div class="tab-pane fade show active text-center" id="weekly-goals" role="tabpanel">
+                @if (hasWeeklyData)
+                {
+                    <canvas id="weeklyChart" class="chart-canvas"></canvas>
+                }
+                else
+                {
+                    <p class="text-center">No weekly goals data.</p>
+                }
+            </div>
+
+            <div class="tab-pane fade text-center" id="monthly-goals" role="tabpanel">
+                @if (hasMonthlyData)
+                {
+                    <canvas id="monthlyChart" class="chart-canvas"></canvas>
+                }
+                else
+                {
+                    <p class="text-center">No monthly goals data.</p>
+                }
+            </div>
+
+            <div class="tab-pane fade text-center" id="yearly-goals" role="tabpanel">
+                @if (hasYearlyData)
+                {
+                    <canvas id="yearlyChart" class="chart-canvas"></canvas>
+                }
+                else
+                {
+                    <p class="text-center">No yearly goals data.</p>
+                }
+            </div>
+
+        </div>
 
     </div>
+
 
   
     <div class="tab-pane fade" id="pie-charts" role="tabpanel">
