@@ -14,6 +14,6 @@ namespace BucketProject.BLL.Business_Logic.DTOs
         public int InvitedId { get; set; }
         public string Status { get; set; }
         public DateTime CreatedAt { get; set; }
-        public DateTime? CompletedAt { get; set; }
+        //public DateTime? CompletedAt { get; set; }
     }
 }

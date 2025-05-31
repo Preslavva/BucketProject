@@ -20,6 +20,8 @@ namespace BucketsTests
         private readonly IMapper _mapper;
         private readonly MapperConfiguration _config;
 
+        public TestContext TestContext { get; set; } 
+
         public AutoMapperBLTests()
         {
             _config = new MapperConfiguration(cfg =>
@@ -27,14 +29,25 @@ namespace BucketsTests
                 cfg.AddProfile(new AutoMapperBL());
             });
             _mapper = _config.CreateMapper();
-    
         }
 
-        //[TestMethod]
-        //public void AutoMapper_Configuration_Is_Valid()
-        //{
-        //    _config.AssertConfigurationIsValid(); 
-        //}
+        [TestMethod]
+        public void AutoMapper_Configuration_Is_Valid()
+        {
+            try
+            {
+                _config.AssertConfigurationIsValid();
+            }
+            catch (Exception ex)
+            {
+                TestContext.WriteLine("AutoMapper configuration validation failed.");
+                TestContext.WriteLine($"Exception: {ex.Message}");
+                TestContext.WriteLine($"Stack Trace: {ex.StackTrace}");
+                Assert.Fail("AutoMapper configuration is invalid. See test output for details.");
+            }
+        }
+
+
 
         [TestMethod]
         public void User_ToUserEntity_Maps_Correctly()

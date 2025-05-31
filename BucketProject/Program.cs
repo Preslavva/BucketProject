@@ -9,6 +9,10 @@ using BucketProject.Filters;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+builder.Logging.AddDebug();
+
 builder.Services.AddControllersWithViews();
 builder.Services.AddSession();
 
@@ -25,8 +29,6 @@ builder.Services.AddScoped<IUserService,UserService>();
 builder.Services.AddScoped<ISocialService, SocialService>();
 builder.Services.AddScoped<IStatsService, StatsService>();
 builder.Services.AddScoped<IManagerRepo, ManagerRepo>();
-
-
 
 
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();

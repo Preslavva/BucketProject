@@ -7,7 +7,6 @@ namespace BucketProject.BLL.Business_Logic.InterfacesRepo;
 
 public interface IGoalRepo
     {
-    //int GetIdOfUser(string username);
  
      List<GoalEntity> LoadPersonalGoalsOfUserbyCategory(int userId, Category category);
     List<GoalEntity> LoadSharedGoalsOfUserByCategory(int userId, Category category);

@@ -12,15 +12,35 @@ namespace BucketsTests
     public class AutoMapperTestUI
     {
         private readonly IMapper _mapper;
+        private readonly MapperConfiguration _config;
+
+        public TestContext TestContext { get; set; }
 
         public AutoMapperTestUI()
         {
-            var config = new MapperConfiguration(cfg =>
+             _config = new MapperConfiguration(cfg =>
             {
                 cfg.AddProfile(new AutoMapperUI());
             });
-            _mapper = config.CreateMapper();
+            _mapper = _config.CreateMapper();
         }
+
+        [TestMethod]
+        public void AutoMapper_Configuration_Is_Valid()
+        {
+            try
+            {
+                _config.AssertConfigurationIsValid();
+            }
+            catch (Exception ex)
+            {
+                TestContext.WriteLine("AutoMapper configuration validation failed.");
+                TestContext.WriteLine($"Exception: {ex.Message}");
+                TestContext.WriteLine($"Stack Trace: {ex.StackTrace}");
+                Assert.Fail("AutoMapper configuration is invalid. See test output for details.");
+            }
+        }
+
 
         [TestMethod]
         public void LogInViewModel_ToUser_Maps_Correctly()
