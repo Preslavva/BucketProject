@@ -4,6 +4,7 @@ using BucketProject.UI.ViewModels.ViewModels;
 using BucketProject.BLL.Business_Logic.DTOs;
 using BucketProject.BLL.Business_Logic.Domain;
 using BucketProject.DAL.Models.Enums;
+using BucketProject.BLL.Business_Logic.Mapping;
 
 
 namespace BucketsTests
@@ -18,10 +19,12 @@ namespace BucketsTests
 
         public AutoMapperTestUI()
         {
-             _config = new MapperConfiguration(cfg =>
+            _config = new MapperConfiguration(cfg =>
             {
-                cfg.AddProfile(new AutoMapperUI());
+                cfg.AddProfile(new AutoMapperBL()); 
+                cfg.AddProfile(new AutoMapperUI());  
             });
+
             _mapper = _config.CreateMapper();
         }
 

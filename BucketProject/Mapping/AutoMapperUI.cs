@@ -40,8 +40,7 @@ namespace BucketProject.UI.BucketProject.Mapping
 
             CreateMap<Goal, GoalViewModel>()
     .ForMember(dest => dest.Category, opt => opt.MapFrom(src => src.Category.ToString()))
-    .ForMember(dest => dest.Type, opt => opt.MapFrom(src => src.Type.ToString()))
-    .ForMember(dest => dest.Recipients, opt => opt.Ignore());
+    .ForMember(dest => dest.Type, opt => opt.MapFrom(src => src.Type.ToString()));
 
 
             //CreateMap<GoalViewModel, Goal>()
@@ -55,8 +54,7 @@ namespace BucketProject.UI.BucketProject.Mapping
           .ForMember(dest => dest.IsPostponed, opt => opt.Ignore())
           .ForMember(dest => dest.Users, opt => opt.Ignore())
           .ForMember(dest => dest.Category, opt => opt.MapFrom(src => Enum.Parse<Category>(src.Category)))
-          .ForMember(dest => dest.Type, opt => opt.MapFrom(src => Enum.Parse<GoalType>(src.Type)))
-          .ForMember(dest => dest.Recipients, opt => opt.Ignore()); // ✅ Fix
+          .ForMember(dest => dest.Type, opt => opt.MapFrom(src => Enum.Parse<GoalType>(src.Type)));
 
 
 
@@ -72,8 +70,8 @@ namespace BucketProject.UI.BucketProject.Mapping
             CreateMap<Goal, HistoryViewModel>()
                 .ForMember(dest => dest.Type, opt => opt.MapFrom(src => src.Type.ToString()))
                 .ForMember(dest => dest.Category, opt => opt.MapFrom(src => src.Category.ToString()))
-                .ForMember(dest => dest.ChildGoals, opt => opt.Ignore())
-                .ForMember(dest => dest.Recipients, opt => opt.Ignore());
+                .ForMember(dest => dest.ChildGoals, opt => opt.Ignore());
+
 
 
             CreateMap<Goal, NotificationViewModel>()
@@ -82,8 +80,7 @@ namespace BucketProject.UI.BucketProject.Mapping
     .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
     .ForMember(dest => dest.Message, opt => opt.Ignore())
     .ForMember(dest => dest.TypeOfNotification, opt => opt.Ignore())
-    .ForMember(dest => dest.TriggeredByUserId, opt => opt.Ignore())
-    .ForMember(dest => dest.Recipients, opt => opt.Ignore());
+    .ForMember(dest => dest.TriggeredByUserId, opt => opt.Ignore());
 
 
 
