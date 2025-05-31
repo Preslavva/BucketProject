@@ -10,7 +10,7 @@ using Exceptions.Exceptions;
 
 namespace BucketProject.BLL.Business_Logic.Services
 {
-    public class UserService: IUserService
+    public class UserService : IUserService
     {
         private readonly IHttpContextAccessor _contextAccessor;
         private readonly IUserRepo _userRepo;
@@ -63,7 +63,7 @@ namespace BucketProject.BLL.Business_Logic.Services
         {
             if (string.IsNullOrWhiteSpace(userDomain.Username))
                 throw new ValidationException("Username is required.");
-            if (userDomain.Username.Length<3)
+            if (userDomain.Username.Length < 3)
                 throw new ValidationException("Username must be at least 3 characters.");
             if (string.IsNullOrWhiteSpace(userDomain.Email))
                 throw new ValidationException("Email is required.");
@@ -80,7 +80,7 @@ namespace BucketProject.BLL.Business_Logic.Services
             if (!emailAttr.IsValid(userDomain.Email))
                 throw new ValidationException("Email is not a valid address.");
 
-            if (userDomain.Username.Length>20)
+            if (userDomain.Username.Length > 20)
             {
                 throw new ValidationException("Username must be under 20 characters");
             }
@@ -110,7 +110,7 @@ namespace BucketProject.BLL.Business_Logic.Services
 
             if (newUsername.Length > 20)
                 throw new ValidationException("Username must be under 20 characters.");
-            
+
             if (newUsername.Length < 3)
                 throw new ValidationException("Username must be at least 3 characters.");
 
@@ -134,17 +134,19 @@ namespace BucketProject.BLL.Business_Logic.Services
         public async Task UpdateProfilePicture(IFormFile? photoFile)
         {
             if (photoFile == null || photoFile.Length == 0)
-                throw new ValidationException("Please select a photo to upload");
+                throw new ValidationException("Please select a photo to upload.");
+
+            var allowedMimeTypes = new[] { "image/jpeg", "image/png", "image/gif" };
+            if (!allowedMimeTypes.Contains(photoFile.ContentType))
+                throw new ValidationException("Only JPG, PNG, or GIF image files are allowed.");
 
             string username = _contextAccessor.HttpContext!
-                            .Session
-                            .GetString("Username")
-                        ?? throw new UserNotLoggedInException();
-
-
+                .Session
+                .GetString("Username")
+                ?? throw new UserNotLoggedInException();
 
             UserEntity user = _userRepo.GetUserByUsername(username)
-             ?? throw new UserNotFoundException(username);
+                ?? throw new UserNotFoundException(username);
 
             using (var memoryStream = new MemoryStream())
             {
@@ -154,4 +156,4 @@ namespace BucketProject.BLL.Business_Logic.Services
             }
         }
     }
-}
+    }

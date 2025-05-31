@@ -179,6 +179,25 @@ namespace BucketsTests
         }
 
         [TestMethod]
+        public void UpdateUsername_TooLongtNewUsername_ThrowsValidationException()
+        {
+            string oldUsername = "oldUsername";
+            string newUsername = "This has more than 20 characters.";
+            SetSession(oldUsername);
+
+            UserEntity userEntity = new UserEntity(1, oldUsername, "john@mail.com", "password", new byte[] { 0x01 }, "salt", "nationality", DateTime.Now, "Gender", DateOnly.MaxValue, "Role");
+
+            _userRepo.Setup(r => r.GetUserByUsername(oldUsername)).Returns(userEntity);
+
+            var ex = Assert.ThrowsException<ValidationException>(() =>
+                _userService.UpdateUsername(newUsername)
+            );
+
+            Assert.AreEqual("Username must be under 20 characters.", ex.Message);
+            _userRepo.Verify(r => r.UpdateName(It.IsAny<UserEntity>(), It.IsAny<string>()), Times.Never);
+        }
+
+        [TestMethod]
         public void UpdateUsername_ValidUsername_UpdatesSessionAndRepository()
         {
             string oldUsername = "oldUser";
@@ -267,6 +286,20 @@ namespace BucketsTests
             Assert.AreEqual($"User '{username}' was not found.", ex.Message);
         }
 
-    }
+        [TestMethod]
+        public async Task UpdateProfilePicture_InvalidFileType_ThrowsValidationException()
+        {
+            var mockFile = new Mock<IFormFile>();
+            mockFile.Setup(f => f.Length).Returns(100);
+            mockFile.Setup(f => f.ContentType).Returns("application/pdf"); 
+            mockFile.Setup(f => f.CopyToAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>()))
+                    .Returns(Task.CompletedTask);
 
+            var ex = await Assert.ThrowsExceptionAsync<ValidationException>(async () =>
+                await _userService.UpdateProfilePicture(mockFile.Object)
+            );
+
+            Assert.AreEqual("Only JPG, PNG, or GIF image files are allowed.", ex.Message);
+        }
+    }
 }

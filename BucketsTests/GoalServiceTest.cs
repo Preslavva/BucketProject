@@ -109,6 +109,32 @@ namespace BucketsTests
         }
 
         [TestMethod]
+        public void CreateGoal_DescriptionTooShort_ThrowsValidationException()
+        {
+            string? invalidDescription = "test";
+            Goal goalDomain = new Goal(
+                id: 1,
+                category: Category.Week,
+                type: GoalType.Education,
+                createdAt: DateTime.UtcNow,
+                completedAt: DateTime.UtcNow.AddDays(1),
+                description: invalidDescription,
+                deadline: DateTime.UtcNow.AddDays(30),
+                isDone: false,
+                isDeleted: false,
+                isPostponed: false,
+                parentGoalId: null,
+                ownerId: 123
+            );
+
+            var ex = Assert.ThrowsException<ValidationException>(() =>
+                _goalService.CreateGoal(goalDomain, null)
+            );
+
+            Assert.AreEqual("Goal description must have at least 5 characters.", ex.Message);
+        }
+
+        [TestMethod]
         public void CreateGoal_ShouldCreateGoal_WhenNoSharedUsers()
         {
             int ownerId = 123;
@@ -150,7 +176,7 @@ namespace BucketsTests
 
             _userService.Setup(r => r.GetCurrentUserId()).Returns(ownerId);
 
-            _goalRepo.Setup(r => r.InsertGoal(ownerId, It.IsAny<GoalEntity>())).Callback<int, GoalEntity>((u, e) => e.Id = 42);
+            _goalRepo.Setup(r => r.InsertGoal(ownerId, It.IsAny<GoalEntity>())).Callback<int, GoalEntity>((ownerId, goalEntity) => goalEntity.Id = 42);
     
             _goalRepo.Setup(r => r.AssignUsersToGoal(42, new[] { ownerId }));
   
@@ -205,7 +231,7 @@ namespace BucketsTests
             _userService.Setup(r => r.GetCurrentUserId()).Returns(ownerId);
 
             _goalRepo.Setup(r => r.InsertGoal(ownerId, It.IsAny<GoalEntity>()))
-                     .Callback<int, GoalEntity>((u, e) => e.Id = 99);
+                     .Callback<int, GoalEntity>((userId, goalEntity) => goalEntity.Id = 99);
 
             _goalService.CreateGoal(goalDomain, sharedWith);
 
@@ -220,19 +246,24 @@ namespace BucketsTests
         [TestMethod]
         public void RespondToInvitation_DeclineOnly_UpdatesStatusAndDoesNotAssign()
         {
-            GoalInvitation invitation = new GoalInvitation(23, 10, 1, 55, "Status", DateTime.Now);
-            _inviteRepo.Setup(r => r.GetById(123)).Returns(invitation);
+            int invitationId = 123;
+            GoalInvitation invitation = new GoalInvitation(invitationId, 10, 1, 55, "Status", DateTime.Now);
+            _inviteRepo.Setup(r => r.GetById(invitationId)).Returns(invitation);
 
-            _goalService.RespondToInvitation(invitationId: 123, accept: false, currentUserId: 20);
+            _goalService.RespondToInvitation(invitationId: invitationId, accept: false, currentUserId: 20);
 
-            _inviteRepo.Verify(r => r.UpdateStatus(123, "Declined"), Times.Once);
+            _inviteRepo.Verify(r => r.UpdateStatus(invitationId, "Declined"), Times.Once);
             _goalRepo.Verify(g => g.AssignUsersToGoal(It.IsAny<int>(), It.IsAny<IEnumerable<int>>()), Times.Never);
+
         }
 
         [TestMethod]
         public void RespondToInvitation_Accept_UpdatesStatusAndAssignsBothUsers()
         {
-            GoalInvitation invitation = new GoalInvitation (234, 10, 1, 55, "Status", DateTime.Now);
+            int inviterId = 10;
+            int invitedId = 20;
+
+            GoalInvitation invitation = new GoalInvitation (234, inviterId, invitedId, 55, "Status", DateTime.Now);
             _inviteRepo.Setup(r => r.GetById(234)).Returns(invitation);
 
             _goalService.RespondToInvitation(invitationId: 234, accept: true, currentUserId: 20);
@@ -255,8 +286,10 @@ namespace BucketsTests
         [TestMethod]
         public void RespondToInvitation_AcceptWithSameUserIds_OnlyAssignsOnce()
         {
+            int inviterId = 42;
             
-            GoalInvitation invitation = new GoalInvitation(345,42,1, 99, "Status", DateTime.Now);
+            GoalInvitation invitation = new GoalInvitation(345,inviterId,1, 99, "Status", DateTime.Now);
+
             _inviteRepo.Setup(r => r.GetById(345)).Returns(invitation);
 
             _goalService.RespondToInvitation(invitationId: 345, accept: true, currentUserId: 42);
@@ -299,8 +332,11 @@ namespace BucketsTests
             _userService.Setup(s => s.GetCurrentUserId()).Returns(userId);
             _goalRepo.Setup(r => r.GetGoalById(goalId, userId)).Returns(entity);
 
-            await Assert.ThrowsExceptionAsync<VagueGoalDescriptionException>(() =>
+            var ex = await Assert.ThrowsExceptionAsync<VagueGoalDescriptionException>(() =>
                 _goalService.BreakDownGoalAsync(goalId));
+
+            Assert.AreEqual("The goal description is too vague or too short to generate meaningful sub-goals.", ex.Message);
+
         }
 
         [TestMethod]
@@ -364,8 +400,8 @@ namespace BucketsTests
             _userService.Setup(u => u.GetCurrentUserId()).Returns(userId);
             _goalRepo.Setup(r => r.GetGoalById(goalId, userId)).Returns(entity);
 
-            var userMessage = "User-friendly message.";
-            var devMessage = "Developer-only technical message.";
+            string userMessage = "User-friendly message.";
+            string devMessage = "Developer-only technical message.";
 
             _aIClient.Setup(ai => ai.BreakDownTextIntoGoalsAsync("Learn programming", Category.Week))
                      .ThrowsAsync(new AIRequestFailedException(userMessage, devMessage));
@@ -376,5 +412,39 @@ namespace BucketsTests
             Assert.AreEqual(userMessage, ex.UserMessage);
             Assert.AreEqual(devMessage, ex.Message);
         }
+
+        [TestMethod]
+        public async Task BreakDownGoalAsync_EmptyAIResponse_ThrowsEmptyAIResponseException()
+        {
+            int goalId = 123;
+            int userId = 99;
+
+            var goalEntity = new GoalEntity(
+                id: goalId,
+                category: Category.Week,
+                type: GoalType.Education,
+                createdAt: DateTime.UtcNow,
+                completedAt: DateTime.UtcNow,
+                description: "Learn programming",
+                deadline: DateTime.UtcNow.AddDays(7),
+                isDone: false,
+                isDeleted: false,
+                isPostponed: false,
+                parentGoalId: null,
+                ownerId: userId
+            );
+
+            _userService.Setup(u => u.GetCurrentUserId()).Returns(userId);
+            _goalRepo.Setup(r => r.GetGoalById(goalId, userId)).Returns(goalEntity);
+
+            _aIClient.Setup(ai => ai.BreakDownTextIntoGoalsAsync("Learn programming", Category.Week))
+                     .ThrowsAsync(new EmptyAIResponseException());
+
+            var ex = await Assert.ThrowsExceptionAsync<EmptyAIResponseException>(() =>
+                _goalService.BreakDownGoalAsync(goalId));
+
+            Assert.AreEqual("Failed to generate sub goal.", ex.Message);
+        }
+
     }
 }

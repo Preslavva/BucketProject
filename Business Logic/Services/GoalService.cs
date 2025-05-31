@@ -127,11 +127,11 @@ namespace BucketProject.BLL.Business_Logic.Services
         public void UpdateGoal(int goalId, Goal goalDomain)
         {
             if (string.IsNullOrWhiteSpace(goalDomain.Description))
-            {
                 throw new ValidationException("New description cannot be empty");
-            }
             if (goalDomain.Description.Length < 5)
                 throw new ValidationException("Goal description must have at least 5 characters.");
+            if (goalDomain.Description.Length > 50)
+                throw new ValidationException("Goal description is too long. Maximum allowed is 50 characters.");
 
             int userId = _userService.GetCurrentUserId();
             EnsureUserIsOwner(goalId, userId);

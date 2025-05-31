@@ -163,8 +163,8 @@ namespace BucketProject.UI.BucketProject.Controllers
             {
                 ModelState.AddModelError(string.Empty, ex.Message);
 
-                var userDomain = _userService.GetUserByUsername();
-                var vm = _mapper.Map<UserViewModel>(userDomain);
+                User userDomain = _userService.GetUserByUsername();
+                UserViewModel vm = _mapper.Map<UserViewModel>(userDomain);
 
                 return View("Account", vm);
             }
