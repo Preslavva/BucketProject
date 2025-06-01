@@ -13,10 +13,6 @@ namespace BucketProject.BLL.Business_Logic.DTOs
         public string Category { get; set; }
 
         public int Count { get; set; }
-
-        public string Ownership { get; set; }
-        public int Completed { get; set; }
-        public int Incomplete { get; set; }
         public string Period { get; set; }
         public int TotalGoals { get; set; }
         public int CompletedGoals { get; set; }
