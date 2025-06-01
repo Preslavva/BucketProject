@@ -42,7 +42,6 @@ namespace BucketProject.UI.BucketProject.Controllers
         {
             viewModel.Category = "Month";
 
-         
                 ViewBag.AvailableTypes = GetAvailableTypes();
                 ViewBag.Friends = _socialService.GetFriends(_userService.GetCurrentUserId());
                 TempData.Keep("SubGoals");
@@ -257,7 +256,7 @@ namespace BucketProject.UI.BucketProject.Controllers
             
                 try
                 {
-                    var updated = _mapper.Map<Goal>(viewModel);
+                    Goal updated = _mapper.Map<Goal>(viewModel);
                     _goalService.UpdateGoal(viewModel.Id, updated);
                 }
                 catch (ValidationException vex)
@@ -275,7 +274,7 @@ namespace BucketProject.UI.BucketProject.Controllers
         {
             try
             {
-                var updated = _mapper.Map<Goal>(viewModel);
+                Goal updated = _mapper.Map<Goal>(viewModel);
                 _goalService.UpdateGoal(viewModel.Id, updated);
             }
             catch (ValidationException vex)
@@ -293,7 +292,7 @@ namespace BucketProject.UI.BucketProject.Controllers
 
             try
             {
-                var updated = _mapper.Map<Goal>(viewModel);
+                Goal updated = _mapper.Map<Goal>(viewModel);
                 _goalService.UpdateGoal(viewModel.Id, updated);
             }
             catch (ValidationException vex)
@@ -310,7 +309,7 @@ namespace BucketProject.UI.BucketProject.Controllers
         {
             try
             {
-                var updated = _mapper.Map<Goal>(viewModel);
+                Goal updated = _mapper.Map<Goal>(viewModel);
                 _goalService.UpdateGoal(viewModel.Id, updated);
             }
             catch (ValidationException vex)

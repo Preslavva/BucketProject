@@ -34,6 +34,7 @@ namespace BucketProject.UI.BucketProject.Mapping
     .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
     .ForMember(dest => dest.Salt, opt => opt.Ignore())
     .ForMember(dest => dest.Picture, opt => opt.Ignore())
+    .ForMember(dest => dest.ConfirmPassword, opt => opt.Ignore())
     .ForMember(dest => dest.Role, opt => opt.Ignore());
 
 
@@ -71,7 +72,6 @@ namespace BucketProject.UI.BucketProject.Mapping
                 .ForMember(dest => dest.Type, opt => opt.MapFrom(src => src.Type.ToString()))
                 .ForMember(dest => dest.Category, opt => opt.MapFrom(src => src.Category.ToString()))
                 .ForMember(dest => dest.ChildGoals, opt => opt.Ignore());
-
 
 
             CreateMap<Goal, NotificationViewModel>()

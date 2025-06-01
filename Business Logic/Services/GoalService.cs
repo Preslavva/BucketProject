@@ -94,7 +94,7 @@ namespace BucketProject.BLL.Business_Logic.Services
 
             List<Goal> allGoals = _mapper.Map<List<Goal>>(allEntities);
 
-            var today = DateTime.Today;
+            DateTime today = DateTime.Today;
             return allGoals
                 .Where(g => !g.Deadline.HasValue || g.Deadline.Value.Date >today)
                 .ToList();
@@ -137,7 +137,6 @@ namespace BucketProject.BLL.Business_Logic.Services
             EnsureUserIsOwner(goalId, userId);
 
             GoalEntity entityGoal = _goalRepo.GetGoalById(goalId, _userService.GetCurrentUserId());
-           
 
             entityGoal.Description = goalDomain.Description.Trim();
 

@@ -61,7 +61,7 @@ namespace BucketProject.UI.BucketProject.Controllers
             if (!ModelState.IsValid)
                 return View(vm);
 
-            var user = _mapper.Map<User>(vm);
+            User user = _mapper.Map<User>(vm);
             try
             {
                 if (_userService.Register(user))
@@ -70,10 +70,12 @@ namespace BucketProject.UI.BucketProject.Controllers
                 ModelState.AddModelError(string.Empty, "Registration failed. Please try again.");
                 return View(vm);
             }
-            catch (ValidationException vex)
+            catch (ValidationExceptionCollection vex)
             {
-                ModelState.AddModelError(string.Empty, vex.Message);
-                return View(vm);
+                foreach (var error in vex.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error);
+                }    return View(vm);
             }
             catch (DuplicateUserException dex)
             {
@@ -92,6 +94,8 @@ namespace BucketProject.UI.BucketProject.Controllers
         [HttpPost]
         public IActionResult LogIn(LogInViewModel vm)
         {
+            if (!ModelState.IsValid)
+                return View(vm);
             try
             {
                 var loggedUser = _userService.LogIn(vm.Username, vm.Password);

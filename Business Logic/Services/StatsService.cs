@@ -173,8 +173,8 @@ namespace BucketProject.BLL.Business_Logic.Services
         {
             int userId = _userService.GetCurrentUserId();
 
-            var personalGoals = _mapper.Map<List<Goal>>(_goalRepo.LoadPersonalGoalsOfUser(userId));
-            var sharedGoals = _mapper.Map<List<Goal>>(_goalRepo.LoadSharedGoalsOfUser(userId));
+            List<Goal> personalGoals = _mapper.Map<List<Goal>>(_goalRepo.LoadPersonalGoalsOfUser(userId));
+            List<Goal> sharedGoals = _mapper.Map<List<Goal>>(_goalRepo.LoadSharedGoalsOfUser(userId));
 
             var allGoals = personalGoals.Concat(sharedGoals).ToList();
 
