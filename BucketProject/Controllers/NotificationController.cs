@@ -70,18 +70,23 @@ namespace BucketProject.BLL.Business_Logic.Controllers
             //completion notifications
 
             List<Goal> completionGoals = _notificationService.GetSharedCompletionGoals();
-            foreach (Goal goal in completionGoals)
+            foreach (var goal in completionGoals)
             {
-                NotificationViewModel vm = _mapper.Map<NotificationViewModel>(goal);
-                vm.TypeOfNotification = "Completion";
-                vm.TriggeredByUserId = goal.Recipients.First().Id; 
+                // Instead of `Single()`, iterate all completers in goal.Recipients
+                foreach (var completer in goal.Recipients)
+                {
+                    // Map the goal into a fresh view‐model
+                    var vm = _mapper.Map<NotificationViewModel>(goal);
+                    vm.TypeOfNotification = "Completion";
+                    vm.TriggeredByUserId = completer.Id;
 
-                var completer = goal.Recipients.First();
-                var when = goal.CompletedAt?.ToString("MMMM dd, yyyy");
-      
-                vm.Message = $"{completer.Username} completed the goal “{goal.Description}” on {when}.";
+                    // If multiple completers exist, goal.CompletedAt should be the same for all;
+                    // you can format it once per completer or pick a different date if needed.
+                    var when = goal.CompletedAt?.ToString("MMMM dd, yyyy") ?? "an unknown date";
+                    vm.Message = $"{completer.Username} completed the goal “{goal.Description}” on {when}.";
 
-                notifications.Add(vm);
+                    notifications.Add(vm);
+                }
             }
 
             // deleted notifications
@@ -92,7 +97,6 @@ namespace BucketProject.BLL.Business_Logic.Controllers
                 vm.TypeOfNotification = "Deleted";
                 vm.Id = goal.Id;
                 vm.TriggeredByUserId = goal.Recipients.First().Id; 
-
 
                 vm.Message = $"The goal “{goal.Description}” was deleted.";
                 notifications.Add(vm);
@@ -111,7 +115,7 @@ namespace BucketProject.BLL.Business_Logic.Controllers
                 notifications.Add(vm);
             }
 
-            TempData["NotificationCount"] = notifications.Count;
+            //TempData["NotificationCount"] = notifications.Count;
             HttpContext.Session.SetInt32("NotCounter", notifications.Count);
 
             return View(notifications);

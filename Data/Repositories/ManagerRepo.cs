@@ -388,7 +388,7 @@ FETCH NEXT @PageSize ROWS ONLY;
 
                     while (reader.Read())
                     {
-                        var user = new UserEntity(
+                        UserEntity user = new UserEntity(
                             id: reader.GetInt32(reader.GetOrdinal("UserId")),
                             username: reader.GetString(reader.GetOrdinal("Username")),
                             email: reader.GetString(reader.GetOrdinal("Email")),
