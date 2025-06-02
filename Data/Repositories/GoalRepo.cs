@@ -490,8 +490,6 @@ WHERE ug.UserId    = @UserId
                     changeStatus.Parameters.AddWithValue("@UserId", userId);
                     changeStatus.Parameters.AddWithValue("@CompletedAt", goal.CompletedAt ?? (object)DBNull.Value);
 
-
-
                     changeStatus.ExecuteNonQuery();
                 }
             }

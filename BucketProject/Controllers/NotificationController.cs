@@ -71,17 +71,13 @@ namespace BucketProject.BLL.Business_Logic.Controllers
 
             List<Goal> completionGoals = _notificationService.GetSharedCompletionGoals();
             foreach (var goal in completionGoals)
-            {
-                // Instead of `Single()`, iterate all completers in goal.Recipients
+            { 
                 foreach (var completer in goal.Recipients)
                 {
-                    // Map the goal into a fresh view‐model
-                    var vm = _mapper.Map<NotificationViewModel>(goal);
+                    NotificationViewModel vm = _mapper.Map<NotificationViewModel>(goal);
                     vm.TypeOfNotification = "Completion";
                     vm.TriggeredByUserId = completer.Id;
 
-                    // If multiple completers exist, goal.CompletedAt should be the same for all;
-                    // you can format it once per completer or pick a different date if needed.
                     var when = goal.CompletedAt?.ToString("MMMM dd, yyyy") ?? "an unknown date";
                     vm.Message = $"{completer.Username} completed the goal “{goal.Description}” on {when}.";
 
@@ -96,7 +92,8 @@ namespace BucketProject.BLL.Business_Logic.Controllers
                 NotificationViewModel vm = _mapper.Map<NotificationViewModel>(goal);
                 vm.TypeOfNotification = "Deleted";
                 vm.Id = goal.Id;
-                vm.TriggeredByUserId = goal.Recipients.First().Id; 
+                //vm.TriggeredByUserId = goal.Recipients.First().Id; 
+                vm.TriggeredByUserId = goal.OwnerId;
 
                 vm.Message = $"The goal “{goal.Description}” was deleted.";
                 notifications.Add(vm);
@@ -109,14 +106,15 @@ namespace BucketProject.BLL.Business_Logic.Controllers
                 NotificationViewModel vm = _mapper.Map<NotificationViewModel>(goal);
                 vm.TypeOfNotification = "Postponed";
                 vm.Id = goal.Id;
-                vm.TriggeredByUserId = goal.Recipients.First().Id; 
+                //vm.TriggeredByUserId = goal.Recipients.First().Id; 
+                vm.TriggeredByUserId = goal.OwnerId;
 
                 vm.Message = $"The goal “{goal.Description}” was postponed.";
                 notifications.Add(vm);
             }
 
             //TempData["NotificationCount"] = notifications.Count;
-            HttpContext.Session.SetInt32("NotCounter", notifications.Count);
+            //HttpContext.Session.SetInt32("NotCounter", notifications.Count);
 
             return View(notifications);
         }

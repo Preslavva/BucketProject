@@ -122,8 +122,6 @@ namespace BucketProject.BLL.Business_Logic.Services
                 .ToList();
         }
 
-
-
         public void UpdateGoal(int goalId, Goal goalDomain)
         {
             if (string.IsNullOrWhiteSpace(goalDomain.Description))

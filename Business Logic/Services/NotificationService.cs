@@ -159,12 +159,17 @@ namespace BucketProject.BLL.Business_Logic.Services
 
         public int GetTotalNotificationGoalCount(DateTime today)
         {
+            int recipients = 0;
             List<Goal> completedGoals = GetSharedCompletionGoals();
             List<Goal> deletedGoals = GetSharedDeletedGoals();
             List<Goal> postponedGoals = GetSharedPostponedGoals();
             List<Goal> notifyGoals = CheckAndNotify(today);
 
-            int totalCount = completedGoals.Count
+            foreach (Goal goal in completedGoals)
+            {
+                recipients += goal.Recipients.Count;
+            }
+            int totalCount = recipients
                            + deletedGoals.Count
                            + postponedGoals.Count
                            + notifyGoals.Count;

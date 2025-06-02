@@ -395,8 +395,6 @@ namespace BucketProject.UI.BucketProject.Controllers
                 .ToList();
 
 
-
-
             List<GoalInviteDTO> sentInvitationsOfUser = _goalService.GetInvitationsOf(_userService.GetCurrentUserId(), "Week");
             List<GoalInviteViewModel> sentInvitationsOFVMs = sentInvitationsOfUser
   .Select(inv => new GoalInviteViewModel
