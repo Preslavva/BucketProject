@@ -10,7 +10,6 @@
         public DateTime DateOfBirth { get; set; }
 
         public string Nationality { get; set; }
-
         public string Gender { get; set; }
         public DateOnly CreatedAt { get; set; } = DateOnly.FromDateTime(DateTime.Today);
         public string Password { get; set; }
