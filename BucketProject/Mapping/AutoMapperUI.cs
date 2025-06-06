@@ -49,7 +49,7 @@ namespace BucketProject.UI.BucketProject.Mapping
             //    .ForMember(dest => dest.Type, opt => opt.MapFrom(src => Enum.Parse<GoalType>(src.Type)));
 
             CreateMap<GoalViewModel, Goal>()
-          .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+          //.ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
           .ForMember(dest => dest.Deadline, opt => opt.Ignore())
           .ForMember(dest => dest.IsDeleted, opt => opt.Ignore())
           .ForMember(dest => dest.IsPostponed, opt => opt.Ignore())

@@ -54,6 +54,7 @@
         <ul class="nav nav-tabs justify-content-center mb-3" id="goalTab" role="tablist">
             <li class="nav-item">
                 <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#weekly-goals" type="button" role="tab">By Week</button>
+
             </li>
             <li class="nav-item">
                 <button class="nav-link" data-bs-toggle="tab" data-bs-target="#monthly-goals" type="button" role="tab">By Month</button>
@@ -69,6 +70,10 @@
                 @if (hasWeeklyData)
                 {
                     <canvas id="weeklyChart" class="chart-canvas"></canvas>
+                    <div class="text-center mt-3">
+                        <span class="text-muted">@ViewBag.WeekMessage</span>
+                    </div>
+
                 }
                 else
                 {
@@ -80,6 +85,9 @@
                 @if (hasMonthlyData)
                 {
                     <canvas id="monthlyChart" class="chart-canvas"></canvas>
+                    <div class="text-center mt-3">
+                        <span class="text-muted">@ViewBag.MonthMessage</span>
+                    </div>
                 }
                 else
                 {
@@ -91,6 +99,9 @@
                 @if (hasYearlyData)
                 {
                     <canvas id="yearlyChart" class="chart-canvas"></canvas>
+                    <div class="text-center mt-3">
+                        <span class="text-muted">@ViewBag.YearMessage</span>
+                    </div>
                 }
                 else
                 {
@@ -152,6 +163,10 @@
                 }
             });
         </script>
+
+      
+
+
     }
 
     @if (hasMonthlyData)

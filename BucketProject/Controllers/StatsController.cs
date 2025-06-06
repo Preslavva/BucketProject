@@ -33,17 +33,21 @@ namespace BucketProject.UI.BucketProject.Controllers
 
             ViewBag.WeekLabels = weeklyStats.Select(s => s.Period).ToList();
             ViewBag.WeekData = weeklyStats.Select(s => s.Count).ToList();
+            ViewBag.WeekMessage = _statsService.GetWeeklyCompletionRateMessageWeek();
 
 
             List<StatsDTO> monthlyStats = _statsService.GetCompletedGoalsPerMonth();
 
             ViewBag.MonthLabels = monthlyStats.Select(s => s.Period).ToList();
             ViewBag.MonthData = monthlyStats.Select(s => s.Count).ToList();
+            ViewBag.MonthMessage = _statsService.GetCompletionRateMessageMonth();
+
 
             List<StatsDTO> yearlyStats = _statsService.GetCompletedGoalsPerYear();
 
             ViewBag.YearLabels = yearlyStats.Select(s => s.Period).ToList();
             ViewBag.YearData = yearlyStats.Select(s => s.Count).ToList();
+            ViewBag.YearMessage = _statsService.GetYearlyCompletionRateMessage();
 
             double avgDays = _statsService.GetAverageCompletionTimeInDays();
             ViewBag.AverageCompletionDays = Math.Round(avgDays, 1);

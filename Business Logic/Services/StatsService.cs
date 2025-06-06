@@ -91,10 +91,55 @@ namespace BucketProject.BLL.Business_Logic.Services
 
         private string GetWeekLabel(DateTime date)
         {
-            var startOfWeek = date.AddDays(-(int)date.DayOfWeek).Date;
+            var startOfWeek = date.AddDays(-(int)date.DayOfWeek).Date.AddDays(1);
             var endOfWeek = startOfWeek.AddDays(6);
 
             return $"{startOfWeek:yyyy-MM-dd} - {endOfWeek:yyyy-MM-dd}";
+        }
+
+        public string GetWeeklyCompletionRateMessageWeek()
+        {
+            List<StatsDTO> allWeekly = GetCompletedGoalsPerWeek();
+
+            DateTime today = DateTime.Now; 
+            string thisWeekLabel = GetWeekLabel(today);
+            string lastWeekLabel = GetWeekLabel(today.AddDays(-7));
+
+            int thisWeekCount = allWeekly
+                .FirstOrDefault(s => s.Period == thisWeekLabel)?.Count ?? 0;
+            int lastWeekCount = allWeekly
+                .FirstOrDefault(s => s.Period == lastWeekLabel)?.Count ?? 0;
+
+            if (lastWeekCount == 0)
+            {
+                if (thisWeekCount == 0)
+                {
+                    return "You haven’t completed any goals both last week and this week.";
+                }
+                else
+                {
+                    return $"Great job! You completed {thisWeekCount} goal(s) this week, up from 0 last week.";
+                }
+            }
+            else
+            {
+                double rawChange = thisWeekCount - lastWeekCount;
+                double pctChange = (rawChange / lastWeekCount) * 100.0;
+                int rounded = (int)Math.Round(Math.Abs(pctChange));
+
+                if (rounded == 0)
+                {
+                    return "Your completion rate is the same as last week.";
+                }
+                else if (pctChange > 0)
+                {
+                    return $"Your completion rate has gone up by {rounded}% this week.";
+                }
+                else 
+                {
+                    return $"Your completion rate has gone down by {rounded}% this week.";
+                }
+            }
         }
 
 
@@ -128,6 +173,55 @@ namespace BucketProject.BLL.Business_Logic.Services
             return completedPerMonth;
         }
 
+        public string GetCompletionRateMessageMonth()
+        {
+            List<StatsDTO> allMonthly = GetCompletedGoalsPerMonth();
+
+            DateTime today = DateTime.Now; 
+            DateTime firstOfThisMonth = new DateTime(today.Year, today.Month, 1);
+            DateTime firstOfLastMonth = firstOfThisMonth.AddMonths(-1);
+
+            string thisMonthLabel = firstOfThisMonth.ToString("yyyy MMMM");      
+            string lastMonthLabel = firstOfLastMonth.ToString("yyyy MMMM");      
+
+            int thisMonthCount = allMonthly
+                .FirstOrDefault(s => s.Period == thisMonthLabel)?.Count ?? 0;
+            int lastMonthCount = allMonthly
+                .FirstOrDefault(s => s.Period == lastMonthLabel)?.Count ?? 0;
+
+            if (lastMonthCount == 0)
+            {
+                if (thisMonthCount == 0)
+                {
+                    return "You haven’t completed any goals both last month and this month.";
+                }
+                else
+                {
+                  
+                    return $"Great job! You completed {thisMonthCount} goal(s) this month, up from 0 last month.";
+                }
+            }
+            else
+            { 
+                double rawChange = thisMonthCount - lastMonthCount;
+                double pctChange = (rawChange / lastMonthCount) * 100.0;
+                int rounded = (int)Math.Round(Math.Abs(pctChange));
+
+                if (rounded == 0)
+                {
+                    return "Your completion rate is the same as last month.";
+                }
+                else if (pctChange > 0)
+                {
+                    return $"Your completion rate has gone up by {rounded}% this month.";
+                }
+                else 
+                {
+                    return $"Your completion rate has gone down by {rounded}% this month.";
+                }
+            }
+        }
+
 
         public List<StatsDTO> GetCompletedGoalsPerYear()
         {
@@ -149,6 +243,54 @@ namespace BucketProject.BLL.Business_Logic.Services
                 .ToList();
 
             return completedPerYear;
+        }
+
+        public string GetYearlyCompletionRateMessage()
+        {
+            List<StatsDTO> allYearly = GetCompletedGoalsPerYear();
+
+            int thisYear = DateTime.Now.Year;           
+            int lastYear = thisYear - 1;            
+
+            string thisYearLabel = thisYear.ToString(); 
+            string lastYearLabel = lastYear.ToString(); 
+
+            int thisYearCount = allYearly
+                .FirstOrDefault(s => s.Period == thisYearLabel)?.Count ?? 0;
+
+            int lastYearCount = allYearly
+                .FirstOrDefault(s => s.Period == lastYearLabel)?.Count ?? 0;
+
+            if (lastYearCount == 0)
+            {
+                if (thisYearCount == 0)
+                {
+                    return "You haven’t completed any goals both last year and this year.";
+                }
+                else
+                {
+                    return $"Great job! You completed {thisYearCount} goal(s) this year, up from 0 last year.";
+                }
+            }
+            else
+            {
+                double rawChange = thisYearCount - lastYearCount;
+                double pctChange = (rawChange / lastYearCount) * 100.0;
+                int rounded = (int)Math.Round(Math.Abs(pctChange));
+
+                if (rounded == 0)
+                {
+                    return "Your completion rate is the same as last year.";
+                }
+                else if (pctChange > 0)
+                {
+                    return $"Your completion rate has gone up by {rounded}% this year.";
+                }
+                else 
+                {
+                    return $"Your completion rate has gone down by {rounded}% this year.";
+                }
+            }
         }
 
 

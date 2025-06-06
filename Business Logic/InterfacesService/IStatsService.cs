@@ -30,4 +30,7 @@ public interface IStatsService
     List<User> SearchUsers(string query, string gender, string nationality, int? minAge, int? maxAge, DateTime? createdAfter, int page, int pageSize);
     int GetFilteredUserCount(string query, string gender, string nationality, int? minAge, int? maxAge, DateTime? createdAfter);
     List<StatsDTO> GetTopUserCombinations();
+    string GetWeeklyCompletionRateMessageWeek();
+    string GetCompletionRateMessageMonth();
+    string GetYearlyCompletionRateMessage();
 }
