@@ -259,6 +259,9 @@
                                     </button>
 
                                     <ul class="dropdown-menu dropdown-menu-end">
+                                            <li class="dropdown-header">
+                                                Type: @goal.Type | Created: @goal.CreatedAt.Value.ToString("MMMM dd, yyyy")
+                                            </li>
                                         <li>
                                                 <button type="submit" form="@editFormId2" class="dropdown-item text-primary">Save Changes</button>
                                         </li>
@@ -478,6 +481,9 @@
                                             </button>
 
                                             <ul class="dropdown-menu dropdown-menu-end">
+                                                <li class="dropdown-header">
+                                                    Type: @goal.Type | Created: @goal.CreatedAt.Value.ToString("MMMM dd, yyyy")
+                                                </li>
                                                 <li>
                                                     <button type="submit" form="@editFormId2" class="dropdown-item text-primary">Save Changes</button>
                                                 </li>
