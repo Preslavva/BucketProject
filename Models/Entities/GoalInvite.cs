@@ -26,5 +26,6 @@ namespace BucketProject.DAL.Models.Entities
                 
         }
         
+
     }
 }

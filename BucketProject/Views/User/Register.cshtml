@@ -19,12 +19,20 @@
         <input asp-for="DateOfBirth" type="date" class="input-field" />
         <span asp-validation-for="DateOfBirth" class="text-danger"></span>
 
-    
+       @if (Model.CountriesLoaded) 
+       {
         <select asp-for="Nationality" asp-items="Model.Countries" class="input-field">
             <option value="">-- Select Nationality --</option>
         </select>
-        <span asp-validation-for="Nationality" class="text-danger"></span>
+        }
+        else
+        {
+            <input asp-for="Nationality"
+                   class="input-field"
+                   placeholder="Type your nationality" />
+        }
 
+        <span asp-validation-for="Nationality" class="text-danger"></span>
         @Html.DropDownListFor(model => model.Gender, new SelectList(new[] { "Male", "Female", "Other" }), "-- Select Gender --", new { @class = "input-field" })
         <span asp-validation-for="Gender" class="text-danger"></span>
 

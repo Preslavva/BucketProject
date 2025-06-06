@@ -188,5 +188,12 @@ namespace BucketProject.BLL.Business_Logic.Services
                 _userRepo.AddPhoto(user, photoBytes);
             }
         }
+
+        public User GetUserById(int id)
+        {
+            UserEntity? entity = _userRepo.GetUserById(id);
+            return _mapper.Map<User>(entity);
+
+        }
     }
     }

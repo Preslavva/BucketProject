@@ -31,7 +31,9 @@ Do not number them or use bullets, dashes, or any formatting.
 Do not mention specific days, weeks, dates, months, or times.  
 Return exactly four plain sentences, each on a new line.  
 Make sure the sub-goals are unique, clearly related to the main goal, and not repetitive.  
-Each sub-goal must be under 50 characters, including spaces.";
+Each sub-goal must be under 50 characters, including spaces.
+Each sub-goal must be measurable: phrase it so its completion can be verified with a clear ‘done/not-done’ outcome, allowing a specific completion date to be assigned (no date should appear in the text).
+Each sub-goal must describe a concrete action, not an instruction to set or track another goal.";
 
 
         var client = _httpClientFactory.CreateClient();

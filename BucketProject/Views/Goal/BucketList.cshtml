@@ -25,12 +25,10 @@
 <form method="post" asp-controller="Goal" asp-action="CreateBucketListGoal">
     <div class="d-flex align-items-start gap-3 mb-3 flex-wrap">
         <div class="input-container">
-            <input asp-for="NewGoal.Description" class="form-control" />
-            <label asp-for="NewGoal.Description" class="label">Enter Goal</label>
+            <input type="text" name="Description" required />
+            <label class="label">Enter Goal</label>
             <div class="underline"></div>
-            <span asp-validation-for="NewGoal.Description" class="text-danger"></span>
         </div>
-
         <select name="Type" required class="form-select custom-dropdown">
             <option value="" disabled selected>Select goal type</option>
             @foreach (var type in (List<string>)ViewBag.AvailableTypes)
@@ -39,6 +37,8 @@
             }
         </select>
     </div>
+
+    <input type="hidden" name="Category" value="Week" />
 
     <input type="hidden" name="Category" value="Bucket_list" />
 
@@ -523,20 +523,52 @@
                             <input type="hidden" name="triggeredByUserId" value="@inv.TriggeredByUserId" />
                             <button type="submit" class="btn-close" aria-label="Dismiss invitation notification"></button>
                         </form>
+                        <div class="d-flex align-items-start">
+                            <div class="flex-grow-1">
+                                <em>@inv.GoalDescription</em><br />
+                                <small>sent @inv.CreatedAt.ToShortDateString()</small>
+                                <small class="ms-3">Status: @inv.Status</small>
 
-                        <div class="me-4">
-                            <em>@inv.GoalDescription</em><br />
-                            <small>sent @inv.CreatedAt.ToShortDateString()</small>
-                            <small class="ms-3">Status: @inv.Status</small>
-                            <small class="ms-3">Recipient: @inv.InvitedUsername</small>
-                            @if (!string.IsNullOrEmpty(inv.ParentGoalDescription))
-                            {
-                                <div>
-                                    <small class="text-muted">
-                                        Parent goal: @inv.ParentGoalDescription
-                                    </small>
-                                </div>
-                            }
+                                <small class="ms-3 d-flex align-items-center">
+                                    <span>Recipient:&nbsp;</span>
+
+                                    @{
+                                        string? imgSrc = null;
+                                        if (inv.InvitedPicture != null && inv.InvitedPicture.Length > 0)
+                                        {
+                                            string base64 = Convert.ToBase64String(inv.InvitedPicture);
+                                            imgSrc = $"data:image/jpeg;base64,{base64}";
+                                        }
+                                    }
+
+                                    @if (imgSrc != null)
+                                    {
+                                        <img src="@imgSrc"
+                                             alt="@inv.InvitedUsername"
+                                             class="rounded-circle"
+                                             style="width:24px; height:24px; object-fit:cover; margin-left:4px;" />
+                                    }
+                                    else
+                                    {
+                                        <div class="rounded-circle bg-secondary text-white d-inline-flex
+                      align-items-center justify-content-center"
+                                             style="width:24px; height:24px; font-size:0.8rem; font-weight:bold; margin-left:4px;">
+                                            @char.ToUpperInvariant(inv.InvitedUsername[0])
+                                        </div>
+                                    }
+
+                                    <span class="ms-1">@inv.InvitedUsername</span>
+                                </small>
+
+                                @if (!string.IsNullOrEmpty(inv.ParentGoalDescription))
+                                {
+                                    <div>
+                                        <small class="text-muted">
+                                            Parent goal: @inv.ParentGoalDescription
+                                        </small>
+                                    </div>
+                                }
+                            </div>
                         </div>
                     </li>
                 }
@@ -558,19 +590,47 @@
                 @foreach (var inv in Model.PendingInvitations)
                 {
                     <li class="list-group-item d-flex justify-content-between align-items-center mb-3">
-
                         <div>
-                            <strong>@inv.InviterUsername</strong> invited you to:<br />
-                            <em>@inv.GoalDescription</em>
-                            @if (!string.IsNullOrEmpty(inv.ParentGoalDescription))
-                            {
-                                <div>
-                                    <small class="text-muted">
-                                        Parent goal: @inv.ParentGoalDescription
-                                    </small>
-                                </div>
-                            }
+                            <div class="d-flex align-items-center mb-1">
+                                @{
+                                    string? imgSrc = null;
+                                    if (inv.InviterPicture != null && inv.InviterPicture.Length > 0)
+                                    {
+                                        string base64 = Convert.ToBase64String(inv.InviterPicture);
+                                        imgSrc = $"data:image/jpeg;base64,{base64}";
+                                    }
+                                }
 
+                                @if (imgSrc != null)
+                                {
+                                    <img src="@imgSrc"
+                                         alt="@inv.InvitedUsername"
+                                         class="rounded-circle"
+                                         style="width:32px; height:32px; object-fit:cover; margin-right:8px;" />
+                                }
+                                else
+                                {
+                                    <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center"
+                                         style="width:32px; height:32px; font-size:0.9rem; font-weight:bold; margin-right:8px;">
+                                        @char.ToUpperInvariant(inv.InvitedUsername[0])
+                                    </div>
+                                }
+
+                                <strong>@inv.InviterUsername</strong>
+                            </div>
+
+                            <div>
+                                invited you to:
+                                <em>@inv.GoalDescription</em>
+                                @if (!string.IsNullOrEmpty(inv.ParentGoalDescription))
+                                {
+                                    <div>
+                                        <small class="text-muted">
+                                            Parent goal: @inv.ParentGoalDescription
+                                        </small>
+                                    </div>
+                                }
+                            </div>
                         </div>
                         <div class="d-flex">
                             <form method="post" asp-action="RespondInvitationBucketList" class="me-1">

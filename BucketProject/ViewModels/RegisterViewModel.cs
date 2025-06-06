@@ -34,7 +34,8 @@ namespace BucketProject.UI.ViewModels.ViewModels
 
             [ValidateNever]                           
             public IEnumerable<SelectListItem> Countries { get; set; }
-        }
+        public bool CountriesLoaded { get; set; }
+    }
 
     
 }

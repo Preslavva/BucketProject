@@ -293,7 +293,8 @@ namespace BucketProject.BLL.Business_Logic.Services
             List<User> users = _mapper.Map<List<User>>(entities);
 
             return users
-                .GroupBy(g => g.Nationality)
+                 .GroupBy(u => (u.Nationality ?? string.Empty).Trim(),
+                 StringComparer.OrdinalIgnoreCase)
                 .Select(g => new StatsDTO
                 {
                     Nationality = g.Key,
@@ -362,8 +363,16 @@ namespace BucketProject.BLL.Business_Logic.Services
 
         public List<string> GetAllNationalities()
         {
-            return _managerRepo.GetAllDistinctNationalities();
+            return _managerRepo
+                   .GetAllDistinctNationalities()          
+                   .AsEnumerable()                        
+                   .Where(n => !string.IsNullOrWhiteSpace(n))
+                   .Select(n => n.Trim())
+                   .Distinct(StringComparer.OrdinalIgnoreCase)
+                   .OrderBy(n => n, StringComparer.OrdinalIgnoreCase)
+                   .ToList();
         }
+
         public int GetFilteredUserCount(string query, string gender, string nationality, int? minAge, int? maxAge, DateTime? createdAfter)
         {
             return _managerRepo.CountFilteredUsers(query, gender, nationality, minAge, maxAge, createdAfter);
@@ -371,31 +380,45 @@ namespace BucketProject.BLL.Business_Logic.Services
 
         public List<StatsDTO> GetTopUserCombinations()
         {
-            List<UserEntity> entities = _managerRepo.GetAllUsers();
-            List<User> users = _mapper.Map<List<User>>(entities);
-            DateTime now = DateTime.Today;
+            var entities = _managerRepo.GetAllUsers();
+            var users = _mapper.Map<List<User>>(entities);
+
+            DateTime today = DateTime.Today;
 
             var result = users
-                .Select(u => new
+                .Select(u =>
                 {
-                    Age = now.Year - u.DateOfBirth.Year - (u.DateOfBirth.Date > now.AddYears(-(now.Year - u.DateOfBirth.Year)) ? 1 : 0),
-                    u.Nationality,
-                    u.Gender
+                    int age = today.Year - u.DateOfBirth.Year
+                              - (u.DateOfBirth.Date > today.AddYears(-(today.Year - u.DateOfBirth.Year)) ? 1 : 0);
+
+                    string nationality = (u.Nationality ?? string.Empty).Trim();
+                    string gender = (u.Gender ?? string.Empty).Trim();
+
+                    return new
+                    {
+                        Age = age,
+                        NormNationality = nationality.ToUpperInvariant(),
+                        NormGender = gender.ToUpperInvariant(),
+                        DisplayNationality = nationality,
+                        DisplayGender = gender
+                    };
                 })
-                .GroupBy(u => new { u.Age, u.Nationality, u.Gender })
+                .GroupBy(x => new { x.Age, x.NormNationality, x.NormGender })
+
                 .Select(g => new StatsDTO
                 {
                     Age = g.Key.Age,
-                    Nationality = g.Key.Nationality,
-                    Gender = g.Key.Gender,
+                    Nationality = g.First().DisplayNationality,  
+                    Gender = g.First().DisplayGender,
                     Count = g.Count()
                 })
-                .OrderByDescending(x => x.Count)
+                .OrderByDescending(s => s.Count)
                 .Take(5)
                 .ToList();
 
             return result;
         }
+
 
 
 

@@ -8,6 +8,9 @@ namespace BucketProject.UI.ViewModels.ViewModels
         public string GoalDescription { get; set; }
         public string InviterUsername { get; set; }
         public string InvitedUsername { get; set; }
+        public byte[] InvitedPicture { get; set; }
+        public byte[] InviterPicture { get; set; }
+
         public DateTime CreatedAt { get; set; }
         public string Status { get; set; }
         public string? ParentGoalDescription { get; set; }

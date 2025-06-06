@@ -390,7 +390,8 @@ namespace BucketProject.UI.BucketProject.Controllers
                     InvitationId = inv.Id,
                     GoalDescription = _goalService.GetGoalDescription(inv.GoalId),
                     InviterUsername = _socialService.GetUsername(inv.InviterId),
-                    ParentGoalDescription = _goalService.GetParentGoalDescription(inv.GoalId)
+                    ParentGoalDescription = _goalService.GetParentGoalDescription(inv.GoalId),
+                    InviterPicture = _userService.GetUserById(inv.InviterId).Picture
                 })
                 .ToList();
 
@@ -406,7 +407,9 @@ namespace BucketProject.UI.BucketProject.Controllers
       Status = _goalService.GetInvitationStatus(inv.GoalId, inv.InvitedId),
       ParentGoalDescription = _goalService.GetParentGoalDescription(inv.GoalId),
       GoalId = inv.GoalId,
-      TriggeredByUserId = inv.InvitedId
+      TriggeredByUserId = inv.InvitedId,
+      InvitedPicture = _userService.GetUserById(inv.InvitedId).Picture
+
   })
   .ToList();
 

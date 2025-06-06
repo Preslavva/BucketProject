@@ -244,6 +244,65 @@ namespace BucketProject.DAL.Data.Repositories
                 throw;
             }
         }
+
+        public UserEntity? GetUserById(int id)
+        {
+            try
+            {
+                using (SqlConnection sqlConn = GetSqlConnection())
+                {
+                    sqlConn.Open();
+
+                    string query = @"
+                SELECT UserId, [Username], Email, [Password], Picture, Salt, Nationality, DateOfBirth, Gender, CreatedAt, Role
+                FROM [User]
+                WHERE UserId = @id";
+
+                    using (SqlCommand getUser = new SqlCommand(query, sqlConn))
+                    {
+                        getUser.Parameters.AddWithValue("@id", id);
+
+                        using (SqlDataReader reader = getUser.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                return new UserEntity(
+                                 id: (int)reader["UserId"],
+                                 username: reader["Username"].ToString(),
+                                 email: reader["Email"].ToString(),
+                                 password: reader["Password"].ToString(),
+                                 picture: reader.IsDBNull(reader.GetOrdinal("Picture")) ? null : (byte[])reader["Picture"],
+                                 salt: reader["Salt"].ToString(),
+                                 nationality: reader["Nationality"].ToString(),
+                                 dateOfBirth: (DateTime)reader["DateOfBirth"],
+                                 gender: reader["Gender"].ToString(),
+                                 createdAt: DateOnly.FromDateTime((DateTime)reader["CreatedAt"]),
+                                 role: reader["Role"].ToString()
+);
+
+                            }
+                        }
+                    }
+                }
+            }
+            catch (SqlException sqlEx)
+            {
+                _logger.LogError(sqlEx,
+                    "SQL error in GetUserById (Id={id})",
+                     id);
+
+                throw new Exception("A database error occurred while getting user by id.", sqlEx);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex,
+                    "SQL error in GetUserById (Id={id})",
+                     id);
+
+                throw;
+            }
+            return null;
+        }
     }
 
 }

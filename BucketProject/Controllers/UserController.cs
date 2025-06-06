@@ -16,52 +16,72 @@ namespace BucketProject.UI.BucketProject.Controllers
         private readonly IUserService _userService;
         private readonly IMapper _mapper;
         private readonly IHttpClientFactory _httpClientFactory;
+        private readonly ILogger<UserController> _logger;
 
 
-        public UserController(IUserService userService, IMapper mapper, IHttpClientFactory httpClientFactory)
+        public UserController(IUserService userService, IMapper mapper, IHttpClientFactory httpClientFactory, ILogger<UserController> logger)
         {
+            _logger = logger;
             _userService = userService;
             _mapper = mapper;
             _httpClientFactory = httpClientFactory;
         }
 
+        private static readonly Uri CountriesEndpoint = new("https://restcountries.com/v3.1/all");
+
         private async Task<List<SelectListItem>> LoadCountriesAsync()
         {
             var client = _httpClientFactory.CreateClient();
-            var json = await client.GetStringAsync("https://restcountries.com/v3.1/all");
-            using var doc = JsonDocument.Parse(json);
 
-            return doc.RootElement
-                      .EnumerateArray()
-                      .Select(el => {
-                          var name = el.GetProperty("name")
-                                       .GetProperty("common")
-                                       .GetString()!;
-                          return new SelectListItem { Value = name, Text = name };
-                      })
-                      .OrderBy(x => x.Text)
-                      .ToList();
+            using var response = await client.GetAsync(CountriesEndpoint, HttpCompletionOption.ResponseHeadersRead);
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new HttpRequestException(
+                    $"Failed to load countries (status {(int)response.StatusCode} {response.ReasonPhrase}).");
+            }
+
+            await using var contentStream = await response.Content.ReadAsStreamAsync();
+            using var doc = await JsonDocument.ParseAsync(contentStream);
+
+            var countries = doc.RootElement
+                               .EnumerateArray()
+                               .Select(el =>
+                               {
+                                   var name = el.GetProperty("name")
+                                                .GetProperty("common")
+                                                .GetString()!;
+                                   return new SelectListItem { Value = name, Text = name };
+                               })
+                               .OrderBy(x => x.Text)
+                               .ToList();
+
+            if (countries.Count == 0)
+            {
+                throw new InvalidOperationException(
+                    "The countries list came back empty – the API payload contained no elements.");
+            }
+
+            return countries;
         }
-
 
         [HttpGet]
         public async Task<IActionResult> Register()
         {
-            RegisterViewModel vm = new RegisterViewModel
-            {
-                Countries = await LoadCountriesAsync()
-            };
+            var vm = new RegisterViewModel();
+            await PopulateCountriesAsync(vm);  
             return View(vm);
         }
+
         [HttpPost]
         public async Task<IActionResult> Register(RegisterViewModel vm)
         {
-            vm.Countries = await LoadCountriesAsync();
+            await PopulateCountriesAsync(vm);
 
             if (!ModelState.IsValid)
                 return View(vm);
 
-            User user = _mapper.Map<User>(vm);
+            var user = _mapper.Map<User>(vm);
+
             try
             {
                 if (_userService.Register(user))
@@ -72,10 +92,9 @@ namespace BucketProject.UI.BucketProject.Controllers
             }
             catch (ValidationExceptionCollection vex)
             {
-                foreach (var error in vex.Errors)
-                {
-                    ModelState.AddModelError(string.Empty, error);
-                }    return View(vm);
+                foreach (var err in vex.Errors)
+                    ModelState.AddModelError(string.Empty, err);
+                return View(vm);
             }
             catch (DuplicateUserException dex)
             {
@@ -83,6 +102,33 @@ namespace BucketProject.UI.BucketProject.Controllers
                 return View(vm);
             }
         }
+
+        private async Task PopulateCountriesAsync(RegisterViewModel vm)
+        {
+            try
+            {
+                vm.Countries = await LoadCountriesAsync();
+                vm.CountriesLoaded = vm.Countries.Any();
+            }
+            catch (HttpRequestException ex)          
+            {
+                _logger.LogError(ex, "Could not reach restcountries.com");
+                ModelState.AddModelError(
+                   string.Empty,
+                   "Sorry – we couldn’t load the list of countries just now. "); ;
+                vm.Countries = new List<SelectListItem>();    
+            }
+            catch (InvalidOperationException ex)    
+            {
+                _logger.LogWarning(ex, "Countries payload invalid or empty");
+                ModelState.AddModelError(
+                  string.Empty,
+                  "Sorry – we couldn’t load the list of countries just now. "); ;
+                vm.Countries = new List<SelectListItem>();
+            }
+              
+        }
+
 
 
         [HttpGet]

@@ -53,15 +53,25 @@ VALUES
         public List<GoalInvitation> GetPendingFor(int invitedId, string category)
         {
             const string sql = @"
-SELECT gi.InvitationId, gi.InviterId, gi.InvitedId, gi.GoalId, gi.Status, gi.CreatedAt
-FROM dbo.GoalInvitation gi
-INNER JOIN dbo.Goal g ON gi.GoalId = g.Id
-WHERE gi.InvitedId = @InvitedId 
-  AND gi.Status = 'Pending'
-  AND g.Category = @Category
-  AND g.IsDeleted = 0
-  AND g.Deadline > GETDATE()
-ORDER BY gi.CreatedAt DESC;";
+SELECT 
+    gi.InvitationId,
+    gi.InviterId,
+    gi.InvitedId, 
+    gi.GoalId,
+    gi.Status,
+    gi.CreatedAt
+FROM dbo.GoalInvitation AS gi
+INNER JOIN dbo.Goal AS g
+    ON gi.GoalId = g.Id
+WHERE 
+    gi.InvitedId = @InvitedId
+    AND gi.Status    = 'Pending'
+    AND g.Category   = @Category
+    AND g.IsDeleted  = 0
+    AND g.Deadline > GETDATE()
+ORDER BY 
+    gi.CreatedAt DESC;
+";
 
             var list = new List<GoalInvitation>();
 

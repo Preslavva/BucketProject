@@ -12,5 +12,6 @@ public interface IUserRepo
 
         void AddPhoto(UserEntity user, byte[] pictute);
         int GetIdOfUser(string username);
+         public UserEntity? GetUserById(int id); 
     }
 

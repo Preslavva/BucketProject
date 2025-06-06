@@ -15,6 +15,7 @@ namespace BucketProject.BLL.Business_Logic.InterfacesService
         Task UpdateProfilePicture(IFormFile? photoFile);
 
         int GetCurrentUserId();
+        User GetUserById(int id);
 
     }
 }
