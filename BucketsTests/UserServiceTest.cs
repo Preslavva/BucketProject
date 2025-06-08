@@ -218,25 +218,24 @@ namespace BucketsTests
 
         }
 
-
         [TestMethod]
         public async Task UpdateProfilePicture_ValidFile_AddsPhotoSuccessfully()
         {
             string username = "username";
             SetSession(username);
 
-            UserEntity userEntity = new UserEntity(1, username);
+            var userEntity = new UserEntity(1, username);
             _userRepo.Setup(r => r.GetUserByUsername(username)).Returns(userEntity);
 
             byte[] imageBytes = Encoding.UTF8.GetBytes("photo-bytes");
             var mockFile = new Mock<IFormFile>();
             mockFile.Setup(f => f.Length).Returns(imageBytes.Length);
+            mockFile.Setup(f => f.ContentType).Returns("image/jpeg");
             mockFile
                 .Setup(f => f.CopyToAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>()))
-                .Returns<Stream, CancellationToken>((stream, _) => stream.WriteAsync(imageBytes, 0, imageBytes.Length));
+                .Returns<Stream, CancellationToken>((stream, ct) => stream.WriteAsync(imageBytes, 0, imageBytes.Length, ct));
 
             await _userService.UpdateProfilePicture(mockFile.Object);
-
             _userRepo.Verify(r =>
                 r.AddPhoto(
                     It.Is<UserEntity>(u => u == userEntity),
@@ -244,27 +243,24 @@ namespace BucketsTests
                 ), Times.Once);
         }
 
-
         [TestMethod]
         public async Task UpdateProfilePicture_EmptyFile_ThrowsValidationException()
         {
             var mockFile = new Mock<IFormFile>();
             mockFile.Setup(f => f.Length).Returns(0);
 
-            var ex = await Assert.ThrowsExceptionAsync<ValidationException>(async () =>
-                await _userService.UpdateProfilePicture(mockFile.Object)
+            var ex = await Assert.ThrowsExceptionAsync<ValidationException>(
+                () => _userService.UpdateProfilePicture(mockFile.Object)
             );
-
             Assert.AreEqual("Please select a photo to upload", ex.Message);
         }
 
         [TestMethod]
         public async Task UpdateProfilePicture_NullFile_ThrowsValidationException()
         {
-            var ex = await Assert.ThrowsExceptionAsync<ValidationException>(async () =>
-                await _userService.UpdateProfilePicture(null)
+            var ex = await Assert.ThrowsExceptionAsync<ValidationException>(
+                () => _userService.UpdateProfilePicture(null)
             );
-
             Assert.AreEqual("Please select a photo to upload", ex.Message);
         }
 
@@ -276,15 +272,16 @@ namespace BucketsTests
 
             var mockFile = new Mock<IFormFile>();
             mockFile.Setup(f => f.Length).Returns(3);
+            mockFile.Setup(f => f.ContentType).Returns("image/png");
 
             _userRepo.Setup(r => r.GetUserByUsername(username)).Returns((UserEntity?)null);
 
-            var ex = await Assert.ThrowsExceptionAsync<UserNotFoundException>(async () =>
-                await _userService.UpdateProfilePicture(mockFile.Object)
+            var ex = await Assert.ThrowsExceptionAsync<UserNotFoundException>(
+                () => _userService.UpdateProfilePicture(mockFile.Object)
             );
-
             Assert.AreEqual($"User '{username}' was not found.", ex.Message);
         }
+    
 
         [TestMethod]
         public async Task UpdateProfilePicture_InvalidFileType_ThrowsValidationException()

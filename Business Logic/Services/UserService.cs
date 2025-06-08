@@ -164,10 +164,11 @@ namespace BucketProject.BLL.Business_Logic.Services
         }
 
 
+
         public async Task UpdateProfilePicture(IFormFile? photoFile)
         {
             if (photoFile == null || photoFile.Length == 0)
-                throw new ValidationException("Please select a photo to upload.");
+                throw new ValidationException("Please select a photo to upload");
 
             var allowedMimeTypes = new[] { "image/jpeg", "image/png", "image/gif" };
             if (!allowedMimeTypes.Contains(photoFile.ContentType))
