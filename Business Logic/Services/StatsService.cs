@@ -376,38 +376,159 @@ namespace BucketProject.BLL.Business_Logic.Services
             };
         }
 
+        private List<string> GetMonthLabelsFromStart(DateOnly startDate, int maxMonths = 12)
+        {
+            DateTime start = new DateTime(startDate.Year, startDate.Month, 1);
+            DateTime end = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
+
+            var labels = new List<string>();
+            for (DateTime dt = start; dt <= end && labels.Count < maxMonths; dt = dt.AddMonths(1))
+            {
+                labels.Add(dt.ToString("yyyy MMM", CultureInfo.InvariantCulture));
+            }
+
+            return labels;
+        }
+
+
         public List<StatsDTO> GetUserRegistrationsPerMonth()
         {
             List<UserEntity> entities = _managerRepo.GetAllUsers();
             List<User> users = _mapper.Map<List<User>>(entities);
 
-            return users
+            if (!users.Any())
+                return new List<StatsDTO>();
+
+            var firstDate = users.Min(u => u.CreatedAt);
+            var monthLabels = GetMonthLabelsFromStart(firstDate, 12);
+
+            var grouped = users
                 .GroupBy(u => u.CreatedAt.ToString("yyyy MMM", CultureInfo.InvariantCulture))
-                .Select(g => new StatsDTO
+                .ToDictionary(g => g.Key, g => g.Count());
+
+            return monthLabels
+                .Select(label => new StatsDTO
                 {
-                    Period = g.Key,
-                    Count = g.Count()
+                    Period = label,
+                    Count = grouped.ContainsKey(label) ? grouped[label] : 0
                 })
-                .OrderBy(s => DateTime.ParseExact(s.Period, "yyyy MMM", CultureInfo.InvariantCulture))
                 .ToList();
         }
-
         public List<StatsDTO> GetGoalsPerMonth()
         {
             List<GoalEntity> entities = _managerRepo.GetAllGoals();
             List<Goal> goals = _mapper.Map<List<Goal>>(entities);
 
+            if (!goals.Any())
+                return new List<StatsDTO>();
 
-            return goals
-                .GroupBy(u => u.CreatedAt.ToString("yyyy MMM", CultureInfo.InvariantCulture))
-                .Select(g => new StatsDTO
+            DateTime firstDate = goals.Min(g => g.CreatedAt);
+            var monthLabels = GetMonthLabelsFromStart(DateOnly.FromDateTime(firstDate), 12);
+
+            var grouped = goals
+                .GroupBy(g => g.CreatedAt.ToString("yyyy MMM", CultureInfo.InvariantCulture))
+                .ToDictionary(g => g.Key, g => g.Count());
+
+            return monthLabels
+                .Select(label => new StatsDTO
                 {
-                    Period = g.Key,
-                    Count = g.Count()
+                    Period = label,
+                    Count = grouped.ContainsKey(label) ? grouped[label] : 0
                 })
-                .OrderBy(s => DateTime.ParseExact(s.Period, "yyyy MMM", CultureInfo.InvariantCulture))
                 .ToList();
         }
+
+        public string GetMonthlyUserRegistrationMessage()
+        {
+            var stats = GetUserRegistrationsPerMonth();
+
+            if (stats.Count < 2)
+                return "Not enough data to compare user registrations yet.";
+
+            string lastMonthLabel = stats[^2].Period;
+            string thisMonthLabel = stats[^1].Period;
+
+            int lastMonthCount = stats[^2].Count;
+            int thisMonthCount = stats[^1].Count;
+
+            if (lastMonthCount == 0)
+            {
+                if (thisMonthCount == 0)
+                {
+                    return $"No user registrations in either {lastMonthLabel} or {thisMonthLabel}.";
+                }
+                else
+                {
+                    return $"User registrations began in {thisMonthLabel} with {thisMonthCount} new user(s), up from 0 in {lastMonthLabel}.";
+                }
+            }
+            else
+            {
+                double change = thisMonthCount - lastMonthCount;
+                double pctChange = (change / lastMonthCount) * 100.0;
+                int rounded = (int)Math.Round(Math.Abs(pctChange));
+
+                if (rounded == 0)
+                {
+                    return $"User registrations in {thisMonthLabel} remained the same as in {lastMonthLabel}.";
+                }
+                else if (pctChange > 0)
+                {
+                    return $"User registrations increased by {rounded}% in {thisMonthLabel} compared to {lastMonthLabel}.";
+                }
+                else
+                {
+                    return $"User registrations decreased by {rounded}% in {thisMonthLabel} compared to {lastMonthLabel}.";
+                }
+            }
+        }
+
+        public string GetMonthlyGoalCreationMessage()
+        {
+            var stats = GetGoalsPerMonth();
+
+            if (stats.Count < 2)
+                return "Not enough data to compare goal creation yet.";
+
+            string lastMonthLabel = stats[^2].Period;
+            string thisMonthLabel = stats[^1].Period;
+
+            int lastMonthCount = stats[^2].Count;
+            int thisMonthCount = stats[^1].Count;
+
+            if (lastMonthCount == 0)
+            {
+                if (thisMonthCount == 0)
+                {
+                    return $"No goals were created in either {lastMonthLabel} or {thisMonthLabel}.";
+                }
+                else
+                {
+                    return $"Goal creation started in {thisMonthLabel} with {thisMonthCount} new goal(s), up from 0 in {lastMonthLabel}.";
+                }
+            }
+            else
+            {
+                double change = thisMonthCount - lastMonthCount;
+                double pctChange = (change / lastMonthCount) * 100.0;
+                int rounded = (int)Math.Round(Math.Abs(pctChange));
+
+                if (rounded == 0)
+                {
+                    return $"Goal creation in {thisMonthLabel} remained the same as in {lastMonthLabel}.";
+                }
+                else if (pctChange > 0)
+                {
+                    return $"Goal creation increased by {rounded}% in {thisMonthLabel} compared to {lastMonthLabel}.";
+                }
+                else
+                {
+                    return $"Goal creation decreased by {rounded}% in {thisMonthLabel} compared to {lastMonthLabel}.";
+                }
+            }
+        }
+
+
 
         public StatsDTO GetGoalSummaryStatsManager()
         {

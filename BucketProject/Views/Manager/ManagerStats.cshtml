@@ -30,7 +30,9 @@
 
 <div class="tab-content mt-4" id="statsTabContent">
 
+
     <div class="tab-pane fade show active" id="summary" role="tabpanel" aria-labelledby="summary-tab">
+    <br></br>
         <div class="circle-stats-container" style="display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; margin: 0 auto;">
             <div class="circle-wrapper"><div class="circle-stat total">@ViewBag.TotalGoals</div><div class="circle-label">Total Goals</div></div>
             <div class="circle-wrapper"><div class="circle-stat completed">@ViewBag.PersonalGoals</div><div class="circle-label">Personal Goals</div></div>
@@ -74,14 +76,24 @@
             {
                 <div class="tab-pane fade show active" id="user-chart" role="tabpanel">
                     <canvas id="userLineChart" class="chart-canvas"></canvas>
+
+                    <div class="text-center mt-3">
+                        <span class="text-muted">@ViewBag.UserMessage</span>
+                    </div>
                 </div>
+         
             }
 
             @if (hasGoals)
             {
                 <div class="tab-pane fade @(hasUsers ? "" : "show active")" id="goals-chart" role="tabpanel">
                     <canvas id="goalsLineChart" class="chart-canvas"></canvas>
+
+                    <div class="text-center mt-3">
+                        <span class="text-muted">@ViewBag.GoalMessage</span>
+                    </div>
                 </div>
+               
             }
 
             @if (!hasUsers && !hasGoals)

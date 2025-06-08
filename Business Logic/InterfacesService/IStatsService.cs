@@ -33,4 +33,6 @@ public interface IStatsService
     string GetWeeklyCompletionRateMessageWeek();
     string GetCompletionRateMessageMonth();
     string GetYearlyCompletionRateMessage();
+    string GetMonthlyUserRegistrationMessage();
+    string GetMonthlyGoalCreationMessage();
 }

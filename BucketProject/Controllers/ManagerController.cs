@@ -54,10 +54,12 @@ namespace BucketProject.Controllers
             List<StatsDTO> userStats = _statsService.GetUserRegistrationsPerMonth();
             ViewBag.UserLabels = userStats.Select(s => s.Period).ToList();
             ViewBag.UserData = userStats.Select(s => s.Count).ToList();
+            ViewBag.UserMessage = _statsService.GetMonthlyUserRegistrationMessage();
 
             List<StatsDTO> goalStats = _statsService.GetGoalsPerMonth();
             ViewBag.GoalLabels = goalStats.Select(s => s.Period).ToList();
             ViewBag.GoalData = goalStats.Select(s => s.Count).ToList();
+            ViewBag.GoalMessage = _statsService.GetMonthlyGoalCreationMessage();
 
             StatsDTO summary = _statsService.GetGoalSummaryStatsManager();
             ViewBag.TotalGoals = summary.TotalGoals;
