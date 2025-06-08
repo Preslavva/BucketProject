@@ -35,16 +35,14 @@ namespace BucketProject.Controllers
 
         [HttpGet]
         public IActionResult FilterHistory(
-        DateTime? startDate,
-        DateTime? endDate,
-        string? category,
-        string? goalType,
-        int page = 1,
-        int pageSize = 4)
+     DateTime? startDate,
+     DateTime? endDate,
+     string? category,
+     string? goalType,
+     int page = 1,
+     int pageSize = 4)
         {
-
             int totalGoals = _goalService.CountGoalsCreatedInRange(startDate, endDate, category, goalType);
-
 
             List<Goal> goals = _goalService.GetGoalsCreatedInRange(startDate, endDate, category, goalType, page, pageSize);
             List<HistoryViewModel> result = _mapper.Map<List<HistoryViewModel>>(goals);
@@ -54,6 +52,14 @@ namespace BucketProject.Controllers
             ViewBag.CurrentPage = page;
             ViewBag.PageSize = pageSize;
             ViewBag.TotalPages = totalPages;
+
+            foreach (var goal in result)
+            {
+                if (goal.ParentGoalId != null)
+                {
+                    goal.ParentGoalDescription = _goalService.GetParentGoalDescription(goal.Id); 
+                }
+            }
 
             return PartialView("_HistoryPartial", result);
         }

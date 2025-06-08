@@ -43,6 +43,13 @@ else
                         <small class="text-muted">Category: @goal.Category</small><br />
                         <small class="text-muted">Type: @goal.Type</small><br />
 
+                        @if (isChild && !string.IsNullOrEmpty(goal.ParentGoalDescription))
+                        {
+                            <small class="text-muted">↳ Parent Goal: <em>@goal.ParentGoalDescription</em></small>
+
+                            <br />
+                        }
+
 
                         @if (goal.Recipients != null && goal.Recipients.Any())
                         {

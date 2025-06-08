@@ -71,7 +71,9 @@ namespace BucketProject.UI.BucketProject.Mapping
             CreateMap<Goal, HistoryViewModel>()
                 .ForMember(dest => dest.Type, opt => opt.MapFrom(src => src.Type.ToString()))
                 .ForMember(dest => dest.Category, opt => opt.MapFrom(src => src.Category.ToString()))
-                .ForMember(dest => dest.ChildGoals, opt => opt.Ignore());
+                .ForMember(dest => dest.ChildGoals, opt => opt.Ignore())
+                .ForMember(dest => dest.ParentGoalDescription, opt => opt.Ignore());
+                
 
 
             CreateMap<Goal, NotificationViewModel>()
