@@ -27,13 +27,14 @@ namespace BucketProject.UI.BucketProject.Controllers
             _httpClientFactory = httpClientFactory;
         }
 
-        private static readonly Uri CountriesEndpoint = new("https://restcountries.com/v3.1/all");
+        private static readonly Uri CountriesNowEndpoint =
+     new("https://countriesnow.space/api/v0.1/countries");
 
         private async Task<List<SelectListItem>> LoadCountriesAsync()
         {
             var client = _httpClientFactory.CreateClient();
 
-            using var response = await client.GetAsync(CountriesEndpoint, HttpCompletionOption.ResponseHeadersRead);
+            using var response = await client.GetAsync(CountriesNowEndpoint, HttpCompletionOption.ResponseHeadersRead);
             if (!response.IsSuccessStatusCode)
             {
                 throw new HttpRequestException(
@@ -43,17 +44,18 @@ namespace BucketProject.UI.BucketProject.Controllers
             await using var contentStream = await response.Content.ReadAsStreamAsync();
             using var doc = await JsonDocument.ParseAsync(contentStream);
 
-            var countries = doc.RootElement
-                               .EnumerateArray()
-                               .Select(el =>
-                               {
-                                   var name = el.GetProperty("name")
-                                                .GetProperty("common")
-                                                .GetString()!;
-                                   return new SelectListItem { Value = name, Text = name };
-                               })
-                               .OrderBy(x => x.Text)
-                               .ToList();
+            var dataArray = doc.RootElement
+                               .GetProperty("data")
+                               .EnumerateArray();
+
+            var countries = dataArray
+                .Select(el => new SelectListItem
+                {
+                    Value = el.GetProperty("country").GetString()!,
+                    Text = el.GetProperty("country").GetString()!
+                })
+                .OrderBy(x => x.Text)
+                .ToList();
 
             if (countries.Count == 0)
             {
@@ -63,6 +65,8 @@ namespace BucketProject.UI.BucketProject.Controllers
 
             return countries;
         }
+
+
 
         [HttpGet]
         public async Task<IActionResult> Register()
@@ -112,7 +116,7 @@ namespace BucketProject.UI.BucketProject.Controllers
             }
             catch (HttpRequestException ex)          
             {
-                _logger.LogError(ex, "Could not reach restcountries.com");
+                _logger.LogError(ex, "Could not reach api");
                 ModelState.AddModelError(
                    string.Empty,
                    "Sorry – we couldn’t load the list of countries just now. "); ;
@@ -128,8 +132,6 @@ namespace BucketProject.UI.BucketProject.Controllers
             }
               
         }
-
-
 
         [HttpGet]
         public IActionResult LogIn()
