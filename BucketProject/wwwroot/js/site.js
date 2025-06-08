@@ -74,6 +74,25 @@ $(document).ready(function () {
     });
 });
 
+$(document).on('click', '.pagination a', function (e) {
+    e.preventDefault();
+    const page = $(this).data('page');
+    const searchTerm = $('input[name="searchTerm"]').val();
+
+    $.ajax({
+        url: '/Social/Search',
+        type: 'GET',
+        data: { searchTerm: searchTerm, page: page },
+        success: function (data) {
+            $('#searchResults').html(data);
+        },
+        error: function () {
+            alert("Pagination failed.");
+        }
+    });
+});
+
+
 function resizeInput(input) {
     input.style.width = "1px";
     input.style.width = (input.scrollWidth + 5) + "px"; 

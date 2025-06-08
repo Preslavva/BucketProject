@@ -49,34 +49,29 @@ namespace BucketProject.Controllers
 
 
         [HttpGet]
-        public IActionResult Search(string searchTerm)
+        public IActionResult Search(string searchTerm, int page = 1, int pageSize = 2 )
         {
             int uid = _userService.GetCurrentUserId();
             searchTerm ??= "";
 
-            List<UserSummaryDTO> friends = _socialService.GetFriends(uid)
+            var friends = _socialService.GetFriends(uid)
                 .Where(u => u.Username.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
                 .ToList();
 
-            List<UserSummaryDTO> incoming = _socialService.GetIncomingFriendRequests(uid)
+            var incoming = _socialService.GetIncomingFriendRequests(uid)
                 .Where(u => u.Username.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
                 .ToList();
 
-            List<UserSummaryDTO> outgoing = _socialService.GetOutgoingFriendRequests(uid)
+            var outgoing = _socialService.GetOutgoingFriendRequests(uid)
                 .Where(u => u.Username.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
                 .ToList();
 
-            List<UserSummaryDTO> nonFriends = _socialService.GetNonFriends(uid)
-                .Where(u => u.Username.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
-                .ToList();
+            var potential = _socialService.GetNonFriends(uid, searchTerm, page, pageSize);
 
-            var potential = nonFriends
-                .Concat(outgoing)
-                .GroupBy(u => u.Id)
-                .Select(g => g.First())
-                .ToList();
+            int total = _socialService.CountNonFriends(uid, searchTerm);
+            int totalPages = (int)Math.Ceiling((double)total / pageSize);
 
-            SocialViewModel vm = new SocialViewModel
+            var vm = new SocialViewModel
             {
                 Friends = friends,
                 IncomingRequests = incoming,
@@ -84,8 +79,13 @@ namespace BucketProject.Controllers
                 OutgoingRequestIds = outgoing.Select(x => x.Id).ToList()
             };
 
+            ViewBag.CurrentPage = page;
+            ViewBag.TotalPages = totalPages;
+            ViewBag.SearchTerm = searchTerm;
+
             return PartialView("_SearchResults", vm);
         }
+
 
 
         [HttpPost]

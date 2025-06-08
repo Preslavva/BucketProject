@@ -10,11 +10,12 @@ namespace BucketProject.DAL.Data.Repositories
     public class SocialRepo : Repository, ISocialRepo
     {
         private readonly ILogger<ISocialRepo> _logger;
-        public SocialRepo(IConfiguration configuration,ILogger<SocialRepo> logger) : base(configuration) {
+        public SocialRepo(IConfiguration configuration, ILogger<SocialRepo> logger) : base(configuration)
+        {
             _logger = logger;
         }
 
-    
+
         public List<UserEntity> LoadFriends(int userId)
         {
             var friends = new List<UserEntity>();
@@ -62,7 +63,7 @@ WHERE f.Status = 'Accepted';
             return friends;
         }
 
-        public List<UserEntity> LoadNonFriends(int userId)
+        public List<UserEntity> LoadNonFriends(int userId, string searchTerm, int page, int pageSize)
         {
             var users = new List<UserEntity>();
             const string sql = @"
@@ -70,49 +71,48 @@ SELECT u.UserId, u.Username, u.Picture
 FROM [User] AS u
 WHERE u.UserId <> @Id
   AND u.Role = 'User'
+  AND u.Username LIKE '%' + @SearchTerm + '%'
   AND u.UserId NOT IN (
-      SELECT CASE WHEN f.UserId   = @Id THEN f.FriendId ELSE f.UserId END
+      SELECT CASE WHEN f.UserId = @Id THEN f.FriendId ELSE f.UserId END
       FROM Friends f
       WHERE (f.UserId = @Id OR f.FriendId = @Id)
         AND f.Status IN ('Pending','Accepted')
-  );
+  )
+ORDER BY u.Username
+OFFSET @Offset ROWS
+FETCH NEXT @PageSize ROWS ONLY;
 ";
+
             try
             {
                 using var conn = GetSqlConnection();
                 conn.Open();
                 using var cmd = new SqlCommand(sql, conn);
                 cmd.Parameters.AddWithValue("@Id", userId);
+                cmd.Parameters.AddWithValue("@SearchTerm", searchTerm ?? string.Empty);
+                cmd.Parameters.AddWithValue("@Offset", (page - 1) * pageSize);
+                cmd.Parameters.AddWithValue("@PageSize", pageSize);
+
                 using var rdr = cmd.ExecuteReader();
                 while (rdr.Read())
                 {
                     users.Add(new UserEntity(
                         rdr.GetInt32(rdr.GetOrdinal("UserId")),
                         rdr.GetString(rdr.GetOrdinal("Username")),
-                        rdr.IsDBNull(rdr.GetOrdinal("Picture"))
-                          ? null
-                          : (byte[])rdr["Picture"]));
+                        rdr.IsDBNull(rdr.GetOrdinal("Picture")) ? null : (byte[])rdr["Picture"]
+                    ));
                 }
-            }
-            catch (SqlException sqlEx)
-            {
-                _logger.LogError(sqlEx,
-                    "SQL error in LoadNonFriends (UserId={userId})",
-                    userId);
-
-                throw new Exception("A database error occurred while loading non friends.", sqlEx);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex,
-                    "SQL error in LoadnonFriends (UserId={userId})",
-                    userId);
-
+                _logger.LogError(ex, "Error loading non-friends with pagination");
                 throw;
             }
 
             return users;
         }
+
+
 
 
         public bool SendFriendRequest(int userId, int friendId)
@@ -177,7 +177,7 @@ COMMIT TRANSACTION;
         public bool RespondToFriendRequest(int userId, int requesterId, bool accept)
         {
             int u = Math.Min(userId, requesterId);
-             int f = Math.Max(userId, requesterId);
+            int f = Math.Max(userId, requesterId);
 
             const string sql = @"
         UPDATE dbo.Friends
@@ -363,8 +363,8 @@ WHERE f.Status = 'Pending'
                     return null;
 
                 return new UserEntity(
-                    rdr.GetInt32(0),  
-                    rdr.GetString(1) 
+                    rdr.GetInt32(0),
+                    rdr.GetString(1)
                 );
             }
             catch (SqlException sqlEx)
@@ -379,7 +379,37 @@ WHERE f.Status = 'Pending'
             }
         }
 
+        public int CountNonFriends(int userId, string searchTerm)
+        {
+            const string sql = @"
+SELECT COUNT(*)
+FROM [User] AS u
+WHERE u.UserId <> @Id
+  AND u.Role = 'User'
+  AND u.Username LIKE '%' + @SearchTerm + '%'
+  AND u.UserId NOT IN (
+      SELECT CASE WHEN f.UserId = @Id THEN f.FriendId ELSE f.UserId END
+      FROM Friends f
+      WHERE (f.UserId = @Id OR f.FriendId = @Id)
+        AND f.Status IN ('Pending','Accepted')
+  )
+";
 
+            try
+            {
+                using var conn = GetSqlConnection();
+                conn.Open();
+                using var cmd = new SqlCommand(sql, conn);
+                cmd.Parameters.AddWithValue("@Id", userId);
+                cmd.Parameters.AddWithValue("@SearchTerm", searchTerm ?? string.Empty);
+                return (int)cmd.ExecuteScalar();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error counting non-friends");
+                throw;
+            }
+        }
     }
 
-}
+    }

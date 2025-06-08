@@ -31,11 +31,16 @@ namespace BucketProject.BLL.Business_Logic.Services
             return _mapper.Map<List<UserSummaryDTO>>(ents);
         }
 
-        public List<UserSummaryDTO> GetNonFriends(int userId)
+        public List<UserSummaryDTO> GetNonFriends(int userId, string searchTerm, int page, int pageSize)
         {
-            var ents = _socialRepo.LoadNonFriends(userId);
-            return _mapper.Map<List<UserSummaryDTO>>(ents);
+            List<UserEntity> entities = _socialRepo.LoadNonFriends(userId, searchTerm, page, pageSize);
+            return _mapper.Map<List<UserSummaryDTO>>(entities);
         }
+        public int CountNonFriends(int userId, string searchTerm)
+        {
+            return _socialRepo.CountNonFriends(userId, searchTerm);
+        }
+
 
         public List<UserSummaryDTO> GetIncomingFriendRequests(int userId)
         {

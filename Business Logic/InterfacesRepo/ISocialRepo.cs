@@ -10,13 +10,14 @@ namespace BucketProject.BLL.Business_Logic.InterfacesRepo;
 public interface ISocialRepo
     {
     List<UserEntity> LoadFriends(int userId);
-    List<UserEntity> LoadNonFriends(int userId);
+    List<UserEntity> LoadNonFriends(int userId, string searchTerm, int page, int pageSize);
     bool SendFriendRequest(int userId, int friendId);
     bool TryRemoveFriend(int userId, int friendId);
     List<UserEntity> LoadIncomingRequests(int userId);
     bool RespondToFriendRequest(int userId, int requesterId, bool accept);
     List<UserEntity> LoadOutgoingRequests(int userId);
     UserEntity GetUserById(int userId);
+    int CountNonFriends(int userId, string searchTerm);
 
     }
 

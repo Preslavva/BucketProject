@@ -10,7 +10,7 @@ namespace BucketProjetc.BLL.Business_Logic.InterfacesService
     public interface ISocialService
     {
         List<UserSummaryDTO> GetFriends(int userId);
-        List<UserSummaryDTO> GetNonFriends(int userId);
+        List<UserSummaryDTO> GetNonFriends(int userId, string searchTerm, int page, int pageSize);
         List<UserSummaryDTO> GetIncomingFriendRequests(int userId);
 
         bool SendFriendRequest(int userId, int friendId);
@@ -19,6 +19,7 @@ namespace BucketProjetc.BLL.Business_Logic.InterfacesService
         bool RemoveFriend(int userId, int friendId);
         List<UserSummaryDTO> GetOutgoingFriendRequests(int userId);
         string GetUsername(int userId);
+        int CountNonFriends(int userId, string searchTerm);
 
 
     }
