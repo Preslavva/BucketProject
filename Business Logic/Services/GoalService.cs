@@ -10,6 +10,7 @@ using System.ComponentModel.DataAnnotations;
 using BucketProject.BLL.Business_Logic.DTOs;
 using Exceptions.Exceptions;
 using BucketProject.BLL.Business_Logic.InterfacesRepo;
+using Org.BouncyCastle.Asn1;
 
 
 
@@ -271,6 +272,40 @@ namespace BucketProject.BLL.Business_Logic.Services
             group[category][key][type].Add(goal);
         }
 
+        public List<Goal> GetGoalsCreatedInRange(
+        DateTime? startDate,
+        DateTime? endDate,
+        string? category,
+        string? type,
+        int page,
+        int pageSize)
+        {
+            int userId = _userService.GetCurrentUserId();
+
+            List<GoalEntity> entities = _goalRepo.LoadGoalsOfUserInRange(
+                userId,
+                startDate,
+                endDate,
+                category,
+                type,
+                page,
+                pageSize);
+
+            List<Goal> goals = _mapper.Map<List<Goal>>(entities);
+
+            foreach (Goal goal in goals)
+            {
+                var sharedEntities = _goalRepo.LoadSharedUsersForGoal(goal.Id, userId);
+                goal.Recipients = _mapper.Map<List<User>>(sharedEntities);
+            }
+
+            return goals;
+        }
+
+
+
+
+
         public async Task<List<Goal>> BreakDownGoalAsync(int goalId)
         {
             GoalEntity entity = _goalRepo.GetGoalById(goalId, _userService.GetCurrentUserId());
@@ -342,6 +377,12 @@ namespace BucketProject.BLL.Business_Logic.Services
             string? description = _inviteRepo.GetParentGoalDescription(subGoalId);
             return description;
         }
+        public List<string> GetGoalTypesForCurrentUser()
+        {
+            int userId = _userService.GetCurrentUserId();
+            return _goalRepo.GetDistinctGoalTypesForUser(userId);
+        }
+
     }
 
 }

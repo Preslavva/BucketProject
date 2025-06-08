@@ -1,171 +1,152 @@
-﻿@model Dictionary<string, Dictionary<string, Dictionary<string, List<HistoryViewModel>>>>
-
-@{
-    var username = ViewBag.Username as string;
-    var categoryKeys = Model?.Keys.ToList() ?? new List<string>();
+﻿@{
+    ViewData["Title"] = "Goal History";
+    var goalTypes = ViewBag.GoalTypes as List<string> ?? new List<string>();
+    var categories = ViewBag.Categories as List<string> ?? new List<string>();
 }
 
-<div class="container mt-4">
-    @if (!Model.Any())
-    {
-        <p class="text-muted">No expired goals found.</p>
-    }
-    else
-    {
-        <ul class="nav nav-tabs" id="categoryTabs" role="tablist">
-            @for (int i = 0; i < categoryKeys.Count; i++)
-            {
-                var category = categoryKeys[i];
-                var isActive = i == 0 ? "active" : "";
-                var tabId = $"tab-{category.Replace(" ", "").ToLower()}";
+<h2 class="text-center my-4">Goal History</h2>
 
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link @isActive"
-                            id="@tabId-tab"
-                            data-bs-toggle="tab"
-                            data-bs-target="#@tabId"
-                            type="button"
-                            role="tab"
-                            aria-controls="@tabId"
-                            aria-selected="@(i == 0 ? "true" : "false")">
-                        @category
-                    </button>
-                </li>
-            }
-        </ul>
-
-        <div class="tab-content mt-3" id="categoryTabsContent">
-            @for (int i = 0; i < categoryKeys.Count; i++)
-            {
-                var category = categoryKeys[i];
-                var isActive = i == 0 ? "show active" : "";
-                var tabId = $"tab-{category.Replace(" ", "").ToLower()}";
-
-                <div class="tab-pane fade @isActive" id="@tabId" role="tabpanel" aria-labelledby="@tabId-tab">
-                    @{
-                        var categoryGroup = Model[category];
-                    }
-
-                    @foreach (var timeGroup in categoryGroup.OrderByDescending(g => g.Key))
-                    {
-                        <h4 class="mt-4">@timeGroup.Key</h4>
-
-                        @foreach (var typeGroup in timeGroup.Value)
-                        {
-                            <h5>@typeGroup.Key</h5>
-                            <ul class="list-group mb-3">
-                                @foreach (var goal in typeGroup.Value)
-                                {
-                                    <li class="list-group-item">
-                                        <div class="d-flex justify-content-between">
-                                            <div>
-                                                <strong>@goal.Description</strong><br />
-                                                <small class="text-muted">Deadline: @goal.Deadline?.ToShortDateString()</small>
-
-                                                @if (goal.Recipients != null && goal.Recipients.Any())
-                                                {
-                                                    <div class="mt-1">
-                                                        <small class="text-muted">Shared with:</small>
-                                                        @foreach (var u in goal.Recipients)
-                                                        {
-                                                            <span class="ms-2 align-middle d-inline-flex">
-                                                                @if (u.Picture != null && u.Picture.Length > 0)
-                                                                {
-                                                                    <img src="data:image/png;base64,@Convert.ToBase64String(u.Picture)"
-                                                                         alt="@u.Username"
-                                                                         width="24" height="24"
-                                                                         class="rounded-circle me-1" />
-                                                                }
-                                                                else
-                                                                {
-                                                                    <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center me-1"
-                                                                         style="width:24px; height:24px; font-size:0.8rem;">
-                                                                        @u.Username.Substring(0, 1).ToUpper()
-                                                                    </div>
-                                                                }
-                                                                <span class="align-self-center">@u.Username</span>
-                                                            </span>
-                                                        }
-                                                    </div>
-                                                }
-                                            </div>
-                                            <div class="text-end">
-                                                @if (goal.IsDone)
-                                                {
-                                                    <span class="badge bg-success">Completed</span>
-
-                                                    <br />
-                                                    <small class="text-muted">on @goal.CompletedAt?.ToShortDateString()</small>
-                                                }
-                                                else
-                                                {
-                                                    <span class="badge bg-danger">Not Completed</span>
-                                                }
-                                            </div>
-                                        </div>
-                                    </li>
-
-                                  
-                                    @if (goal.ChildGoals != null && goal.ChildGoals.Any())
-                                    {
-                                        foreach (var child in goal.ChildGoals)
-                                        {
-                                            <li class="list-group-item ms-4 border-start ps-3">
-                                                <div class="d-flex justify-content-between">
-                                                    <div>
-                                                        ↳ <strong>@child.Description</strong><br />
-                                                        <small class="text-muted">Deadline: @child.Deadline?.ToShortDateString()</small>
-
-                                                        @if (child.Recipients != null && child.Recipients.Any())
-                                                        {
-                                                            <div class="mt-1">
-                                                                <small class="text-muted">Shared with:</small>
-                                                                @foreach (var u in child.Recipients)
-                                                                {
-                                                                    <span class="ms-2 align-middle d-inline-flex">
-                                                                        @if (u.Picture != null && u.Picture.Length > 0)
-                                                                        {
-                                                                            <img src="data:image/png;base64,@Convert.ToBase64String(u.Picture)"
-                                                                                 alt="@u.Username"
-                                                                                 width="24" height="24"
-                                                                                 class="rounded-circle me-1" />
-                                                                        }
-                                                                        else
-                                                                        {
-                                                                            <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center me-1"
-                                                                                 style="width:24px; height:24px; font-size:0.8rem;">
-                                                                                @u.Username.Substring(0, 1).ToUpper()
-                                                                            </div>
-                                                                        }
-                                                                        <span class="align-self-center">@u.Username</span>
-                                                                    </span>
-                                                                }
-                                                            </div>
-                                                        }
-                                                    </div>
-                                                    <div class="text-end">
-                                                        @if (child.IsDone)
-                                                        {
-                                                            <span class="badge bg-success">Completed</span>
-
-                                                            <br />
-                                                            <small class="text-muted">on @child.CompletedAt?.ToShortDateString()</small>
-                                                        }
-                                                        else
-                                                        {
-                                                            <span class="badge bg-danger">Not Completed</span>
-                                                        }
-                                                    </div>
-                                                </div>
-                                            </li>
-                                        }
-                                    }
-                                }
-                            </ul>
-                        }
-                    }
-                </div>
-            }
+<div class="container mb-4">
+    <div class="row mb-3">
+        <div class="col-md-3">
+            <input type="text" id="historyDateRange" class="form-control" placeholder="Select date range" readonly />
         </div>
-    }
+        <div class="col-md-3">
+            <select id="goalTypeFilter" class="form-select">
+                <option value="">All Goal Types</option>
+                @foreach (var type in goalTypes)
+                {
+                    <option value="@type">@type</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-3">
+            <select id="categoryFilter" class="form-select">
+                <option value="">All Categories</option>
+                @foreach (var category in categories)
+                {
+                    <option value="@category">@category</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-3">
+            <button id="clearFilters" class="btn btn-outline-secondary w-100">Clear Filters</button>
+        </div>
+    </div>
+
+    <div id="historyContainer" class="mt-4 text-center">
+        <p class="text-muted">Please select a date range or filters to view your goal history.</p>
+    </div>
 </div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/litepicker/dist/litepicker.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/litepicker/dist/litepicker.css" rel="stylesheet" />
+
+    <script>
+        $(document).ready(function () {
+            const picker = new Litepicker({
+                element: document.getElementById('historyDateRange'),
+                singleMode: false,
+                format: 'YYYY-MM-DD',
+                maxDate: new Date(),
+                setup: (picker) => {
+                    picker.on('selected', () => {
+                        loadHistory();
+                    });
+                }
+            });
+
+            $('#goalTypeFilter, #categoryFilter').on('change', function () {
+                loadHistory();
+            });
+
+            $('#clearFilters').on('click', function () {
+                $('#historyDateRange').val('');
+                picker.clearSelection();
+
+                $('#goalTypeFilter').val('');
+                $('#categoryFilter').val('');
+                $('#historyContainer').html('<p class="text-muted">Please select a date range or filters to view your goal history.</p>');
+            });
+
+                   function loadHistory() {
+            const range = $('#historyDateRange').val();
+            let startDate = null;
+            let endDate = null;
+
+            if (range.includes(' - ')) {
+                const parts = range.split(' - ');
+                startDate = parts[0];
+                endDate = parts[1];
+            }
+
+                    const goalType = $('#goalTypeFilter').val() || null;
+        const category = $('#categoryFilter').val() || null;
+
+            if (!startDate && !endDate && !goalType && !category) {
+                $('#historyContainer').html('<p class="text-muted">Please select a date range or filters to view your goal history.</p>');
+                return;
+            }
+
+            $.ajax({
+                url: '/History/FilterHistory',
+                type: 'GET',
+                data: {
+                    startDate: startDate,
+                    endDate: endDate,
+                    goalType: goalType,
+                    category: category
+                },
+                success: function (html) {
+                    $('#historyContainer').html(html);
+                },
+                error: function () {
+                    $('#historyContainer').html('<p class="text-danger">Failed to load history.</p>');
+                }
+            });
+        }
+
+        });
+
+            $(document).off('click', '#loadMoreBtn').on('click', '#loadMoreBtn', function () {
+            const button = $(this);
+            const nextPage = parseInt(button.data('page')) + 1;
+            const pageSize = parseInt(button.data('pagesize'));
+
+            const dateRange = $('#historyDateRange').val();
+            let startDate = null, endDate = null;
+            if (dateRange.includes(' - ')) {
+                [startDate, endDate] = dateRange.split(' - ');
+            }
+
+            const goalType = $('#goalTypeFilter').val();
+            const category = $('#categoryFilter').val();
+
+            $.ajax({
+                url: '/History/FilterHistory',
+                type: 'GET',
+                data: {
+                    startDate: startDate,
+                    endDate: endDate,
+                    goalType: goalType,
+                    category: category,
+                    page: nextPage,
+                    pageSize: pageSize
+                },
+                success: function (html) {
+                    const newItems = $(html).find('ul.list-group').html();
+                    const newButton = $(html).find('#loadMoreBtn').closest('div');
+
+                    $('#historyContainer ul.list-group').append(newItems);
+                    $('#loadMoreBtn').closest('div').remove();
+                    $('#historyContainer').append(newButton);
+                },
+                error: function () {
+                    alert('Failed to load more results.');
+                }
+            });
+        });
+    </script>
+}

@@ -31,5 +31,14 @@ public interface IGoalRepo
     List<GoalEntity> LoadSharedGoalsOfUser(int userId);
     List<GoalEntity> LoadPersonalGoalsOfUser(int userId);
     List<GoalEntity> LoadActiveGoalsExcludingDismissed(int userId);
+    List<GoalEntity> LoadGoalsOfUserInRange(
+        int userId,
+        DateTime? startDate,
+        DateTime? endDate,
+        string? category,
+        string? goalType,
+        int page,
+        int pageSize);
+    List<string> GetDistinctGoalTypesForUser(int userId);
 
 }

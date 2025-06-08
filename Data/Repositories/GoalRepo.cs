@@ -1395,6 +1395,124 @@ AND dn.TriggeredByUserId = ug.UserId
 
         return goals;
     }
+    public List<GoalEntity> LoadGoalsOfUserInRange(
+    int userId,
+    DateTime? startDate,
+    DateTime? endDate,
+    string? category,
+    string? goalType,
+    int page,
+    int pageSize)
+    {
+        List<GoalEntity> goals = new();
+
+        using (SqlConnection conn = GetSqlConnection())
+        {
+            var command = new SqlCommand(@"
+SELECT DISTINCT
+    g.Id,
+    g.Category,
+    g.Type,
+    g.Description,
+    g.CreatedAt,
+    g.Deadline,
+    ug.CompletedAt,
+    ug.IsDone,
+    g.IsDeleted,
+    g.IsPostponed,
+    g.ParentGoalId,
+    g.OwnerId
+FROM Goal g
+INNER JOIN User_Goal ug ON g.Id = ug.GoalId
+WHERE ug.UserId = @UserId
+  AND g.IsDeleted = 0
+  AND (@StartDate IS NULL OR g.CreatedAt >= @StartDate)
+  AND (@EndDate IS NULL OR g.CreatedAt <= @EndDate)
+  AND (@GoalType IS NULL OR g.Type = @GoalType)
+  AND (@Category IS NULL OR g.Category = @Category)
+ORDER BY g.CreatedAt DESC
+OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY;", conn);
+
+            int offset = (page - 1) * pageSize;
+
+            command.Parameters.AddWithValue("@UserId", userId);
+            command.Parameters.AddWithValue("@StartDate", startDate.HasValue ? (object)startDate.Value : DBNull.Value);
+            command.Parameters.AddWithValue("@EndDate", endDate.HasValue ? (object)endDate.Value : DBNull.Value);
+            command.Parameters.AddWithValue("@GoalType", string.IsNullOrWhiteSpace(goalType) ? DBNull.Value : goalType);
+            command.Parameters.AddWithValue("@Category", string.IsNullOrWhiteSpace(category) ? DBNull.Value : category);
+            command.Parameters.AddWithValue("@Offset", offset);
+            command.Parameters.AddWithValue("@PageSize", pageSize);
+
+            conn.Open();
+            using SqlDataReader reader = command.ExecuteReader();
+            while (reader.Read())
+            {
+                var id = reader.GetInt32(0);
+                var categoryEnum = Enum.Parse<Category>(reader.GetString(1));
+                var typeEnum = Enum.Parse<GoalType>(reader.GetString(2));
+                var description = reader.GetString(3);
+                var createdAt = reader.GetDateTime(4);
+                var deadline = reader.IsDBNull(5) ? (DateTime?)null : reader.GetDateTime(5);
+                var completedAt = reader.IsDBNull(6) ? (DateTime?)null : reader.GetDateTime(6);
+                var isDone = reader.GetBoolean(7);
+                var isDeleted = reader.GetBoolean(8);
+                var isPostponed = reader.GetBoolean(9);
+                var parentGoalId = reader.IsDBNull(10) ? (int?)null : reader.GetInt32(10);
+                var ownerId = reader.GetInt32(11);
+
+                goals.Add(new GoalEntity(
+                    id,
+                    categoryEnum,
+                    typeEnum,
+                    description,
+                    createdAt,
+                    deadline,
+                    completedAt,
+                    isDone,
+                    isDeleted,
+                    isPostponed,
+                    parentGoalId,
+                    ownerId
+                ));
+            }
+        }
+
+        return goals;
+    }
+
+
+
+    public List<string> GetDistinctGoalTypesForUser(int userId)
+    {
+        var types = new List<string>();
+
+        using (SqlConnection conn = GetSqlConnection())
+        {
+            conn.Open();
+
+            string query = @"
+            SELECT DISTINCT g.[Type]
+            FROM Goal g
+            INNER JOIN User_Goal ug ON g.Id = ug.GoalId
+            WHERE ug.UserId = @UserId AND g.IsDeleted = 0";
+
+            using (SqlCommand cmd = new SqlCommand(query, conn))
+            {
+                cmd.Parameters.AddWithValue("@UserId", userId);
+
+                using (SqlDataReader reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        types.Add(reader.GetString(0));
+                    }
+                }
+            }
+        }
+
+        return types;
+    }
+
 
 }
 

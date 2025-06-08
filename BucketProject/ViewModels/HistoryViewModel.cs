@@ -8,6 +8,8 @@ namespace BucketProject.UI.ViewModels.ViewModels
         public string Description { get; set; }
         public DateTime? Deadline { get; set; }
         public DateTime? CompletedAt { get; set; }
+        public DateTime CreatedAt { get; set; }
+
         public bool IsDone { get; set; }
         public string Type { get; set; }
         public string Category { get; set; }
