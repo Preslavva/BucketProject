@@ -67,6 +67,34 @@ namespace BucketProject.BLL.Business_Logic.Services
                 .ToList();
         }
 
+        private string GetWeekLabel(DateTime date)
+        {
+            int diff = (7 + (date.DayOfWeek - DayOfWeek.Monday)) % 7;
+            var startOfWeek = date.AddDays(-diff).Date;
+            var endOfWeek = startOfWeek.AddDays(6).Date;
+            return $"{startOfWeek:yyyy-MM-dd} - {endOfWeek:yyyy-MM-dd}";
+        }
+        private List<string> GetWeekLabelsFromFirstCompletion(List<Goal> completedGoals, int maxWeeks = 12)
+        {
+            if (completedGoals.Count == 0)
+                return new List<string>();
+
+            DateTime first = completedGoals.Min(g => g.CompletedAt.Value);
+            int firstDiff = (7 + (first.DayOfWeek - DayOfWeek.Monday)) % 7;
+            DateTime startWeek = first.AddDays(-firstDiff).Date;
+
+            DateTime today = DateTime.Today;
+            int todayDiff = (7 + (today.DayOfWeek - DayOfWeek.Monday)) % 7;
+            DateTime currentWeek = today.AddDays(-todayDiff).Date;
+
+            List<string> weekLabels = new List<string>();
+            for (DateTime dt = startWeek; dt <= currentWeek && weekLabels.Count < maxWeeks; dt = dt.AddDays(7))
+            {
+                weekLabels.Add(GetWeekLabel(dt));
+            }
+
+            return weekLabels;
+        }
         public List<StatsDTO> GetCompletedGoalsPerWeek()
         {
             int userId = _userService.GetCurrentUserId();
@@ -75,40 +103,38 @@ namespace BucketProject.BLL.Business_Logic.Services
             List<Goal> sharedGoals = _mapper.Map<List<Goal>>(_goalRepo.LoadSharedGoalsOfUser(userId));
             var allGoals = personalGoals.Concat(sharedGoals);
 
-            var completedPerWeek = allGoals
+            var completedGoals = allGoals
                 .Where(g => g.IsDone && g.CompletedAt.HasValue)
-                .GroupBy(g => GetWeekLabel(g.CompletedAt.Value))
-                .Select(grp => new StatsDTO
-                {
-                    Period = grp.Key,
-                    Count = grp.Count()
-                })
-                .OrderBy(dto => dto.Period)
                 .ToList();
 
-            return completedPerWeek;
+            var completedGrouped = completedGoals
+                .GroupBy(g => GetWeekLabel(g.CompletedAt.Value))
+                .ToDictionary(grp => grp.Key, grp => grp.Count());
+
+            var weekLabels = GetWeekLabelsFromFirstCompletion(completedGoals, 12);
+
+            var result = weekLabels
+                .Select(label => new StatsDTO
+                {
+                    Period = label,
+                    Count = completedGrouped.ContainsKey(label) ? completedGrouped[label] : 0
+                })
+                .ToList();
+
+            return result;
         }
-
-        private string GetWeekLabel(DateTime date)
-        {
-            var startOfWeek = date.AddDays(-(int)date.DayOfWeek).Date.AddDays(1);
-            var endOfWeek = startOfWeek.AddDays(6);
-
-            return $"{startOfWeek:yyyy-MM-dd} - {endOfWeek:yyyy-MM-dd}";
-        }
-
         public string GetWeeklyCompletionRateMessageWeek()
         {
-            List<StatsDTO> allWeekly = GetCompletedGoalsPerWeek();
+            var allWeekly = GetCompletedGoalsPerWeek();
 
-            DateTime today = DateTime.Now; 
-            string thisWeekLabel = GetWeekLabel(today);
-            string lastWeekLabel = GetWeekLabel(today.AddDays(-7));
+            if (allWeekly.Count < 2)
+                return "Not enough data to compare weekly progress yet.";
 
-            int thisWeekCount = allWeekly
-                .FirstOrDefault(s => s.Period == thisWeekLabel)?.Count ?? 0;
-            int lastWeekCount = allWeekly
-                .FirstOrDefault(s => s.Period == lastWeekLabel)?.Count ?? 0;
+            string lastWeekLabel = allWeekly[^2].Period;
+            string thisWeekLabel = allWeekly[^1].Period;
+
+            int lastWeekCount = allWeekly[^2].Count;
+            int thisWeekCount = allWeekly[^1].Count;
 
             if (lastWeekCount == 0)
             {
@@ -133,16 +159,35 @@ namespace BucketProject.BLL.Business_Logic.Services
                 }
                 else if (pctChange > 0)
                 {
-                    return $"Your completion rate has gone up by {rounded}% this week.";
+                    return $"Your completion rate has gone up by {rounded}% this week, compared to last week.";
                 }
-                else 
+                else
                 {
-                    return $"Your completion rate has gone down by {rounded}% this week.";
+                    return $"Your completion rate has gone down by {rounded}% this week, compared to last week.";
                 }
             }
         }
 
 
+
+
+        private List<string> GetMonthLabelsFromFirstCompletion(List<Goal> completedGoals, int maxMonths = 12)
+        {
+            if (completedGoals.Count == 0)
+                return new List<string>(); 
+
+            DateTime first = completedGoals.Min(g => g.CompletedAt.Value);
+            DateTime startMonth = new DateTime(first.Year, first.Month, 1);
+            DateTime now = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
+
+            var labels = new List<string>();
+            for (DateTime dt = startMonth; dt <= now && labels.Count < maxMonths; dt = dt.AddMonths(1))
+            {
+                labels.Add(dt.ToString("yyyy MMMM"));
+            }
+
+            return labels;
+        }
         public List<StatsDTO> GetCompletedGoalsPerMonth()
         {
             int userId = _userService.GetCurrentUserId();
@@ -150,44 +195,38 @@ namespace BucketProject.BLL.Business_Logic.Services
             List<Goal> sharedGoals = _mapper.Map<List<Goal>>(_goalRepo.LoadSharedGoalsOfUser(userId));
             var allGoals = personalGoals.Concat(sharedGoals);
 
-            var completedPerMonth = allGoals
+            var completedGoals = allGoals
                 .Where(g => g.IsDone && g.CompletedAt.HasValue)
-                .GroupBy(g => new DateTime(
-                    g.CompletedAt.Value.Year,
-                    g.CompletedAt.Value.Month,
-                    1
-                ))
-                .Select(grp => new
+                .ToList();
+
+            var monthLabels = GetMonthLabelsFromFirstCompletion(completedGoals, 12);
+
+            var grouped = completedGoals
+                .GroupBy(g => new DateTime(g.CompletedAt.Value.Year, g.CompletedAt.Value.Month, 1))
+                .ToDictionary(g => g.Key.ToString("yyyy MMMM"), g => g.Count());
+
+            var result = monthLabels
+                .Select(label => new StatsDTO
                 {
-                    MonthKey = grp.Key,    
-                    Count = grp.Count()
-                })
-                .OrderBy(x => x.MonthKey)
-                .Select(x => new StatsDTO
-                {
-                    Period = x.MonthKey.ToString("yyyy MMMM"),
-                    Count = x.Count
+                    Period = label,
+                    Count = grouped.ContainsKey(label) ? grouped[label] : 0
                 })
                 .ToList();
 
-            return completedPerMonth;
+            return result;
         }
-
         public string GetCompletionRateMessageMonth()
         {
-            List<StatsDTO> allMonthly = GetCompletedGoalsPerMonth();
+            var allMonthly = GetCompletedGoalsPerMonth();
 
-            DateTime today = DateTime.Now; 
-            DateTime firstOfThisMonth = new DateTime(today.Year, today.Month, 1);
-            DateTime firstOfLastMonth = firstOfThisMonth.AddMonths(-1);
+            if (allMonthly.Count < 2)
+                return "Not enough data to compare monthly progress yet.";
 
-            string thisMonthLabel = firstOfThisMonth.ToString("yyyy MMMM");      
-            string lastMonthLabel = firstOfLastMonth.ToString("yyyy MMMM");      
+            string lastMonthLabel = allMonthly[^2].Period;
+            string thisMonthLabel = allMonthly[^1].Period;
 
-            int thisMonthCount = allMonthly
-                .FirstOrDefault(s => s.Period == thisMonthLabel)?.Count ?? 0;
-            int lastMonthCount = allMonthly
-                .FirstOrDefault(s => s.Period == lastMonthLabel)?.Count ?? 0;
+            int lastMonthCount = allMonthly[^2].Count;
+            int thisMonthCount = allMonthly[^1].Count;
 
             if (lastMonthCount == 0)
             {
@@ -197,12 +236,11 @@ namespace BucketProject.BLL.Business_Logic.Services
                 }
                 else
                 {
-                  
                     return $"Great job! You completed {thisMonthCount} goal(s) this month, up from 0 last month.";
                 }
             }
             else
-            { 
+            {
                 double rawChange = thisMonthCount - lastMonthCount;
                 double pctChange = (rawChange / lastMonthCount) * 100.0;
                 int rounded = (int)Math.Round(Math.Abs(pctChange));
@@ -213,11 +251,11 @@ namespace BucketProject.BLL.Business_Logic.Services
                 }
                 else if (pctChange > 0)
                 {
-                    return $"Your completion rate has gone up by {rounded}% this month.";
+                    return $"Your completion rate has gone up by {rounded}% this month, compared to last month.";
                 }
-                else 
+                else
                 {
-                    return $"Your completion rate has gone down by {rounded}% this month.";
+                    return $"Your completion rate has gone down by {rounded}% this month, compared to last month";
                 }
             }
         }
@@ -248,6 +286,9 @@ namespace BucketProject.BLL.Business_Logic.Services
         public string GetYearlyCompletionRateMessage()
         {
             List<StatsDTO> allYearly = GetCompletedGoalsPerYear();
+
+            if (allYearly.Count < 2)
+                return "Not enough data to compare yearly progress yet.";
 
             int thisYear = DateTime.Now.Year;           
             int lastYear = thisYear - 1;            
@@ -284,11 +325,11 @@ namespace BucketProject.BLL.Business_Logic.Services
                 }
                 else if (pctChange > 0)
                 {
-                    return $"Your completion rate has gone up by {rounded}% this year.";
+                    return $"Your completion rate has gone up by {rounded}% this year, compared to last year.";
                 }
                 else 
                 {
-                    return $"Your completion rate has gone down by {rounded}% this year.";
+                    return $"Your completion rate has gone down by {rounded}% this year, compared to last year.";
                 }
             }
         }
