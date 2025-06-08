@@ -5,6 +5,7 @@ using BucketProject.UI.ViewModels.ViewModels;
 using AutoMapper;
 using BucketProject.BLL.Business_Logic.Domain;
 using BucketProject.DAL.Models.Enums;
+using BucketProject.BLL.Business_Logic.Services;
 
 namespace BucketProject.Controllers
 {
@@ -33,17 +34,30 @@ namespace BucketProject.Controllers
         }
 
         [HttpGet]
-        public IActionResult FilterHistory(DateTime? startDate, DateTime? endDate, string? category, string? goalType, int page = 1, int pageSize = 4)
+        public IActionResult FilterHistory(
+        DateTime? startDate,
+        DateTime? endDate,
+        string? category,
+        string? goalType,
+        int page = 1,
+        int pageSize = 4)
         {
+
+            int totalGoals = _goalService.CountGoalsCreatedInRange(startDate, endDate, category, goalType);
+
+
             List<Goal> goals = _goalService.GetGoalsCreatedInRange(startDate, endDate, category, goalType, page, pageSize);
             List<HistoryViewModel> result = _mapper.Map<List<HistoryViewModel>>(goals);
 
+            int totalPages = (int)Math.Ceiling((double)totalGoals / pageSize);
+
             ViewBag.CurrentPage = page;
             ViewBag.PageSize = pageSize;
-            ViewBag.HasMore = result.Count == pageSize;
+            ViewBag.TotalPages = totalPages;
 
             return PartialView("_HistoryPartial", result);
         }
+
     }
 
 }

@@ -40,5 +40,5 @@ public interface IGoalRepo
         int page,
         int pageSize);
     List<string> GetDistinctGoalTypesForUser(int userId);
-
+    int CountGoalsOfUser(int userId, DateTime? startDate, DateTime? endDate, string? goalType, string? category);
 }

@@ -1513,6 +1513,30 @@ OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY;", conn);
         return types;
     }
 
+    public int CountGoalsOfUser(int userId, DateTime? startDate, DateTime? endDate, string? goalType, string? category)
+    {
+        using var conn = GetSqlConnection();
+        using var command = new SqlCommand(@"
+        SELECT COUNT(*)
+        FROM Goal g
+        INNER JOIN User_Goal ug ON g.Id = ug.GoalId
+        WHERE ug.UserId = @UserId
+          AND g.IsDeleted = 0
+          AND (@StartDate IS NULL OR g.CreatedAt >= @StartDate)
+          AND (@EndDate IS NULL OR g.CreatedAt <= @EndDate)
+          AND (@GoalType IS NULL OR g.Type = @GoalType)
+          AND (@Category IS NULL OR g.Category = @Category)
+    ", conn);
+
+        command.Parameters.AddWithValue("@UserId", userId);
+        command.Parameters.AddWithValue("@StartDate", startDate ?? (object)DBNull.Value);
+        command.Parameters.AddWithValue("@EndDate", endDate ?? (object)DBNull.Value);
+        command.Parameters.AddWithValue("@GoalType", string.IsNullOrWhiteSpace(goalType) ? DBNull.Value : goalType);
+        command.Parameters.AddWithValue("@Category", string.IsNullOrWhiteSpace(category) ? DBNull.Value : category);
+
+        conn.Open();
+        return (int)command.ExecuteScalar();
+    }
 
 }
 

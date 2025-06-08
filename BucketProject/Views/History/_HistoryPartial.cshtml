@@ -3,7 +3,7 @@
 @{
     int currentPage = ViewBag.CurrentPage ?? 1;
     int pageSize = ViewBag.PageSize ?? 4;
-    bool hasMore = ViewBag.HasMore ?? false;
+    int totalPages = ViewBag.TotalPages ?? 1;
 }
 
 @if (!Model.Any())
@@ -15,65 +15,86 @@ else
     <ul class="list-group">
         @foreach (var goal in Model)
         {
-            <li class="list-group-item mb-2">
-                <div class="d-flex justify-content-between align-items-start">
-                    <div>
-                        <strong>@goal.Description</strong><br />
+            var isChild = goal.ParentGoalId != null;
+            var indentClass = isChild ? "ms-4" : "";
+            var arrow = isChild ? "<span class='me-2'>▶</span>" : "";
+            var marginClass = isChild ? "" : "mb-2"; 
+
+            <li class="list-group-item position-relative @marginClass @indentClass">
+                <div class="position-absolute top-0 end-0 m-2 text-end">
+                    @if (goal.IsDone)
+                    {
+                        <span class="badge bg-success">Completed</span>
+
+                        <br />
+                        <small class="text-muted">on @goal.CompletedAt?.ToShortDateString()</small>
+                    }
+                    else
+                    {
+                        <span class="badge bg-danger">Not Completed</span>
+                    }
+                </div>
+
+                <div class="d-flex align-items-start">
+                    <div class="flex-grow-1 text-start">
+                        @Html.Raw(arrow)<strong>@goal.Description</strong><br />
                         <small class="text-muted">Created At: @goal.CreatedAt.ToShortDateString()</small><br />
-                        <small class="text-muted">Deadline: @goal.Deadline?.ToShortDateString()</small>
+                        <small class="text-muted">Deadline: @goal.Deadline?.ToShortDateString()</small><br />
+                        <small class="text-muted">Category: @goal.Category</small><br />
+                        <small class="text-muted">Type: @goal.Type</small><br />
+
 
                         @if (goal.Recipients != null && goal.Recipients.Any())
                         {
-                            <div class="mt-2">
-                                <small class="text-muted">Shared with:</small>
-                                @foreach (var u in goal.Recipients)
+                            <div class="mt-2 d-flex align-items-center flex-wrap">
+                                <small class="text-muted me-2">Shared with:</small>
+                                @foreach (var user in goal.Recipients)
                                 {
-                                    <span class="ms-2 d-inline-flex align-items-center">
-                                        @if (u.Picture != null && u.Picture.Length > 0)
-                                        {
-                                            <img src="data:image/png;base64,@Convert.ToBase64String(u.Picture)"
-                                                 alt="@u.Username"
-                                                 width="24" height="24"
-                                                 class="rounded-circle me-1" />
-                                        }
-                                        else
-                                        {
-                                            <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center me-1"
-                                                 style="width:24px; height:24px; font-size:0.8rem;">
-                                                @u.Username.Substring(0, 1).ToUpper()
-                                            </div>
-                                        }
-                                        <span>@u.Username</span>
-                                    </span>
+                                    @if (user.Picture != null && user.Picture.Length > 0)
+                                    {
+                                        var imgSrc = $"data:image/png;base64,{Convert.ToBase64String(user.Picture)}";
+                                        <img src="@imgSrc" alt="@user.Username"
+                                             width="24" height="24"
+                                             class="rounded-circle me-1"
+                                             style="object-fit: cover;" />
+                                    }
+                                    else
+                                    {
+                                        <div class="rounded-circle bg-secondary text-white d-inline-flex align-items-center justify-content-center me-1"
+                                             style="width: 24px; height: 24px; font-size: 0.8rem;">
+                                            @user.Username.Substring(0, 1).ToUpper()
+                                        </div>
+                                    }
+                                    <span class="me-3">@user.Username</span>
                                 }
                             </div>
-                        }
-                    </div>
-
-                    <div class="text-end">
-                        @if (goal.IsDone)
-                        {
-                            <span class="badge bg-success">Completed</span>
-                            <br />
-                            <small class="text-muted">on @goal.CompletedAt?.ToShortDateString()</small>
-                        }
-                        else
-                        {
-                            <span class="badge bg-danger">Not Completed</span>
                         }
                     </div>
                 </div>
             </li>
         }
+
+
     </ul>
 
-    @if (hasMore)
+    @if (totalPages > 1)
     {
-        <div class="text-center mt-3">
-            <button id="loadMoreBtn" class="btn btn-outline-primary"
-                    data-page="@currentPage" data-pagesize="@pageSize">
-                Load More
-            </button>
+        <div class="pagination mt-3 justify-content-center d-flex gap-2">
+            @if (currentPage > 1)
+            {
+                <a href="javascript:void(0);" class="page-link" data-page="@(currentPage - 1)">« Previous</a>
+            }
+
+            @for (int i = 1; i <= totalPages; i++)
+            {
+                var activeClass = i == currentPage ? "active-page" : "";
+                <a href="javascript:void(0);" class="page-link @activeClass" data-page="@i">@i</a>
+            }
+
+            @if (currentPage < totalPages)
+            {
+                <a href="javascript:void(0);" class="page-link" data-page="@(currentPage + 1)">Next »</a>
+            }
         </div>
     }
 }

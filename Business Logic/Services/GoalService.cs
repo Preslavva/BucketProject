@@ -382,6 +382,11 @@ namespace BucketProject.BLL.Business_Logic.Services
             int userId = _userService.GetCurrentUserId();
             return _goalRepo.GetDistinctGoalTypesForUser(userId);
         }
+        public int CountGoalsCreatedInRange(DateTime? startDate, DateTime? endDate, string? category, string? type)
+        {
+            int userId = _userService.GetCurrentUserId();
+            return _goalRepo.CountGoalsOfUser(userId, startDate, endDate, type, category);
+        }
 
     }
 

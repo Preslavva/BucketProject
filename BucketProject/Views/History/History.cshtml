@@ -53,100 +53,66 @@
                 maxDate: new Date(),
                 setup: (picker) => {
                     picker.on('selected', () => {
-                        loadHistory();
+                        loadHistory(1); 
                     });
                 }
             });
 
             $('#goalTypeFilter, #categoryFilter').on('change', function () {
-                loadHistory();
+                loadHistory(1); 
             });
 
             $('#clearFilters').on('click', function () {
                 $('#historyDateRange').val('');
                 picker.clearSelection();
-
                 $('#goalTypeFilter').val('');
                 $('#categoryFilter').val('');
                 $('#historyContainer').html('<p class="text-muted">Please select a date range or filters to view your goal history.</p>');
             });
 
-                   function loadHistory() {
-            const range = $('#historyDateRange').val();
-            let startDate = null;
-            let endDate = null;
-
-            if (range.includes(' - ')) {
-                const parts = range.split(' - ');
-                startDate = parts[0];
-                endDate = parts[1];
-            }
-
-                    const goalType = $('#goalTypeFilter').val() || null;
-        const category = $('#categoryFilter').val() || null;
-
-            if (!startDate && !endDate && !goalType && !category) {
-                $('#historyContainer').html('<p class="text-muted">Please select a date range or filters to view your goal history.</p>');
-                return;
-            }
-
-            $.ajax({
-                url: '/History/FilterHistory',
-                type: 'GET',
-                data: {
-                    startDate: startDate,
-                    endDate: endDate,
-                    goalType: goalType,
-                    category: category
-                },
-                success: function (html) {
-                    $('#historyContainer').html(html);
-                },
-                error: function () {
-                    $('#historyContainer').html('<p class="text-danger">Failed to load history.</p>');
-                }
+            $(document).on('click', '.page-link', function () {
+                const page = $(this).data('page');
+                loadHistory(page);
             });
-        }
 
-        });
+            function loadHistory(page) {
+                const range = $('#historyDateRange').val();
+                let startDate = null, endDate = null;
 
-            $(document).off('click', '#loadMoreBtn').on('click', '#loadMoreBtn', function () {
-            const button = $(this);
-            const nextPage = parseInt(button.data('page')) + 1;
-            const pageSize = parseInt(button.data('pagesize'));
-
-            const dateRange = $('#historyDateRange').val();
-            let startDate = null, endDate = null;
-            if (dateRange.includes(' - ')) {
-                [startDate, endDate] = dateRange.split(' - ');
-            }
-
-            const goalType = $('#goalTypeFilter').val();
-            const category = $('#categoryFilter').val();
-
-            $.ajax({
-                url: '/History/FilterHistory',
-                type: 'GET',
-                data: {
-                    startDate: startDate,
-                    endDate: endDate,
-                    goalType: goalType,
-                    category: category,
-                    page: nextPage,
-                    pageSize: pageSize
-                },
-                success: function (html) {
-                    const newItems = $(html).find('ul.list-group').html();
-                    const newButton = $(html).find('#loadMoreBtn').closest('div');
-
-                    $('#historyContainer ul.list-group').append(newItems);
-                    $('#loadMoreBtn').closest('div').remove();
-                    $('#historyContainer').append(newButton);
-                },
-                error: function () {
-                    alert('Failed to load more results.');
+                if (range.includes(' - ')) {
+                    const parts = range.split(' - ');
+                    startDate = parts[0];
+                    endDate = parts[1];
                 }
-            });
+
+                const goalType = $('#goalTypeFilter').val() || null;
+                const category = $('#categoryFilter').val() || null;
+
+                if (!startDate && !endDate && !goalType && !category) {
+                    $('#historyContainer').html('<p class="text-muted">Please select a date range or filters to view your goal history.</p>');
+                    return;
+                }
+
+                $.ajax({
+                    url: '/History/FilterHistory',
+                    type: 'GET',
+                    data: {
+                        startDate: startDate,
+                        endDate: endDate,
+                        goalType: goalType,
+                        category: category,
+                        page: page,
+                        pageSize: 4
+                    },
+                    success: function (html) {
+                        $('#historyContainer').html(html);
+                    },
+                    error: function () {
+                        $('#historyContainer').html('<p class="text-danger">Failed to load history.</p>');
+                    }
+                });
+            }
         });
     </script>
 }
+
