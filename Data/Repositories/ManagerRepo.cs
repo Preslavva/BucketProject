@@ -494,6 +494,7 @@ FETCH NEXT @PageSize ROWS ONLY;
               AND (@minAge IS NULL OR DATEDIFF(YEAR, DateOfBirth, @today) >= @minAge)
               AND (@maxAge IS NULL OR DATEDIFF(YEAR, DateOfBirth, @today) <= @maxAge)
               AND (@createdAfter IS NULL OR CreatedAt >= @createdAfter)
+              AND Role <> 'Manager'
         ", connection);
 
                 command.Parameters.AddWithValue("@query", string.IsNullOrWhiteSpace(query) ? DBNull.Value : query);

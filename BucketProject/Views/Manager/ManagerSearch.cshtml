@@ -42,31 +42,21 @@
     </form>
 
     <div id="userTableContainer">
-        @await Html.PartialAsync("_UserTablePartial", Model)
+        @if ((Model != null && Model.Any()) )
+        {
+            @await Html.PartialAsync("_UserTablePartial", Model)
+        }
+        else
+        {
+            <p class="text-center text-muted">Please apply a filter to search for users.</p>
+        }
+
     </div>
 
-        @if (ViewBag.TotalPages > 1)
-        {
-            <div class="pagination mt-3">
-                @for (int i = 1; i <= ViewBag.TotalPages; i++)
-                {
-                    var isActive = i == ViewBag.CurrentPage ? "active-page" : "";
-                    <a class="page-link @isActive"
-                       href="@Url.Action("ManagerSearch", new {
-                           query = Context.Request.Query["query"],
-                           gender = Context.Request.Query["gender"],
-                           nationality = Context.Request.Query["nationality"],
-                           minAge = Context.Request.Query["minAge"],
-                           maxAge = Context.Request.Query["maxAge"],
-                           createdAfter = Context.Request.Query["createdAfter"],
-                           page = i
-                       })">
-                        @i
-                    </a>
-                }
-            </div>
-        }
+   
+
    
 </div>
+
 
 

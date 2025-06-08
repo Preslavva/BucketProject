@@ -53,13 +53,24 @@ else
 
     @if (ViewBag.TotalPages > 1)
     {
-        <div class="pagination mt-3">
+        <div class="pagination mt-3 justify-content-center d-flex gap-2">
+            @if ((int)ViewBag.CurrentPage > 1)
+            {
+                <a href="javascript:void(0);" class="page-link" data-page="@(ViewBag.CurrentPage - 1)">« Previous</a>
+            }
+
             @for (int i = 1; i <= (int)ViewBag.TotalPages; i++)
             {
                 var activeClass = i == (int)ViewBag.CurrentPage ? "active-page" : "";
                 <a href="javascript:void(0);" class="page-link @activeClass" data-page="@i">@i</a>
             }
+
+            @if ((int)ViewBag.CurrentPage < (int)ViewBag.TotalPages)
+            {
+                <a href="javascript:void(0);" class="page-link" data-page="@(ViewBag.CurrentPage + 1)">Next »</a>
+            }
         </div>
     }
+
 }
 

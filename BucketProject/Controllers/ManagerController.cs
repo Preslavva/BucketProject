@@ -18,30 +18,16 @@ namespace BucketProject.Controllers
         }
 
         [HttpGet]
-        public IActionResult ManagerSearch(string query, string gender, string nationality, int? minAge, int? maxAge, DateTime? createdAfter, int page = 1)
+        public IActionResult ManagerSearch()
         {
             var role = HttpContext.Session.GetString("Role");
             if (role != "Manager")
                 return RedirectToAction("LogIn", "User");
 
-            const int pageSize = 4;
-
             ViewBag.Genders = _statsService.GetAllGenders();
             ViewBag.Nationalities = _statsService.GetAllNationalities();
 
-            List<User> pagedUsers = new List<User>();
-            var totalUserCount = 0;
-
-            if (HasActiveFilters(query, gender, nationality, minAge, maxAge, createdAfter))
-            {
-                pagedUsers = _statsService.SearchUsers(query, gender, nationality, minAge, maxAge, createdAfter, page, pageSize);
-                totalUserCount = _statsService.GetFilteredUserCount(query, gender, nationality, minAge, maxAge, createdAfter);
-            }
-
-            ViewBag.CurrentPage = page;
-            ViewBag.TotalPages = (int)Math.Ceiling(totalUserCount / (double)pageSize);
-
-            return View("ManagerSearch", pagedUsers);
+            return View("ManagerSearch"); 
         }
 
         [HttpGet]
@@ -116,20 +102,23 @@ namespace BucketProject.Controllers
         {
             const int pageSize = 4;
 
-            List<User> pagedUsers = new List<User>();
-            int totalUserCount = 0;
-
-            if (HasActiveFilters(query, gender, nationality, minAge, maxAge, createdAfter))
+            if (!HasActiveFilters(query, gender, nationality, minAge, maxAge, createdAfter))
             {
-                pagedUsers = _statsService.SearchUsers(query, gender, nationality, minAge, maxAge, createdAfter, page, pageSize);
-                totalUserCount = _statsService.GetFilteredUserCount(query, gender, nationality, minAge, maxAge, createdAfter);
+                ViewBag.CurrentPage = 1;
+                ViewBag.TotalPages = 0;
+                return PartialView("_UserTablePartial", new List<User>());
             }
+
+            List<User> pagedUsers = _statsService.SearchUsers(query, gender, nationality, minAge, maxAge, createdAfter, page, pageSize);
+            int totalUserCount = _statsService.GetFilteredUserCount(query, gender, nationality, minAge, maxAge, createdAfter);
 
             ViewBag.CurrentPage = page;
             ViewBag.TotalPages = (int)Math.Ceiling(totalUserCount / (double)pageSize);
 
             return PartialView("_UserTablePartial", pagedUsers);
         }
+
+
 
     }
 }
