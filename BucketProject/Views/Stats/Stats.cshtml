@@ -162,7 +162,18 @@
                         title: { display: true, text: 'Completed Goals Per Week' },
                         legend: { position: 'bottom' }
                     },
-                    scales: { y: { beginAtZero: true } }
+                                scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1,
+                        callback: function(value) {
+                            return Number.isInteger(value) && value > 0 ? value : '';
+                        }
+                    }
+                }
+            }
+
                 }
             });
         </script>
@@ -195,7 +206,18 @@
                         title: { display: true, text: 'Completed Goals Per Month' },
                         legend: { position: 'bottom' }
                     },
-                    scales: { y: { beginAtZero: true } }
+                               scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1,
+                        callback: function(value) {
+                            return Number.isInteger(value) && value > 0 ? value : '';
+                        }
+                    }
+                }
+            }
+
                 }
             });
         </script>
@@ -224,7 +246,18 @@
                         title: { display: true, text: 'Completed Goals Per Year' },
                         legend: { position: 'bottom' }
                     },
-                    scales: { y: { beginAtZero: true } }
+                               scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1,
+                        callback: function(value) {
+                            return Number.isInteger(value) && value > 0 ? value : '';
+                        }
+                    }
+                }
+            }
+
                 }
             });
         </script>

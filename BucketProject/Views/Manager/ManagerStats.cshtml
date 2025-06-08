@@ -90,7 +90,7 @@
                     <canvas id="goalsLineChart" class="chart-canvas"></canvas>
 
                     <div class="text-center mt-3">
-                        <span class="text-muted">@ViewBag.GoalMessage</span>
+                        <span class="text-muted">@ViewBag.Message</span>
                     </div>
                 </div>
                
@@ -145,10 +145,9 @@
 
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
         @if (hasUsers)
         {
-            <text>
+            <script>
                     const userCtx = document.getElementById('userLineChart').getContext('2d');
                     new Chart(userCtx, {
                         type: 'line',
@@ -170,20 +169,26 @@
                                 title: { display: true, text: 'Monthly User Registrations' },
                                 legend: { position: 'bottom' }
                             },
-                            scales: {
-                                y: {
-                                    beginAtZero: true
-                                   
-                                }
-                            }
+                                        scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1,
+                        callback: function (value) {
+                            return Number.isInteger(value) && value > 0 ? value : '';
+                        }
+                    }
+                }
+            }
+
                         }
                     });
-            </text>
+            </script>
         }
 
         @if (hasGoals)
         {
-            <text>
+            <script>
                     const goalCtx = document.getElementById('goalsLineChart').getContext('2d');
                     new Chart(goalCtx, {
                         type: 'line',
@@ -205,86 +210,97 @@
                                 title: { display: true, text: 'Monthly Goal Creation' },
                                 legend: { position: 'bottom' }
                             },
-                            scales: {
-                                y: {
-                                    beginAtZero: true
-                                }
-                            }
+                                       scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1,
+                        callback: function (value) {
+                            return Number.isInteger(value) && value > 0 ? value : '';
+                        }
+                    }
+                }
+            }
+
                         }
                     });
-            </text>
+            </script>
         }
 
+    <script>
         const pieConfigs = [
-            {
-                id: 'goalTypeChart',
-                data: @Html.Raw(Json.Serialize(ViewBag.TypeData)),
-                labels: @Html.Raw(Json.Serialize(ViewBag.TypeLabels)),
-                title: 'Top 5 Goal Types'
-            },
-            {
-                id: 'goalCategoryChart',
-                data: @Html.Raw(Json.Serialize(ViewBag.CategoryData)),
-                labels: @Html.Raw(Json.Serialize(ViewBag.CategoryLabels)),
-                title: 'Goals by Category'
-            },
-            {
-                id: 'nationalityChart',
-                data: @Html.Raw(Json.Serialize(ViewBag.NationalityData)),
-                labels: @Html.Raw(Json.Serialize(ViewBag.NationalityLabels)),
-                title: 'Top 5 Nationalities'
-            },
-            {
-                id: 'genderChart',
-                data: @Html.Raw(Json.Serialize(ViewBag.GenderData)),
-                labels: @Html.Raw(Json.Serialize(ViewBag.GenderLabels)),
-                title: 'User Gender Distribution'
-            },
-            {
-                id: 'ageChart',
-                data: @Html.Raw(Json.Serialize(ViewBag.AgeData)),
-                labels: @Html.Raw(Json.Serialize(ViewBag.AgeLabels)),
-                title: 'User Age Group Distribution'
-            }
+        {
+        id: 'goalTypeChart',
+        data: @Html.Raw(Json.Serialize(ViewBag.TypeData)),
+        labels: @Html.Raw(Json.Serialize(ViewBag.TypeLabels)),
+        title: 'Top 5 Goal Types'
+        },
+        {
+        id: 'goalCategoryChart',
+        data: @Html.Raw(Json.Serialize(ViewBag.CategoryData)),
+        labels: @Html.Raw(Json.Serialize(ViewBag.CategoryLabels)),
+        title: 'Goals by Category'
+        },
+        {
+        id: 'nationalityChart',
+        data: @Html.Raw(Json.Serialize(ViewBag.NationalityData)),
+        labels: @Html.Raw(Json.Serialize(ViewBag.NationalityLabels)),
+        title: 'Top 5 Nationalities'
+        },
+        {
+        id: 'genderChart',
+        data: @Html.Raw(Json.Serialize(ViewBag.GenderData)),
+        labels: @Html.Raw(Json.Serialize(ViewBag.GenderLabels)),
+        title: 'User Gender Distribution'
+        },
+        {
+        id: 'ageChart',
+        data: @Html.Raw(Json.Serialize(ViewBag.AgeData)),
+        labels: @Html.Raw(Json.Serialize(ViewBag.AgeLabels)),
+        title: 'User Age Group Distribution'
+        }
         ];
 
         pieConfigs.forEach(cfg => {
-            if (cfg.data.length > 0) {
-                const ctx = document.getElementById(cfg.id)?.getContext('2d');
-                if (ctx) {
-                    new Chart(ctx, {
-                        type: 'pie',
-                        data: {
-                            labels: cfg.labels,
-                            datasets: [{
-                                data: cfg.data,
-                                backgroundColor: [
-                                    'rgba(255, 99, 132, 0.6)',
-                                    'rgba(54, 162, 235, 0.6)',
-                                    'rgba(255, 206, 86, 0.6)',
-                                    'rgba(75, 192, 192, 0.6)',
-                                    'rgba(153, 102, 255, 0.6)',
-                                    'rgba(255, 159, 64, 0.6)',
-                                    'rgba(201, 203, 207, 0.6)'
-                                ],
-                                borderWidth: 1
-                            }]
-                        },
-                        options: {
-                            responsive: false,
-                            plugins: {
-                                legend: { position: 'bottom' },
-                                title: { display: true, text: cfg.title }
-                            }
-                        }
-                    });
-                }
-            }
+        if (cfg.data.length > 0) {
+        const ctx = document.getElementById(cfg.id)?.getContext('2d');
+        if (ctx) {
+        new Chart(ctx, {
+        type: 'pie',
+        data: {
+        labels: cfg.labels,
+        datasets: [{
+        data: cfg.data,
+        backgroundColor: [
+        'rgba(255, 99, 132, 0.6)',
+        'rgba(54, 162, 235, 0.6)',
+        'rgba(255, 206, 86, 0.6)',
+        'rgba(75, 192, 192, 0.6)',
+        'rgba(153, 102, 255, 0.6)',
+        'rgba(255, 159, 64, 0.6)',
+        'rgba(201, 203, 207, 0.6)'
+        ],
+        borderWidth: 1
+        }]
+        },
+        options: {
+        responsive: false,
+        plugins: {
+        legend: { position: 'bottom' },
+        title: { display: true, text: cfg.title }
+        }
+        }
         });
+        }
+        }
+        });
+    </script>
+
+
 
         @if (hasUserCombos)
         {
-            <text>
+            <script>
                     const comboCtx = document.getElementById('userComboChart').getContext('2d');
                     new Chart(comboCtx, {
                         type: 'bar',
@@ -308,9 +324,15 @@
                                 legend: { display: false }
                             },
                             scales: {
-                                y: {
-                                    beginAtZero: true
-                                },
+                                       y: {
+                beginAtZero: true,
+                ticks: {
+                    stepSize: 1,
+                    callback: function (value) {
+                        return Number.isInteger(value) && value > 0 ? value : '';
+                    }
+                }
+            },
                                 x: {
                                     ticks: {
                                         callback: function(value) {
@@ -322,7 +344,6 @@
                             }
                         }
                     });
-            </text>
+            </script>
         }
-    </script>
 }
