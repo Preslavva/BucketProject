@@ -40,8 +40,10 @@ namespace BucketProject.UI.BucketProject.Mapping
 
 
             CreateMap<Goal, GoalViewModel>()
-    .ForMember(dest => dest.Category, opt => opt.MapFrom(src => src.Category.ToString()))
-    .ForMember(dest => dest.Type, opt => opt.MapFrom(src => src.Type.ToString()));
+     .ForMember(dest => dest.Category, opt => opt.MapFrom(src => src.Category.ToString()))
+     .ForMember(dest => dest.Type, opt => opt.MapFrom(src => src.Type.ToString()))
+     .ForMember(dest => dest.ProgressPercent, opt => opt.Ignore());
+
 
 
             //CreateMap<GoalViewModel, Goal>()
