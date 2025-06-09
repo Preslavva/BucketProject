@@ -36,6 +36,7 @@ namespace BucketProject.BLL.Business_Logic.InterfacesService
                 int pageSize);
         List<string> GetGoalTypesForCurrentUser();
         int CountGoalsCreatedInRange(DateTime? startDate, DateTime? endDate, string? category, string? type);
+        int GetProgressPercent(Goal goal);
 
     }
 }

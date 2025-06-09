@@ -114,7 +114,6 @@ namespace BucketProject.BLL.Business_Logic.Controllers
             }
 
             TempData["NotificationCount"] = notifications.Count;
-            //HttpContext.Session.SetInt32("NotCounter", notifications.Count);
 
             return View(notifications);
         }

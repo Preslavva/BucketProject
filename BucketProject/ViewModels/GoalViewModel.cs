@@ -27,6 +27,7 @@ namespace BucketProject.UI.ViewModels.ViewModels
         public int OwnerId { get; set; }
 
         public List<UserSummaryDTO> Recipients { get; set; } = new();
+        public int ProgressPercent { get; set; }
 
 
     }

@@ -368,6 +368,9 @@ namespace BucketProject.UI.BucketProject.Controllers
                 p.Children = personalVMs
                     .Where(c => c.ParentGoalId == p.Id)
                     .ToList();
+
+                var domainGoal = personalDomains.First(d => d.Id == p.Id);
+                p.ProgressPercent = _goalService.GetProgressPercent(domainGoal);
             }
 
             List<GoalViewModel> sharedParents = sharedVMs
@@ -378,6 +381,9 @@ namespace BucketProject.UI.BucketProject.Controllers
                 p.Children = sharedVMs
                     .Where(c => c.ParentGoalId == p.Id)
                     .ToList();
+
+                var domainGoal = sharedDomains.First(d => d.Id == p.Id);
+                p.ProgressPercent = _goalService.GetProgressPercent(domainGoal);
             }
 
 

@@ -196,6 +196,21 @@
                     </span>
                 }
 
+                    @if (goal.Children?.Any() == true)
+                    {
+                        <div class="progress mt-2 mb-3">
+                            <div class="progress-bar"
+                                 role="progressbar"
+                                 style="width:@goal.ProgressPercent%;"
+                                 aria-valuenow="@goal.ProgressPercent"
+                                 aria-valuemin="0"
+                                 aria-valuemax="100">
+                                @goal.ProgressPercent%
+                            </div>
+                        </div>
+                    }
+
+
                 @if (subGoalForId == goal.Id.ToString() && brokenDownGoals.Any())
                 {
                     <div class="mt-2 p-2">
@@ -408,6 +423,21 @@
                             </ul>
                         }
                     </div>
+
+
+                    @if (goal.Children?.Any() == true)
+                    {
+                        <div class="progress mt-2 mb-3">
+                            <div class="progress-bar"
+                                 role="progressbar"
+                                 style="width:@goal.ProgressPercent%;"
+                                 aria-valuenow="@goal.ProgressPercent"
+                                 aria-valuemin="0"
+                                 aria-valuemax="100">
+                                @goal.ProgressPercent%
+                            </div>
+                        </div>
+                    }
 
 
                     @if (goal.OwnerId == ViewBag.CurrentUserId)
