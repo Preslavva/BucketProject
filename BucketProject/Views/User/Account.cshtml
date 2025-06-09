@@ -1,57 +1,94 @@
 ﻿@model UserViewModel
 
-<div class="account-container">
-    <div class="account-form">
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
 
-        <h2 class="text-center">Account Info</h2>
+            <div class="card mb-4" style="border: 1px solid #2D2D2D; border-radius: 10px;">
+                <div class="card-header text-center" style="background-color: #2D2D2D;">
+                    <h2 class="text-white">Account Info</h2>
+                </div>
 
-        <div class="text-center">
-            @if (Model.Picture != null && Model.Picture.Length > 0)
-            {
-                var base64 = Convert.ToBase64String(Model.Picture);
-                var imgSrc = $"data:image/jpeg;base64,{base64}";
-                <img src="@imgSrc" alt="Profile Picture" class="profile-pic" />
-            }
-            else
-            {
-                <p class="text-center">No profile picture uploaded.</p>
-            }
+                <div class="card-body">
+
+                    <section class="text-center mb-4">
+                        @if (Model.Picture != null && Model.Picture.Length > 0)
+                        {
+                            var base64 = Convert.ToBase64String(Model.Picture);
+                            var imgSrc = $"data:image/jpeg;base64,{base64}";
+                            <img src="@imgSrc" alt="Profile Picture" class="rounded-circle img-thumbnail profile-pic" />
+                        }
+                        else
+                        {
+                            <p class="text-muted">No profile picture uploaded.</p>
+                        }
+                    </section>
+
+                    <section class="mb-4">
+                        <form asp-controller="User" asp-action="AddPhoto" method="post" enctype="multipart/form-data"
+                              class="d-flex flex-column align-items-center">
+                            <div asp-validation-summary="ModelOnly" class="text-danger mb-2 text-center"></div>
+
+                            <div class="file-input-wrapper">
+                                <label for="photoFile" class="file-input-label">Select Photo</label>
+                                <input type="file" name="photoFile" id="photoFile" accept="image/*" />
+                            </div>
+                            <button type="submit" class="btn btn-secondary mt-2" style="background-color: #2D2D2D;">
+                                Upload
+                            </button>
+
+                        </form>
+                    </section>
+
+                    <hr />
+
+                    <section class="mb-4">
+                        <form asp-controller="User" asp-action="UpdateUsername" method="post" class="d-flex flex-column align-items-center">
+                            <div class="form-group w-100">
+                                <label for="username">Username</label>
+                                <input type="text"
+                                       name="newUsername"
+                                       id="username"
+                                       value="@Model.Username"
+                                       class="form-control text-muted"
+                                       placeholder="Enter new username" />
+                            </div>
+                            <button type="submit" class="btn btn-secondary mt-2" style="background-color: #2D2D2D;">
+                                Update Username
+                            </button>
+
+                        </form>
+                    </section>
+
+                    <hr />
+
+                    <section>
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" value="@Model.Email" readonly class="form-control-plaintext text-muted" />
+                        </div>
+                        <div class="form-group">
+                            <label>Account Created</label>
+                            <input type="text" value="@Model.CreatedAt.ToString("yyyy-MM-dd")" readonly class="form-control-plaintext text-muted" />
+                        </div>
+                        <div class="form-group">
+                            <label>Nationality</label>
+                            <input type="text" value="@Model.Nationality" readonly class="form-control-plaintext text-muted" />
+                        </div>
+                        <div class="form-group">
+                            <label>Gender</label>
+                            <input type="text" value="@Model.Gender" readonly class="form-control-plaintext text-muted" />
+                        </div>
+                        <div class="form-group">
+                            <label>Date of Birth</label>
+                            <input type="text" value="@Model.DateOfBirth.ToString("yyyy-MM-dd")" readonly class="form-control-plaintext text-muted" />
+                        </div>
+                    </section>
+
+                </div>
+            </div>
+
         </div>
-
-        <form asp-action="AddPhoto" asp-controller="User" method="post" enctype="multipart/form-data">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-
-            <label for="photoFile">Select a photo</label>
-            <input type="file" name="photoFile" id="photoFile" accept="image/*" class="input-field" />
-
-            <button type="submit" class="button">Upload</button>
-        </form>
-
-
-        <hr />
-
-        <form asp-action="UpdateUsername" asp-controller="User" method="post">
-            <label for="username">Username</label>
-            <input type="text" name="newUsername" id="username" value="@Model.Username" class="input-field" />
-
-            <button type="submit" class="button">Update Username</button>
-        </form>
-
-        <hr />
-
-        <label>Email</label>
-        <input type="text" value="@Model.Email" readonly class="input-field" />
-
-        <label>Account Created</label>
-        <input type="text" value="@Model.CreatedAt.ToString("yyyy-MM-dd")" readonly class="input-field" />
-
-        <label>Nationality</label>
-        <input type="text" value="@Model.Nationality" readonly class="input-field" />
-
-        <label>Gender</label>
-        <input type="text" value="@Model.Gender" readonly class="input-field" />
-
-        <label>Date of Birth</label>
-        <input type="text" value="@Model.DateOfBirth.ToString("yyyy-MM-dd")" readonly class="input-field" />
     </div>
 </div>
+
