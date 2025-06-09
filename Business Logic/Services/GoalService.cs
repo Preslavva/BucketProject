@@ -388,9 +388,8 @@ namespace BucketProject.BLL.Business_Logic.Services
         public int GetProgressPercent(Goal goal)
         {
             int userId = _userService.GetCurrentUserId();
-            var entities = _goalRepo.LoadGoalsOfUser(userId);
+            List<GoalEntity> entities = _goalRepo.LoadGoalsOfUser(userId);
 
-            // all immediate children of this goal
             var childGoals = entities
                 .Where(g => g.ParentGoalId.HasValue && g.ParentGoalId == goal.Id)
                 .ToList();
@@ -398,12 +397,6 @@ namespace BucketProject.BLL.Business_Logic.Services
             int totalChildren = childGoals.Count;
             int completedChildren = childGoals.Count(g => g.IsDone);
 
-            if (totalChildren == 0)
-            {
-                return 0;  // or you could decide to return 100, if "no children" means "nothing to do"
-            }
-
-            // percentage as an integer (rounded)
             double rawPercent = (double)completedChildren / totalChildren * 100;
             return (int)Math.Round(rawPercent);
         }
