@@ -17,7 +17,7 @@ namespace BucketProject.BLL.Business_Logic.InterfacesService
 
         void ChangeGoalStatus(int goalId, bool isDone);
 
-        Dictionary<string, Dictionary<string, Dictionary<string, List<Goal>>>> LoadGroupedExpiredGoals();
+        //Dictionary<string, Dictionary<string, Dictionary<string, List<Goal>>>> LoadGroupedExpiredGoals();
         Task<List<Goal>> BreakDownGoalAsync(int goalId);
         List<GoalInviteDTO> GetPendingInvitations(int userId, string category);
         void RespondToInvitation(int invitationId, bool accept, int currentUserId);

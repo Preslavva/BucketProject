@@ -192,85 +192,85 @@ namespace BucketProject.BLL.Business_Logic.Services
         //the first string represents the time category
         //the second string represents the grouping key
         //the third string is the type of goal
-        public Dictionary<string, Dictionary<string, Dictionary<string, List<Goal>>>> LoadGroupedExpiredGoals()
-        {
-            var grouped = new Dictionary<string, Dictionary<string, Dictionary<string, List<Goal>>>>();
+     //   public Dictionary<string, Dictionary<string, Dictionary<string, List<Goal>>>> LoadGroupedExpiredGoals()
+     //   {
+     //       var grouped = new Dictionary<string, Dictionary<string, Dictionary<string, List<Goal>>>>();
 
-            string? username = _contextAccessor.HttpContext.Session.GetString("Username");
-            if (string.IsNullOrEmpty(username))
-                return grouped;
+     //       string? username = _contextAccessor.HttpContext.Session.GetString("Username");
+     //       if (string.IsNullOrEmpty(username))
+     //           return grouped;
 
-            int userId = _userService.GetCurrentUserId();
+     //       int userId = _userService.GetCurrentUserId();
 
-            List<GoalEntity> expiredEntities = _goalRepo.LoadExpiredGoalsOfUser(userId);
-            List<Goal> expiredGoals = _mapper.Map<List<Goal>>(expiredEntities);
+     //       List<GoalEntity> expiredEntities = _goalRepo.LoadExpiredGoalsOfUser(userId);
+     //       List<Goal> expiredGoals = _mapper.Map<List<Goal>>(expiredEntities);
 
-            foreach (Goal goal in expiredGoals)
-            {
-                var sharedEntities = _goalRepo.LoadSharedUsersForGoal(
-                    goal.Id,
-                    userId
-                );
-                goal.Recipients = _mapper.Map<List<User>>(sharedEntities);
-            }
+     //       foreach (Goal goal in expiredGoals)
+     //       {
+     //           var sharedEntities = _goalRepo.LoadSharedUsersForGoal(
+     //               goal.Id,
+     //               userId
+     //           );
+     //           goal.Recipients = _mapper.Map<List<User>>(sharedEntities);
+     //       }
 
-            var childGoals = expiredGoals
-                .Where(g => g.ParentGoalId.HasValue)
-                .GroupBy(g => g.ParentGoalId.Value)
-                .ToDictionary(g => g.Key, g => g.ToList());
+     //       var childGoals = expiredGoals
+     //           .Where(g => g.ParentGoalId.HasValue)
+     //           .GroupBy(g => g.ParentGoalId.Value)
+     //           .ToDictionary(g => g.Key, g => g.ToList());
 
-            foreach (var root in expiredGoals.Where(g => g.ParentGoalId == null))
-            {
-                if (!root.Deadline.HasValue)
-                    continue;
+     //       foreach (var root in expiredGoals.Where(g => g.ParentGoalId == null))
+     //       {
+     //           if (!root.Deadline.HasValue)
+     //               continue;
 
-                DateTime date = root.Deadline.Value.Date;
-                string category = root.Category.ToString();
-                string type = root.Type.ToString();
-                string key = GetGroupingKey(root.Category, date);
+     //           DateTime date = root.Deadline.Value.Date;
+     //           string category = root.Category.ToString();
+     //           string type = root.Type.ToString();
+     //           string key = GetGroupingKey(root.Category, date);
 
-                AddToGroup(grouped, category, key, type, root);
+     //           AddToGroup(grouped, category, key, type, root);
 
-                if (childGoals.TryGetValue(root.Id, out var children))
-                {
-                    foreach (var child in children)
-                        AddToGroup(grouped, category, key, type, child);
-                }
-            }
+     //           if (childGoals.TryGetValue(root.Id, out var children))
+     //           {
+     //               foreach (var child in children)
+     //                   AddToGroup(grouped, category, key, type, child);
+     //           }
+     //       }
 
-            return grouped;
-        }
+     //       return grouped;
+     //   }
 
-        private string GetGroupingKey(Category category, DateTime date)
-        {
-            return category switch
-            {
-                Category.Week => $"Week {date.AddDays((int)date.DayOfWeek-8):dd.MM.yyyy} - {date.AddDays((int)date.DayOfWeek - 2):dd.MM.yyyy}",
-                Category.Month => $"{date.AddMonths(-1):MMMM yyyy}",
-                Category.Year => $"{date.Year-1}",
-                _ => "Other"
-            };
-        }
+     //   private string GetGroupingKey(Category category, DateTime date)
+     //   {
+     //       return category switch
+     //       {
+     //           Category.Week => $"Week {date.AddDays((int)date.DayOfWeek-8):dd.MM.yyyy} - {date.AddDays((int)date.DayOfWeek - 2):dd.MM.yyyy}",
+     //           Category.Month => $"{date.AddMonths(-1):MMMM yyyy}",
+     //           Category.Year => $"{date.Year-1}",
+     //           _ => "Other"
+     //       };
+     //   }
 
 
-        private void AddToGroup(
-     Dictionary<string, Dictionary<string, Dictionary<string, List<Goal>>>> group,
-     string category,
-     string key,
-     string type,
-     Goal goal)
-        {
-            if (!group.ContainsKey(category))
-                group[category] = new Dictionary<string, Dictionary<string, List<Goal>>>();
+     //   private void AddToGroup(
+     //Dictionary<string, Dictionary<string, Dictionary<string, List<Goal>>>> group,
+     //string category,
+     //string key,
+     //string type,
+     //Goal goal)
+     //   {
+     //       if (!group.ContainsKey(category))
+     //           group[category] = new Dictionary<string, Dictionary<string, List<Goal>>>();
 
-            if (!group[category].ContainsKey(key))
-                group[category][key] = new Dictionary<string, List<Goal>>();
+     //       if (!group[category].ContainsKey(key))
+     //           group[category][key] = new Dictionary<string, List<Goal>>();
 
-            if (!group[category][key].ContainsKey(type))
-                group[category][key][type] = new List<Goal>();
+     //       if (!group[category][key].ContainsKey(type))
+     //           group[category][key][type] = new List<Goal>();
 
-            group[category][key][type].Add(goal);
-        }
+     //       group[category][key][type].Add(goal);
+     //   }
 
         public List<Goal> GetGoalsCreatedInRange(
         DateTime? startDate,

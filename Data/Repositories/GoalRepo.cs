@@ -1396,19 +1396,15 @@ AND dn.TriggeredByUserId = ug.UserId
         return goals;
     }
     public List<GoalEntity> LoadGoalsOfUserInRange(
-    int userId,
-    DateTime? startDate,
-    DateTime? endDate,
-    string? category,
-    string? goalType,
-    int page,
-    int pageSize)
+     int userId,
+     DateTime? startDate,
+     DateTime? endDate,
+     string? category,
+     string? goalType,
+     int page,
+     int pageSize)
     {
-        List<GoalEntity> goals = new();
-
-        using (SqlConnection conn = GetSqlConnection())
-        {
-            var command = new SqlCommand(@"
+        const string sql = @"
 SELECT DISTINCT
     g.Id,
     g.Category,
@@ -1431,20 +1427,27 @@ WHERE ug.UserId = @UserId
   AND (@GoalType IS NULL OR g.Type = @GoalType)
   AND (@Category IS NULL OR g.Category = @Category)
 ORDER BY g.CreatedAt DESC
-OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY;", conn);
+OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY;
+";
 
+        try
+        {
+            var goals = new List<GoalEntity>();
             int offset = (page - 1) * pageSize;
 
-            command.Parameters.AddWithValue("@UserId", userId);
-            command.Parameters.AddWithValue("@StartDate", startDate.HasValue ? (object)startDate.Value : DBNull.Value);
-            command.Parameters.AddWithValue("@EndDate", endDate.HasValue ? (object)endDate.Value : DBNull.Value);
-            command.Parameters.AddWithValue("@GoalType", string.IsNullOrWhiteSpace(goalType) ? DBNull.Value : goalType);
-            command.Parameters.AddWithValue("@Category", string.IsNullOrWhiteSpace(category) ? DBNull.Value : category);
-            command.Parameters.AddWithValue("@Offset", offset);
-            command.Parameters.AddWithValue("@PageSize", pageSize);
+            using var conn = GetSqlConnection();
+            using var cmd = new SqlCommand(sql, conn);
+
+            cmd.Parameters.AddWithValue("@UserId", userId);
+            cmd.Parameters.AddWithValue("@StartDate", startDate.HasValue ? (object)startDate.Value : DBNull.Value);
+            cmd.Parameters.AddWithValue("@EndDate", endDate.HasValue ? (object)endDate.Value : DBNull.Value);
+            cmd.Parameters.AddWithValue("@GoalType", string.IsNullOrWhiteSpace(goalType) ? DBNull.Value : goalType!);
+            cmd.Parameters.AddWithValue("@Category", string.IsNullOrWhiteSpace(category) ? DBNull.Value : category!);
+            cmd.Parameters.AddWithValue("@Offset", offset);
+            cmd.Parameters.AddWithValue("@PageSize", pageSize);
 
             conn.Open();
-            using SqlDataReader reader = command.ExecuteReader();
+            using var reader = cmd.ExecuteReader();
             while (reader.Read())
             {
                 var id = reader.GetInt32(0);
@@ -1475,48 +1478,74 @@ OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY;", conn);
                     ownerId
                 ));
             }
+
+            return goals;
         }
-
-        return goals;
+        catch (SqlException sqlEx)
+        {
+            _logger.LogError(sqlEx,
+                "SQL error in LoadGoalsOfUserInRange. UserId: {UserId}, StartDate: {StartDate}, EndDate: {EndDate}, Category: {Category}, GoalType: {GoalType}, Page: {Page}, PageSize: {PageSize}",
+                userId, startDate, endDate, category, goalType, page, pageSize);
+            throw new Exception("A database error occurred while loading user goals.", sqlEx);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex,
+                "Unexpected error in LoadGoalsOfUserInRange. UserId: {UserId}, StartDate: {StartDate}, EndDate: {EndDate}, Category: {Category}, GoalType: {GoalType}, Page: {Page}, PageSize: {PageSize}",
+                userId, startDate, endDate, category, goalType, page, pageSize);
+            throw;
+        }
     }
-
 
 
     public List<string> GetDistinctGoalTypesForUser(int userId)
     {
-        var types = new List<string>();
+        const string sql = @"
+        SELECT DISTINCT g.[Type]
+        FROM Goal g
+        INNER JOIN User_Goal ug ON g.Id = ug.GoalId
+        WHERE ug.UserId = @UserId
+          AND g.IsDeleted = 0;
+    ";
 
-        using (SqlConnection conn = GetSqlConnection())
+        try
         {
+            var types = new List<string>();
+
+            using var conn = GetSqlConnection();
+            using var cmd = new SqlCommand(sql, conn);
+
+            cmd.Parameters.AddWithValue("@UserId", userId);
+
             conn.Open();
-
-            string query = @"
-            SELECT DISTINCT g.[Type]
-            FROM Goal g
-            INNER JOIN User_Goal ug ON g.Id = ug.GoalId
-            WHERE ug.UserId = @UserId AND g.IsDeleted = 0";
-
-            using (SqlCommand cmd = new SqlCommand(query, conn))
+            using var reader = cmd.ExecuteReader();
+            while (reader.Read())
             {
-                cmd.Parameters.AddWithValue("@UserId", userId);
-
-                using (SqlDataReader reader = cmd.ExecuteReader())
-                {
-                    while (reader.Read())
-                    {
-                        types.Add(reader.GetString(0));
-                    }
-                }
+                types.Add(reader.GetString(0));
             }
-        }
 
-        return types;
+            return types;
+        }
+        catch (SqlException sqlEx)
+        {
+            _logger.LogError(sqlEx,
+                "SQL error in GetDistinctGoalTypesForUser. UserId: {UserId}",
+                userId);
+            throw new Exception("A database error occurred while retrieving distinct goal types.", sqlEx);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex,
+                "Unexpected error in GetDistinctGoalTypesForUser. UserId: {UserId}",
+                userId);
+            throw;
+        }
     }
+
 
     public int CountGoalsOfUser(int userId, DateTime? startDate, DateTime? endDate, string? goalType, string? category)
     {
-        using var conn = GetSqlConnection();
-        using var command = new SqlCommand(@"
+        const string sql = @"
         SELECT COUNT(*)
         FROM Goal g
         INNER JOIN User_Goal ug ON g.Id = ug.GoalId
@@ -1525,18 +1554,39 @@ OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY;", conn);
           AND (@StartDate IS NULL OR g.CreatedAt >= @StartDate)
           AND (@EndDate IS NULL OR g.CreatedAt <= @EndDate)
           AND (@GoalType IS NULL OR g.Type = @GoalType)
-          AND (@Category IS NULL OR g.Category = @Category)
-    ", conn);
+          AND (@Category IS NULL OR g.Category = @Category);
+    ";
 
-        command.Parameters.AddWithValue("@UserId", userId);
-        command.Parameters.AddWithValue("@StartDate", startDate ?? (object)DBNull.Value);
-        command.Parameters.AddWithValue("@EndDate", endDate ?? (object)DBNull.Value);
-        command.Parameters.AddWithValue("@GoalType", string.IsNullOrWhiteSpace(goalType) ? DBNull.Value : goalType);
-        command.Parameters.AddWithValue("@Category", string.IsNullOrWhiteSpace(category) ? DBNull.Value : category);
+        try
+        {
+            using var conn = GetSqlConnection();
+            using var cmd = new SqlCommand(sql, conn);
 
-        conn.Open();
-        return (int)command.ExecuteScalar();
+            cmd.Parameters.AddWithValue("@UserId", userId);
+            cmd.Parameters.AddWithValue("@StartDate", startDate ?? (object)DBNull.Value);
+            cmd.Parameters.AddWithValue("@EndDate", endDate ?? (object)DBNull.Value);
+            cmd.Parameters.AddWithValue("@GoalType", string.IsNullOrWhiteSpace(goalType) ? DBNull.Value : goalType!);
+            cmd.Parameters.AddWithValue("@Category", string.IsNullOrWhiteSpace(category) ? DBNull.Value : category!);
+
+            conn.Open();
+            return (int)cmd.ExecuteScalar()!;
+        }
+        catch (SqlException sqlEx)
+        {
+            _logger.LogError(sqlEx,
+                "SQL error in CountGoalsOfUser. UserId: {UserId}, StartDate: {StartDate}, EndDate: {EndDate}, GoalType: {GoalType}, Category: {Category}",
+                userId, startDate, endDate, goalType, category);
+            throw new Exception("A database error occurred while counting user goals.", sqlEx);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex,
+                "Unexpected error in CountGoalsOfUser. UserId: {UserId}, StartDate: {StartDate}, EndDate: {EndDate}, GoalType: {GoalType}, Category: {Category}",
+                userId, startDate, endDate, goalType, category);
+            throw;
+        }
     }
+
 
 }
 
