@@ -1546,7 +1546,7 @@ OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY;
     public int CountGoalsOfUser(int userId, DateTime? startDate, DateTime? endDate, string? goalType, string? category)
     {
         const string sql = @"
-        SELECT COUNT(*)
+        SELECT COUNT(DISTINCT g.Id)   
         FROM Goal g
         INNER JOIN User_Goal ug ON g.Id = ug.GoalId
         WHERE ug.UserId = @UserId
