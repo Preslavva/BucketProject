@@ -168,9 +168,6 @@ namespace BucketProject.BLL.Business_Logic.Services
             }
         }
 
-
-
-
         private List<string> GetMonthLabelsFromFirstCompletion(List<Goal> completedGoals, int maxMonths = 12)
         {
             if (completedGoals.Count == 0)
@@ -527,8 +524,6 @@ namespace BucketProject.BLL.Business_Logic.Services
                 }
             }
         }
-
-
 
         public StatsDTO GetGoalSummaryStatsManager()
         {

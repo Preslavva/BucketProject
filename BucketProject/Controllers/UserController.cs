@@ -201,6 +201,13 @@ namespace BucketProject.UI.BucketProject.Controllers
                 UserViewModel vm = _mapper.Map<UserViewModel>(userDomain);
                 return View("Account", vm);
             }
+            catch(DuplicateUsernameException dex)
+            {
+                ModelState.AddModelError(string.Empty, dex.Message);
+                User userDomain = _userService.GetUserByUsername();
+                UserViewModel vm = _mapper.Map<UserViewModel>(userDomain);
+                return View("Account", vm);
+            }
         }
 
         [HttpPost]

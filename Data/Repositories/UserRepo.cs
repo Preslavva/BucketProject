@@ -1,4 +1,5 @@
 ﻿using System.Data;
+using BucketProject.BLL.Business_Logic.DTOs;
 using BucketProject.BLL.Business_Logic.InterfacesRepo;
 using BucketProject.DAL.Models.Entities;
 using Exceptions.Exceptions;
@@ -119,6 +120,15 @@ namespace BucketProject.DAL.Data.Repositories
                 using (SqlConnection conn = GetSqlConnection())
                 {
                     conn.Open();
+                    string checkSql = @"SELECT COUNT(*) FROM [User] WHERE [Username] = @Username";
+                    using SqlCommand checkCommand = new SqlCommand(checkSql, conn);
+                    checkCommand.Parameters.AddWithValue("@Username", username);
+
+                    int count = (int)checkCommand.ExecuteScalar();
+                    if (count > 0)
+                    {
+                        throw new DuplicateUsernameException();
+                    }
                     string queryUpdateName = @"update [User] set Username = @Username where UserId = @UserId";
 
                     using (SqlCommand changeStatus = new SqlCommand(queryUpdateName, conn))
@@ -157,6 +167,7 @@ namespace BucketProject.DAL.Data.Repositories
                 using (SqlConnection sqlConn = GetSqlConnection())
                 {
                     sqlConn.Open();
+
 
                     string queryValidateUser = @"
                 SELECT UserId, [Username], Email, [Password], Picture, Salt, Nationality, DateOfBirth, Gender, CreatedAt, Role
