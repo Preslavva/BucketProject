@@ -1,5 +1,14 @@
 ﻿@model SocialViewModel
 
+
+@if (!Model.Friends.Any() &&
+           !Model.IncomingRequests.Any() &&
+           !Model.PotentialFriends.Any())
+{
+    <div class="alert alert-warning">
+       No users found.
+    </div>
+}
 @if (Model.Friends.Any())
 {
     <h4>Matching Friends</h4>
