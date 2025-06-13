@@ -644,10 +644,10 @@
                                     }
                                 }
 
-                                @if (imgSrc != null)
+                                @if (!string.IsNullOrWhiteSpace(imgSrc))
                                 {
                                     <img src="@imgSrc"
-                                         alt="@inv.InvitedUsername"
+                                         alt="@inv.InviterUsername"
                                          class="rounded-circle"
                                          style="width:32px; height:32px; object-fit:cover; margin-right:8px;" />
                                 }
@@ -655,7 +655,7 @@
                                 {
                                     <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center"
                                          style="width:32px; height:32px; font-size:0.9rem; font-weight:bold; margin-right:8px;">
-                                        @char.ToUpperInvariant(inv.InvitedUsername[0])
+                                        @char.ToUpperInvariant(inv.InviterUsername[0])
                                     </div>
                                 }
 
