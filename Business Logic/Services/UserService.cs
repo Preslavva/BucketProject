@@ -114,7 +114,24 @@ namespace BucketProject.BLL.Business_Logic.Services
             {
                 errors.Add("Passwords do not match.");
             }
+          
+            if (userDomain.DateOfBirth == default)       
+            {
+                errors.Add("Date of Birth is required.");
+            }
+            else
+            {
+                int MinYear = 1900;
+                int MaxYear = DateTime.UtcNow.Year;
 
+                int birthYear = userDomain.DateOfBirth.Year;
+
+                if (birthYear < MinYear)
+                    errors.Add($"Birth year must be {MinYear} or later.");
+
+                if (birthYear > MaxYear)
+                    errors.Add($"Birth year must be {MaxYear} or earlier.");
+            }
             if (errors.Any())
                 throw new ValidationExceptionCollection(errors);
 
