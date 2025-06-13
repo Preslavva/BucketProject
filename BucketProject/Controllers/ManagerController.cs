@@ -83,6 +83,9 @@ namespace BucketProject.Controllers
                 .Select(c => c.Count)
                 .ToList();
 
+            ViewBag.UserComboGender = userCombinations.Select(c => c.Gender).ToList();
+
+
 
             return View("ManagerStats");
         }

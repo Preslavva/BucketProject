@@ -9,6 +9,8 @@
     var hasGender = (ViewBag.GenderData as List<int> ?? new List<int>()).Any();
     var hasAge = (ViewBag.AgeData as List<int> ?? new List<int>()).Any();
     var hasUserCombos = (ViewBag.UserComboData as List<int> ?? new List<int>()).Any();
+
+
 }
 
 <h2 style="text-align: center; margin-bottom: 40px;">Manager Statistics</h2>
@@ -298,52 +300,66 @@
 
 
 
-        @if (hasUserCombos)
-        {
-            <script>
-                    const comboCtx = document.getElementById('userComboChart').getContext('2d');
-                    new Chart(comboCtx, {
-                        type: 'bar',
-                        data: {
-                            labels: @Html.Raw(Json.Serialize(ViewBag.UserComboLabels)),
-                            datasets: [{
-                                label: 'Users',
-                                data: @Html.Raw(Json.Serialize(ViewBag.UserComboData)),
-                                backgroundColor: 'rgba(255, 99, 132, 0.6)',
-                                borderColor: 'rgba(255, 99, 132, 1)',
-                                borderWidth: 1
-                            }]
+    @if (hasUserCombos)
+    {
+        <script>
+         
+            const labels   = @Html.Raw(Json.Serialize(ViewBag.UserComboLabels));
+            const data     = @Html.Raw(Json.Serialize(ViewBag.UserComboData));
+            const genders  = @Html.Raw(Json.Serialize(ViewBag.UserComboGender));
+
+            const genderColour = {
+                Male:   'rgba(54, 162, 235, 0.7)',   
+                Female: 'rgba(255, 99, 132, 0.7)',  
+                Other:  'rgba(255, 205, 86, 0.7)',   
+                Unknown:'rgba(201, 203, 207, 0.7)'  
+            };
+
+            const barColours   = genders.map(g => genderColour[g] ?? genderColour.Unknown);
+            const borderColours = barColours.map(c => c.replace('0.7', '1'));
+
+            const comboCtx = document.getElementById('userComboChart').getContext('2d');
+            new Chart(comboCtx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Users',
+                        data:  data,
+                        backgroundColor: barColours,
+                        borderColor:     borderColours,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Top 5 User Combinations (Age, Nationality, Gender)'
                         },
-                        options: {
-                            responsive: true,
-                            plugins: {
-                                title: {
-                                    display: true,
-                                    text: 'Top 5 User Combinations (Age, Nationality, Gender)'
-                                },
-                                legend: { display: false }
-                            },
-                            scales: {
-                                       y: {
-                beginAtZero: true,
-                ticks: {
-                    stepSize: 1,
-                    callback: function (value) {
-                        return Number.isInteger(value) && value > 0 ? value : '';
-                    }
-                }
-            },
-                                x: {
-                                    ticks: {
-                                        callback: function(value) {
-                                            let label = this.getLabelForValue(value);
-                                            return label.length > 25 ? label.slice(0, 25) + '…' : label;
-                                        }
-                                    }
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1,
+                                callback: v => Number.isInteger(v) && v > 0 ? v : ''
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                callback(value) {
+                                    const label = this.getLabelForValue(value);
+                                    return label.length > 25 ? label.slice(0, 25) + '…' : label;
                                 }
                             }
                         }
-                    });
-            </script>
-        }
+                    }
+                }
+            });
+        </script>
+    }
+
 }
