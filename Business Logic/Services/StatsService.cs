@@ -387,7 +387,6 @@ namespace BucketProject.BLL.Business_Logic.Services
             return labels;
         }
 
-
         public List<StatsDTO> GetUserRegistrationsPerMonth()
         {
             List<UserEntity> entities = _managerRepo.GetAllUsers();

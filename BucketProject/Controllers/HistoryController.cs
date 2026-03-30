@@ -6,6 +6,7 @@ using AutoMapper;
 using BucketProject.BLL.Business_Logic.Domain;
 using BucketProject.DAL.Models.Enums;
 using BucketProject.BLL.Business_Logic.Services;
+using BucketProject.DAL.Models.Entities;
 
 namespace BucketProject.Controllers
 {
@@ -53,7 +54,7 @@ namespace BucketProject.Controllers
             ViewBag.PageSize = pageSize;
             ViewBag.TotalPages = totalPages;
 
-            foreach (var goal in result)
+            foreach (HistoryViewModel goal in result)
             {
                 if (goal.ParentGoalId != null)
                 {
@@ -63,8 +64,6 @@ namespace BucketProject.Controllers
 
             return PartialView("_HistoryPartial", result);
         }
-
     }
-
 }
 

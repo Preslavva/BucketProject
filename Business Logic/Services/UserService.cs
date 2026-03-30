@@ -58,7 +58,6 @@ namespace BucketProject.BLL.Business_Logic.Services
         }
 
 
-
         public bool Register(User userDomain)
         {
             List<string> errors = new List<string>();
